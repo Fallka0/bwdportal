@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<style>
+body{margin:0;background:#EDEDEA;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#0B3C4C;text-decoration:none}
+a:hover{color:#CE5E6C}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+
+<section style="padding:44px 48px 8px;max-width:1280px">
+<div style="font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:#0B3C4C;opacity:.55">bwd Portal · Redesign</div>
+<h1 style="margin:10px 0 0;font-size:34px;font-weight:700;letter-spacing:-0.9px;color:#0B3C4C">Ruhig, gross, direkt bedienbar</h1>
+<p style="margin:12px 0 0;max-width:660px;font-size:15.5px;line-height:1.6;color:#5F6E74;text-wrap:pretty">Gruppierte weisse Sektionen auf #F2F2F7, Struktur aus Weissraum und Haarlinien, Systemtypografie in einer Skala. Farbe nur mit Bedeutung: Petrol = interaktiv, Rot = Ausfall und Prüfung, Grün = positive Notenentwicklung. Jede Fläche reagiert sofort auf Druck.</p>
+</section>
+
+<section style="padding:28px 48px 72px">
+<div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+<sc-for list="{{ devices }}" as="d" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;padding-left:2px">
+<span style="font-size:13px;font-weight:600;letter-spacing:-0.1px;color:#0B3C4C">{{ d.label }}</span>
+<span style="font-size:13px;color:#8A9499">{{ d.hint }}</span>
+</div>
+
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="height:100%;display:flex;flex-direction:column;background:#F2F2F7;position:relative;overflow:hidden">
+
+<div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch">
+
+<sc-if value="{{ d.showChrome }}" hint-placeholder-val="{{ true }}">
+<div style="position:sticky;top:0;z-index:5;padding:52px 20px 10px;background:{{ d.chromeBg }};backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div style="display:flex;align-items:baseline;gap:1px">
+<span style="font-size:17px;font-weight:700;letter-spacing:-0.4px;color:#0B3C4C">b</span>
+<span style="font-size:19px;font-weight:300;color:#0B3C4C;transform:translateY(1px)">(</span>
+<span style="font-size:17px;font-weight:700;letter-spacing:-0.4px;color:#0B3C4C">wd</span>
+</div>
+<div onClick="{{ d.onToggleRole }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 4px 4px 12px;border-radius:999px;background:rgba(11,60,76,.06);transition:transform .18s cubic-bezier(.32,.72,0,1),background .18s ease" style-active="transform:scale(.96);background:rgba(11,60,76,.12)">
+<span style="font-size:13px;font-weight:500;letter-spacing:-0.1px;color:#0B3C4C">{{ d.roleLabel }}</span>
+<span style="width:26px;height:26px;border-radius:999px;background:#0B3C4C;color:#fff;font-size:10.5px;font-weight:600;letter-spacing:.2px;display:flex;align-items:center;justify-content:center">{{ d.roleInitials }}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isAuth }}">
+<div style="background:#fff;min-height:100%;display:flex;flex-direction:column;padding:0 24px 40px">
+<div style="padding-top:104px;display:flex;align-items:baseline;gap:1px">
+<span style="font-size:26px;font-weight:700;letter-spacing:-0.7px;color:#0B3C4C">b</span>
+<span style="font-size:29px;font-weight:300;color:#0B3C4C;transform:translateY(2px)">(</span>
+<span style="font-size:26px;font-weight:700;letter-spacing:-0.7px;color:#0B3C4C">wd</span>
+</div>
+
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:60px">
+<div style="font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1.12;color:#000">{{ d.authTitle }}</div>
+<div style="margin-top:9px;font-size:17px;font-weight:400;letter-spacing:-0.3px;line-height:1.45;color:#8E8E93;text-wrap:pretty">{{ d.authSub }}</div>
+
+<sc-if value="{{ d.authForm }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ d.onSignIn }}" style="margin-top:32px;padding:16px;border-radius:12px;background:{{ d.btnBg }};display:flex;align-items:center;justify-content:center;gap:11px;cursor:pointer;transition:transform .18s cubic-bezier(.32,.72,0,1),background .2s ease" style-active="transform:scale(.975)">
+<span style="display:grid;grid-template-columns:9px 9px;grid-template-rows:9px 9px;gap:2px">
+<span style="background:#F25022"></span><span style="background:#7FBA00"></span>
+<span style="background:#00A4EF"></span><span style="background:#FFB900"></span>
+</span>
+<span style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#fff">{{ d.btnLabel }}</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.authDone }}">
+<div style="margin-top:32px;padding:18px;background:#F2F2F7;border-radius:14px;display:flex;align-items:center;gap:14px">
+<span style="flex:none;width:46px;height:46px;border-radius:999px;background:#0B3C4C;color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ d.userInitials }}</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.userName }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93">{{ d.userClass }}</div>
+</div>
+</div>
+<div onClick="{{ d.onEnter }}" style="margin-top:14px;padding:16px;border-radius:12px;background:#0B3C4C;text-align:center;cursor:pointer;transition:transform .18s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.975)">
+<span style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#fff">Zum Portal</span>
+</div>
+</sc-if>
+</div>
+
+<div style="font-size:13px;letter-spacing:-0.1px;color:#C7C7CC">bwd Bern · Kaufmännische Berufsschule</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isProfile }}">
+<div style="background:#F2F2F7;min-height:100%">
+<div style="padding:6px 20px 30px;display:flex;align-items:center;gap:16px">
+<span style="flex:none;width:66px;height:66px;border-radius:999px;background:#0B3C4C;color:#fff;font-size:22px;font-weight:600;letter-spacing:.3px;display:flex;align-items:center;justify-content:center">{{ d.userInitials }}</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:26px;font-weight:700;letter-spacing:-0.8px;line-height:1.15;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.userName }}</div>
+<div style="margin-top:3px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.userMail }}</div>
+</div>
+</div>
+
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.profileGroupTitle }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.profileRows }}" as="p" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;padding:15px 18px;border-top:{{ p.sep }}">
+<span style="flex:1;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000">{{ p.label }}</span>
+<span style="flex:none;font-size:17px;letter-spacing:-0.3px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.value }}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Einstellungen</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.settingRows }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:15px 18px;border-top:{{ p.sep }};cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="flex:1;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000">{{ p.label }}</span>
+<span style="flex:none;font-size:17px;letter-spacing:-0.3px;color:#8E8E93">{{ p.value }}</span>
+<span style="flex:none;font-size:17px;color:#C7C7CC">›</span>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div onClick="{{ d.onSignOut }}" style="background:#fff;border-radius:14px;margin:0 16px;padding:15px 18px;text-align:center;cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#A2404D">Abmelden</span>
+</div>
+<div style="height:120px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isHome }}" hint-placeholder-val="{{ true }}">
+<div style="background:#F2F2F7;min-height:100%">
+
+<div style="padding:0 20px 30px">
+<div style="font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1.1;color:#000">{{ d.hello }}</div>
+<div style="margin-top:4px;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#8E8E93">{{ d.today }}</div>
+</div>
+
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Nächste Lektion</div>
+<div onClick="{{ d.onOpenPlan }}" style="background:#fff;border-radius:14px;margin:0 16px;padding:18px 18px 17px;cursor:pointer;transition:transform .2s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.985)">
+<div style="font-size:26px;font-weight:600;letter-spacing:-0.8px;line-height:1.15;color:#000;text-wrap:pretty">{{ d.nowTitle }}</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,0,0,.08);display:flex;align-items:baseline;gap:10px">
+<span style="font-size:20px;font-weight:500;letter-spacing:-0.4px;font-variant-numeric:tabular-nums;color:#000">{{ d.nowSpan }}</span>
+<span style="font-size:17px;letter-spacing:-0.3px;color:#8E8E93">{{ d.nowRoom }}</span>
+<span style="margin-left:auto;font-size:15px;font-weight:600;letter-spacing:.6px;color:#0B3C4C">{{ d.nowTeacher }}</span>
+</div>
+<div style="margin-top:11px;font-size:15px;font-weight:500;letter-spacing:-0.2px;color:#0B3C4C">{{ d.nowCountdown }}</div>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Prüfungen und Termine</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.upcoming }}" as="u" hint-placeholder-count="2">
+<div style="display:flex;gap:16px;padding:15px 18px;border-top:{{ u.sep }};cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="flex:none;width:56px;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-0.2px;color:{{ u.dateColor }}">{{ u.date }}</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.title }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.meta }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.avgTitle }}</div>
+<div onClick="{{ d.onOpenNoten }}" style="background:#fff;border-radius:14px;margin:0 16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;transition:transform .2s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.985)">
+<span style="flex:1;min-width:0;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#8E8E93">{{ d.avgMeta }}</span>
+<div style="flex:none;display:flex;align-items:baseline;gap:8px">
+<span style="font-size:34px;font-weight:600;letter-spacing:-1.2px;line-height:1;font-variant-numeric:tabular-nums;color:#000">{{ d.avgValue }}</span>
+<span style="font-size:17px;font-weight:600;letter-spacing:-0.3px;font-variant-numeric:tabular-nums;color:{{ d.avgDeltaColor }}">{{ d.avgDelta }}</span>
+</div>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.noticeFrom }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;padding:16px 18px 17px;cursor:pointer;transition:transform .2s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.985)">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;line-height:1.42;color:#000;text-wrap:pretty">{{ d.noticeTitle }}</div>
+<div style="margin-top:7px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93">{{ d.noticeMeta }}</div>
+</div>
+
+<div style="height:120px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isNoten }}">
+<div style="background:#F2F2F7;min-height:100%">
+<div style="padding:0 20px 20px"><div style="font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1.1;color:#000">Noten</div></div>
+<div style="margin:0 16px 30px;padding:3px;display:flex;gap:3px;background:rgba(0,0,0,.05);border-radius:11px">
+<sc-for list="{{ d.semesters }}" as="s" hint-placeholder-count="2">
+<div onClick="{{ s.onPick }}" style="flex:1;text-align:center;padding:8px 4px;border-radius:9px;cursor:pointer;background:{{ s.bg }};box-shadow:{{ s.shadow }};font-size:13.5px;font-weight:{{ s.weight }};letter-spacing:-0.1px;color:{{ s.fg }};transition:background .22s cubic-bezier(.32,.72,0,1),color .22s ease">{{ s.label }}</div>
+</sc-for>
+</div>
+
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.avgLabel }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;padding:16px 18px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<span style="flex:1;min-width:0;font-size:17px;letter-spacing:-0.3px;color:#8E8E93">{{ d.promoValue }}</span>
+<div style="flex:none;display:flex;align-items:baseline;gap:8px">
+<span style="font-size:34px;font-weight:600;letter-spacing:-1.2px;line-height:1;font-variant-numeric:tabular-nums;color:#000">{{ d.avg }}</span>
+<span style="font-size:17px;font-weight:600;letter-spacing:-0.3px;font-variant-numeric:tabular-nums;color:{{ d.avgDeltaColor }}">{{ d.avgDelta }}</span>
+</div>
+</div>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.subjectsTitle }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.subjects }}" as="s" hint-placeholder-count="6">
+<div onClick="{{ s.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:15px 18px;border-top:{{ s.sep }};cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.short }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.meta }}</div>
+</div>
+<span style="flex:none;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ s.trendColor }}">{{ s.trend }}</span>
+<span style="flex:none;font-size:20px;font-weight:600;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;color:{{ s.gradeColor }}">{{ s.grade }}</span>
+<span style="flex:none;font-size:17px;color:#C7C7CC">›</span>
+</div>
+</sc-for>
+</div>
+<div style="height:120px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isPlan }}">
+<div style="background:#F2F2F7;min-height:100%">
+<div style="padding:0 20px 20px"><div style="font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1.1;color:#000">Stundenplan</div></div>
+<div style="margin:0 12px 26px;display:flex;gap:4px">
+<sc-for list="{{ d.days }}" as="w" hint-placeholder-count="5">
+<div onClick="{{ w.onPick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;padding:4px 0;cursor:pointer;transition:transform .18s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.94)">
+<span style="font-size:13px;font-weight:500;color:#8E8E93">{{ w.dow }}</span>
+<span style="width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ w.bg }};color:{{ w.fg }};font-size:16px;font-weight:{{ w.weight }};font-variant-numeric:tabular-nums;transition:background .22s cubic-bezier(.32,.72,0,1)">{{ w.date }}</span>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ d.hasChanges }}">
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Änderungen</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;padding:15px 18px;margin-bottom:30px">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;line-height:1.4;color:#A2404D;text-wrap:pretty">{{ d.changeLine }}</div>
+</div>
+</sc-if>
+
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.dayTitle }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.lessons }}" as="l" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;padding:14px 18px;border-top:{{ l.sep }}">
+<span style="flex:none;width:52px;font-size:16px;font-weight:400;font-variant-numeric:tabular-nums;letter-spacing:-0.2px;color:{{ l.inkSoft }}">{{ l.start }}</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:{{ l.ink }};text-decoration:{{ l.strike }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.subject }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:{{ l.metaColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.meta }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<div onClick="{{ d.onToggleLegend }}" style="display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="flex:1;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000">Kürzel Lehrpersonen</span>
+<span style="flex:none;font-size:17px;color:#C7C7CC;transform:{{ d.legendRotate }};transition:transform .28s cubic-bezier(.32,.72,0,1)">›</span>
+</div>
+<sc-if value="{{ d.legendOpen }}">
+<sc-for list="{{ d.legend }}" as="p" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:16px;padding:13px 18px;border-top:1px solid rgba(0,0,0,.08)">
+<span style="flex:none;width:52px;font-size:16px;font-weight:600;letter-spacing:.4px;color:#0B3C4C">{{ p.abbr }}</span>
+<span style="flex:1;min-width:0;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</span>
+<span style="flex:none;font-size:15px;color:#8E8E93">{{ p.subject }}</span>
+</div>
+</sc-for>
+</sc-if>
+</div>
+<div style="height:120px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.isSol }}">
+<div style="background:#F2F2F7;min-height:100%">
+<div style="padding:0 20px 20px"><div style="font-size:34px;font-weight:700;letter-spacing:-1.1px;line-height:1.1;color:#000">SOL</div></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.slotLabel }}</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;padding:18px 18px 16px">
+<div style="display:flex;align-items:baseline;gap:12px">
+<span style="font-size:30px;font-weight:600;letter-spacing:-1.1px;line-height:1;font-variant-numeric:tabular-nums;color:#000">{{ d.slotTime }}</span>
+<span style="font-size:17px;letter-spacing:-0.3px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.slotWhere }}</span>
+</div>
+<div style="margin-top:16px;padding:3px;display:flex;gap:3px;background:rgba(0,0,0,.05);border-radius:11px">
+<sc-for list="{{ d.slots }}" as="sl" hint-placeholder-count="3">
+<div onClick="{{ sl.onPick }}" style="flex:1;text-align:center;padding:8px 4px;border-radius:9px;cursor:{{ sl.cursor }};background:{{ sl.bg }};box-shadow:{{ sl.shadow }};font-size:13.5px;font-weight:{{ sl.weight }};font-variant-numeric:tabular-nums;color:{{ sl.fg }};transition:background .22s cubic-bezier(.32,.72,0,1)">{{ sl.time }}</div>
+</sc-for>
+</div>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;display:flex;align-items:baseline;justify-content:space-between">
+<span style="font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Lernziele</span>
+<span style="font-size:13px;font-weight:600;color:#3F7D53">{{ d.goalsProgress }}</span>
+</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.goals }}" as="g" hint-placeholder-count="4">
+<div onClick="{{ g.onToggle }}" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:{{ g.sep }};cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="flex:none;width:23px;height:23px;border-radius:999px;border:1.5px solid {{ g.boxBorder }};background:{{ g.boxBg }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;transition:background .2s ease,border-color .2s ease">{{ g.check }}</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:{{ g.ink }};text-decoration:{{ g.strike }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.text }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.meta }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;overflow:hidden">
+<sc-for list="{{ d.solRows }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:15px 18px;border-top:{{ r.sep }};cursor:pointer;transition:background .12s ease" style-active="background:#F2F2F0">
+<span style="flex:1;font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000">{{ r.label }}</span>
+<span style="flex:none;font-size:17px;letter-spacing:-0.3px;color:#8E8E93">{{ r.value }}</span>
+<span style="flex:none;font-size:17px;color:#C7C7CC">›</span>
+</div>
+</sc-for>
+</div>
+
+<div style="height:30px"></div>
+<div style="margin:0 0 7px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Rückmeldung</div>
+<div style="background:#fff;border-radius:14px;margin:0 16px;padding:16px 18px 17px">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;line-height:1.45;color:#000;text-wrap:pretty">{{ d.feedbackText }}</div>
+<div style="margin-top:8px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93">{{ d.feedbackMeta }}</div>
+</div>
+<div style="height:120px"></div>
+</div>
+</sc-if>
+
+<div style="height:96px;background:{{ d.groundBg }}"></div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:{{ d.sheetEvents }};z-index:20">
+<div onClick="{{ d.onCloseDetail }}" style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(11,60,76,.32);opacity:{{ d.scrimOpacity }};transition:opacity .34s cubic-bezier(.32,.72,0,1)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;max-height:82%;display:flex;flex-direction:column;background:#F2F2F7;border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(11,60,76,.16);transform:translateY({{ d.sheetY }});transition:transform .42s cubic-bezier(.32,.72,0,1)">
+<div style="flex:none;padding:12px 0 0;display:flex;justify-content:center">
+<span style="width:38px;height:5px;border-radius:999px;background:rgba(11,60,76,.18)"></span>
+</div>
+<div style="flex:none;padding:14px 20px 4px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+<div style="flex:1;min-width:0">
+<div style="font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">{{ d.detailKicker }}</div>
+<div style="margin-top:5px;font-size:28px;font-weight:700;letter-spacing:-0.9px;line-height:1.15;color:#000">{{ d.detailName }}</div>
+</div>
+<div onClick="{{ d.onCloseDetail }}" style="flex:none;width:30px;height:30px;border-radius:999px;background:rgba(11,60,76,.07);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#5F6E74;cursor:pointer;transition:transform .18s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.9)">✕</div>
+</div>
+<div style="flex:1;overflow:auto;padding:14px 16px 30px">
+<div style="padding:16px 18px;background:#fff;border-radius:14px;display:flex;align-items:flex-end;gap:10px">
+<span style="font-size:40px;font-weight:600;letter-spacing:-1.5px;line-height:.9;font-variant-numeric:tabular-nums;color:#000">{{ d.detailAvg }}</span>
+<span style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ d.detailDeltaColor }};padding-bottom:5px">{{ d.detailDelta }}</span>
+<span style="font-size:15px;letter-spacing:-0.2px;color:#8E8E93;padding-bottom:5px">{{ d.detailCompare }}</span>
+</div>
+<div style="margin:26px 0 7px;padding:0 2px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#8E8E93">Prüfungen</div>
+<div style="background:#fff;border-radius:14px;overflow:hidden">
+<sc-for list="{{ d.exams }}" as="e" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:{{ e.sep }}">
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:400;letter-spacing:-0.3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</div>
+<div style="margin-top:2px;font-size:15px;letter-spacing:-0.2px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.meta }}</div>
+</div>
+<span style="flex:none;font-size:20px;font-weight:600;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;color:{{ e.color }}">{{ e.grade }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ d.showChrome }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;bottom:0;padding:0 14px 30px;display:flex;justify-content:center;pointer-events:none;z-index:15">
+<div style="pointer-events:auto;display:flex;gap:2px;padding:7px 8px;border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);box-shadow:0 6px 24px rgba(17,21,23,.14),0 0 0 .5px rgba(17,21,23,.06)">
+<sc-for list="{{ d.tabs }}" as="t" hint-placeholder-count="4">
+<div onClick="{{ t.onPick }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:74px;padding:6px 0 4px;border-radius:999px;cursor:pointer;background:{{ t.pill }};color:{{ t.ink }};transition:background .24s cubic-bezier(.32,.72,0,1),color .18s ease,transform .18s cubic-bezier(.32,.72,0,1)" style-active="transform:scale(.92)">
+<svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="{{ t.stroke }}" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.path }}"></path></svg>
+<span style="font-size:10.5px;font-weight:{{ t.weight }};letter-spacing:.1px">{{ t.label }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-import>
+</div>
+</sc-for>
+</div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:1100}}">
+const NAVY='#0B3C4C', PERI='#6B7CC4', SAGE='#71976F', CORAL='#CE5E6C', INK='#243B43', SOFT='#5F6E74', MUTE='#9AA3A7';
+const SEP = '1px solid rgba(11,60,76,.07)';
+const CARD_PILL = '0 1px 3px rgba(11,60,76,.12),0 1px 1px rgba(11,60,76,.04)';
+
+const SEMS=[
+  {label:'FS 2026', avg:4.62, prev:4.71},
+  {label:'HS 2026', avg:4.87, prev:4.62},
+];
+
+const SUBJECTS={
+  'HS 2026':[
+    {name:'W&G — Wirtschaft und Gesellschaft', g:5.1, prev:4.8, n:4, lp:'GIO'},
+    {name:'IKA — Information, Kommunikation', g:4.6, prev:4.4, n:3, lp:'BRT'},
+    {name:'Deutsch', g:4.9, prev:4.7, n:3, lp:'HFM'},
+    {name:'Französisch', g:3.8, prev:3.5, n:4, lp:'DUC'},
+    {name:'Englisch', g:5.3, prev:5.0, n:3, lp:'WLS'},
+    {name:'Sport', g:5.5, prev:5.3, n:2, lp:'AMB'},
+  ],
+  'FS 2026':[
+    {name:'W&G — Wirtschaft und Gesellschaft', g:4.8, prev:4.9, n:4, lp:'GIO'},
+    {name:'IKA — Information, Kommunikation', g:4.4, prev:4.6, n:3, lp:'BRT'},
+    {name:'Deutsch', g:4.7, prev:4.8, n:3, lp:'HFM'},
+    {name:'Französisch', g:3.5, prev:3.9, n:4, lp:'DUC'},
+    {name:'Englisch', g:5.0, prev:5.1, n:3, lp:'WLS'},
+    {name:'Sport', g:5.3, prev:5.0, n:2, lp:'AMB'},
+  ],
+};
+
+const EXAMS={
+  'W&G — Wirtschaft und Gesellschaft':[
+    {name:'Prüfung Rechnungswesen 2', grade:5.5, weight:'2×', meta:'12.08.2026 · Klasse Ø 4.8'},
+    {name:'Test Kalkulation', grade:4.5, weight:'1×', meta:'01.07.2026 · Klasse Ø 4.6'},
+    {name:'Semesterarbeit Marketing', grade:5.0, weight:'1×', meta:'10.06.2026 · Klasse Ø 4.9'},
+  ],
+  'Französisch':[
+    {name:'Vocabulaire unité 6', grade:3.5, weight:'1×', meta:'14.08.2026 · Klasse Ø 4.5'},
+    {name:'Compréhension orale', grade:4.0, weight:'2×', meta:'02.07.2026 · Klasse Ø 4.7'},
+    {name:'Grammaire — subjonctif', grade:3.5, weight:'1×', meta:'18.06.2026 · Klasse Ø 4.4'},
+    {name:'Exposé oral', grade:4.5, weight:'1×', meta:'05.06.2026 · Klasse Ø 4.8'},
+  ],
+};
+const DEFAULT_EXAMS=[
+  {name:'Prüfung 3', grade:5.0, weight:'2×', meta:'13.08.2026 · Klasse Ø 4.7'},
+  {name:'Prüfung 2', grade:4.5, weight:'1×', meta:'26.06.2026 · Klasse Ø 4.5'},
+  {name:'Prüfung 1', grade:5.0, weight:'1×', meta:'04.06.2026 · Klasse Ø 4.6'},
+];
+
+const LESSONS=[
+  {start:'08:35', subject:'W&G — Rechnungswesen', room:'A 214', lp:'GIO'},
+  {start:'09:25', subject:'W&G — Rechnungswesen', room:'A 214', lp:'GIO'},
+  {start:'10:30', subject:'Französisch', room:'B 214', lp:'DUC', state:'room'},
+  {start:'11:20', subject:'IKA', room:'C 002', lp:'BRT'},
+  {start:'13:15', subject:'SOL — Lernlandschaft', room:'D 1', lp:'HFM'},
+  {start:'14:55', subject:'Sport', room:'Halle', lp:'AMB', state:'cancel'},
+  {start:'15:45', subject:'Englisch', room:'A 108', lp:'WLS'},
+];
+
+const LEGEND=[
+  {abbr:'GIO', name:'M. Giovannacci', subject:'W&G'},
+  {abbr:'BRT', name:'S. Bertschi', subject:'IKA'},
+  {abbr:'HFM', name:'A. Hofmann', subject:'Deutsch'},
+  {abbr:'DUC', name:'C. Ducommun', subject:'Französisch'},
+  {abbr:'WLS', name:'K. Wälchli', subject:'Englisch'},
+  {abbr:'AMB', name:'R. Amberg', subject:'Sport'},
+];
+
+const GOALS=[
+  {text:'Abschlussbuchungen üben', meta:'W&G · bis Fr 22.08. · 90 min'},
+  {text:'Vocabulaire unité 7 lernen', meta:'Französisch · bis Do 21.08.'},
+  {text:'Lernjournal Woche 34', meta:'SOL · bis So 24.08.'},
+  {text:'Präsentation Marketing gliedern', meta:'W&G · bis Mi 27.08.'},
+];
+
+const SLOTS=[
+  {time:'13:15', room:'D 1'},
+  {time:'15:00', room:'D 2'},
+  {time:'16:30', room:'belegt', full:true},
+];
+
+const DAYS=[{dow:'Mo',date:'18'},{dow:'Di',date:'19'},{dow:'Mi',date:'20'},{dow:'Do',date:'21'},{dow:'Fr',date:'22'}];
+
+const TABS=[
+  {key:'home', label:'Start', path:'M4 11.4 13 4.5l9 6.9V21a1 1 0 0 1-1 1h-5.5v-6h-5v6H5a1 1 0 0 1-1-1z'},
+  {key:'noten', label:'Noten', path:'M5 21V13m6.5 8V6.5M18 21v-5.5'},
+  {key:'plan', label:'Plan', path:'M4.5 7.5h17v13a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1zM4.5 12h17M8.5 4.5v4m9-4v4'},
+  {key:'sol', label:'SOL', path:'M5 5.5h5.5A2.5 2.5 0 0 1 13 8v13a2 2 0 0 0-2-2H5zm16 0h-5.5A2.5 2.5 0 0 0 13 8v13a2 2 0 0 1 2-2h6z'},
+];
+
+class Component extends DCLogic {
+  state = {
+    role: 'lernende',
+    tabs: ['home','home','home','noten','plan','sol'],
+    sem: [1,1,1,1,1,1],
+    day: [1,1,1,1,1,1],
+    detail: [null,null,null,null,null,null],
+    legend: [false,false,false,false,true,false],
+    done: {2:true},
+    slot: 0,
+    step: 'form',
+  };
+
+  authVals(teacher) {
+    const step = this.state.step;
+    const loading = step === 'loading';
+    return {
+      showChrome: false,
+      isAuth: true,
+      authTitle: step === 'done' ? 'Angemeldet' : 'bwd Portal',
+      authSub: step === 'done' ? 'Klasse automatisch zugeteilt.' : 'Anmeldung mit deinem Schulkonto.',
+      authForm: step !== 'done',
+      authDone: step === 'done',
+      btnLabel: loading ? 'Anmeldung läuft …' : 'Mit Microsoft anmelden',
+      btnBg: loading ? '#9AA3A7' : '#0B3C4C',
+      onSignIn: () => {
+        if (loading) return;
+        this.setState({ step: 'loading' });
+        setTimeout(() => this.setState({ step: 'done' }), 900);
+      },
+      onEnter: () => this.setState({ step: 'form' }),
+      ...this.identity(teacher),
+    };
+  }
+
+  identity(teacher) {
+    return teacher
+      ? { userName: 'Andrea Hofmann', userMail: 'andrea.hofmann@bwdbern.ch', userInitials: 'AH', userClass: 'KBS 3c' }
+      : { userName: 'Mykyta Test', userMail: 'mykyta.test@bwdbern.ch', userInitials: 'MT', userClass: 'KBS 3c' };
+  }
+
+  profileVals(teacher) {
+    const id = this.identity(teacher);
+    return {
+      isProfile: true, ...id,
+      profileGroupTitle: teacher ? 'Anstellung' : 'Ausbildung',
+      profileRows: this.seps(teacher
+        ? [
+            {label:'Rolle', value:'Lehrperson'},
+            {label:'Fächer', value:'Deutsch · SOL'},
+            {label:'Klassen', value:'KBS 3c, 1a'},
+            {label:'Kürzel', value:'HFM'},
+          ]
+        : [
+            {label:'Klasse', value:'KBS 3c'},
+            {label:'Lehrgang', value:'Kaufmännische Berufsschule'},
+            {label:'Klassenlehrperson', value:'A. Hofmann'},
+            {label:'Semester', value:'HS 2026'},
+          ]),
+      settingRows: this.seps([
+        {label:'Benachrichtigungen', value:'Ein'},
+        {label:'Sprache', value:'Deutsch'},
+        {label:'Kalender abonnieren', value:''},
+      ]),
+      onSignOut: () => this.setState({ step: 'form' }),
+    };
+  }
+
+  set(key, i, val) {
+    this.setState(s => { const a = s[key].slice(); a[i] = val; return { [key]: a }; });
+  }
+
+  gradeColor(g) { return g < 4 ? '#A2404D' : '#000'; }
+  seps(arr) { return arr.map((o, k) => ({ ...o, sep: k ? SEP : 'none' })); }
+  segment(active) {
+    return {
+      bg: active ? '#fff' : 'transparent',
+      shadow: active ? CARD_PILL : 'none',
+      fg: active ? '#000' : '#8E8E93',
+      weight: active ? '600' : '500',
+    };
+  }
+
+  homeVals(teacher, i) {
+    const open = key => () => this.set('tabs', i, key);
+    const line = (o, k) => ({ sep: k ? '1px solid rgba(0,0,0,.09)' : 'none', ...o });
+    const common = {
+      chromeBg: 'rgba(242,242,247,.82)', groundBg: '#F2F2F7',
+      onOpenPlan: open('plan'), onOpenNoten: open('noten'),
+      today: 'Dienstag, 19. August',
+    };
+    if (teacher) return { ...common,
+      hello: 'Guten Morgen',
+      nowCountdown: 'Beginnt in 8 Minuten',
+      nowTitle: 'Deutsch — Textanalyse',
+      nowSpan: '08:35 – 09:20', nowRoom: 'A 118 · KBS 3c', nowTeacher: 'HFM',
+      upcoming: [
+        {date:'Do 21.', title:'Textanalyse korrigieren', meta:'KBS 3c · 24 Arbeiten', dateColor:'#CE5E6C'},
+        {date:'Di 26.', title:'Elterngespräche', meta:'A 118 · ab 17:00', dateColor:'#8E8E93'},
+      ].map(line),
+      avgTitle: 'Klassenschnitt', avgMeta: 'HS 2026 · 3 unter Promotionsgrenze', avgValue: '4.61',
+      avgDelta: '+0.09', avgDeltaColor: '#3F7D53',
+      noticeFrom: 'Mitteilung — Rektorat KBS',
+      noticeTitle: 'Zeugnisnoten HS 2026 bis 18. September erfassen.',
+      noticeMeta: 'Heute, 07:40',
+    };
+    return { ...common,
+      hello: 'Hallo Lena',
+      nowCountdown: 'Beginnt in 8 Minuten',
+      nowTitle: 'W&G — Rechnungswesen',
+      nowSpan: '08:35 – 09:20', nowRoom: 'Raum A 214', nowTeacher: 'GIO',
+      upcoming: [
+        {date:'Do 21.', title:'Vocabulaire unité 7', meta:'Französisch · Prüfung', dateColor:'#CE5E6C'},
+        {date:'Mo 25.', title:'Abschlussbuchungen', meta:'W&G · Prüfung, Gewicht 2×', dateColor:'#8E8E93'},
+      ].map(line),
+      avgTitle: 'Notenschnitt', avgMeta: 'HS 2026', avgValue: '4.87',
+      avgDelta: '+0.25', avgDeltaColor: '#3F7D53',
+      noticeFrom: 'Mitteilung — Sekretariat KBS',
+      noticeTitle: 'Anmeldung für die Wahlfächer Frühling 2027 ist offen.',
+      noticeMeta: 'Heute, 07:40',
+    };
+  }
+
+  notenVals(i, teacher) {
+    const semIdx = this.state.sem[i];
+    const sem = SEMS[semIdx];
+    const subs = SUBJECTS[sem.label];
+    const delta = sem.avg - sem.prev;
+    return {
+      semesters: SEMS.map((s, k) => ({ label: s.label, onPick: () => this.set('sem', i, k), ...this.segment(k === semIdx) })),
+      avgLabel: (teacher ? 'Klassenschnitt ' : 'Notenschnitt ') + sem.label,
+      avg: (teacher ? 4.61 : sem.avg).toFixed(2),
+      avgDelta: (delta >= 0 ? '+' : '−') + Math.abs(delta).toFixed(2),
+      avgDeltaColor: delta >= 0 ? '#3F7D53' : '#A2404D',
+      deltaBg: delta >= 0 ? 'rgba(63,125,83,.12)' : 'rgba(162,64,77,.12)',
+      promoPct: (((sem.avg - 3) / 3) * 100).toFixed(1),
+      promoValue: teacher ? '3 von 24 unter der Promotionsgrenze' : 'Promotion erreicht · 1 Fach ungenügend',
+      subjectsTitle: teacher ? 'Fächer der Klasse' : 'Fächer',
+      subjects: this.seps(subs.map(s => ({
+        short: s.name.includes(' — ') ? s.name.split(' — ')[0] : s.name,
+        meta: s.n + ' Noten · ' + s.lp,
+        grade: s.g.toFixed(1),
+        gradeColor: s.g < 4 ? '#A2404D' : '#000',
+        trend: (s.g - s.prev >= 0 ? '↑' : '↓') + Math.abs(s.g - s.prev).toFixed(1),
+        trendColor: s.g - s.prev >= 0 ? '#3F7D53' : '#A2404D',
+        onOpen: () => this.set('detail', i, s.name),
+      }))),
+    };
+  }
+
+  detailVals(i) {
+    const name = this.state.detail[i];
+    const closed = { sheetY: '101%', scrimOpacity: '0', sheetEvents: 'none', onCloseDetail: () => this.set('detail', i, null) };
+    if (!name) return closed;
+    const sem = SEMS[this.state.sem[i]].label;
+    const s = SUBJECTS[sem].find(x => x.name === name);
+    const exams = EXAMS[name] || DEFAULT_EXAMS;
+    return {
+      ...closed,
+      sheetY: '0%', scrimOpacity: '1', sheetEvents: 'auto',
+      detailKicker: sem + ' · ' + s.lp,
+      detailName: name.split(' — ')[0],
+      detailAvg: s.g.toFixed(1),
+      detailDelta: (s.g - s.prev >= 0 ? '+' : '−') + Math.abs(s.g - s.prev).toFixed(1),
+      detailDeltaColor: s.g - s.prev >= 0 ? '#3F7D53' : '#A2404D',
+      detailCompare: 'Klasse Ø 4.7 · ' + s.n + ' Prüfungen',
+      exams: this.seps(exams.map(e => ({
+        name: e.name,
+        meta: e.meta + ' · Gewicht ' + e.weight,
+        grade: e.grade.toFixed(1),
+        color: this.gradeColor(e.grade),
+      }))),
+    };
+  }
+
+  planVals(i) {
+    const dayIdx = this.state.day[i];
+    const isToday = dayIdx === 1;
+    const lessons = isToday ? LESSONS : LESSONS.slice(0, 5);
+    const last = ['09:20','16:30','15:40','16:30','14:45'][dayIdx];
+    return {
+      days: DAYS.map((w, k) => {
+        const active = k === dayIdx;
+        return {
+          dow: w.dow, date: w.date,
+          bg: active ? NAVY : 'transparent',
+          fg: active ? '#fff' : NAVY,
+          weight: active ? '600' : '400',
+          onPick: () => this.set('day', i, k),
+        };
+      }),
+      dayTitle: ['Montag 18. August','Dienstag 19. August','Mittwoch 20. August','Donnerstag 21. August','Freitag 22. August'][dayIdx],
+      daySummary: lessons.length + ' Lektionen · bis ' + last,
+      hasChanges: isToday,
+      changeLine: 'Sport 14:55 fällt aus · Französisch neu in B 214',
+      lessons: this.seps(lessons.map(l => {
+        const cancel = l.state === 'cancel';
+        const room = l.state === 'room';
+        return {
+          start: l.start,
+          subject: l.subject,
+          meta: room ? l.room + ' statt B 106 · ' + l.lp : cancel ? 'Fällt aus' : l.room + ' · ' + l.lp,
+          metaColor: room ? '#A2404D' : '#8E8E93',
+          ink: cancel ? '#8E8E93' : '#000',
+          inkSoft: cancel ? '#C7C7CC' : '#8E8E93',
+          strike: cancel ? 'line-through' : 'none',
+          rowBg: cancel ? 'rgba(11,60,76,.02)' : '#fff',
+          badge: cancel ? 'Ausfall' : room ? 'Neuer Raum' : '',
+          badgeBg: cancel ? 'rgba(206,94,108,.12)' : 'rgba(107,124,196,.12)',
+          badgeFg: cancel ? '#A2404D' : '#4F5EA0',
+        };
+      })),
+      legendOpen: this.state.legend[i],
+      legendRotate: this.state.legend[i] ? 'rotate(90deg)' : 'rotate(0deg)',
+      legend: LEGEND,
+      onToggleLegend: () => this.set('legend', i, !this.state.legend[i]),
+    };
+  }
+
+  solVals(teacher) {
+    const done = this.state.done;
+    const count = GOALS.filter((g, k) => done[k]).length;
+    const slot = this.state.slot;
+    const booked = SLOTS[slot];
+    return {
+      slotLabel: teacher ? 'Begleitung' : 'Gebuchter Slot',
+      slotTime: booked.time,
+      slotWhere: teacher ? 'D 1 · 18 Lernende' : 'Lernlandschaft ' + booked.room + ' · HFM',
+      slots: SLOTS.map((s, k) => {
+        const active = k === slot && !s.full;
+        const seg = this.segment(active);
+        return {
+          time: s.time,
+          ...seg,
+          fg: s.full ? '#C7C7CC' : seg.fg,
+          cursor: s.full ? 'default' : 'pointer',
+          onPick: () => { if (!s.full) this.setState({ slot: k }); },
+        };
+      }),
+      goalsProgress: count + ' von ' + GOALS.length,
+      goals: this.seps(GOALS.map((g, k) => ({
+        text: g.text,
+        meta: g.meta,
+        check: done[k] ? '✓' : '',
+        boxBorder: done[k] ? '#3F7D53' : 'rgba(0,0,0,.22)',
+        boxBg: done[k] ? '#3F7D53' : 'transparent',
+        ink: done[k] ? '#8E8E93' : '#000',
+        strike: done[k] ? 'line-through' : 'none',
+        onToggle: () => this.setState(s => ({ done: { ...s.done, [k]: !s.done[k] } })),
+      }))),
+      solRows: this.seps(teacher
+        ? [{label:'Lernjournale', value:'8 offen'},{label:'Dokumente', value:'4 Dateien'}]
+        : [{label:'Dokumente', value:'4 Dateien'},{label:'Zeit erfasst', value:'3 h 20'}]),
+      feedbackText: '«Deine Zielformulierung ist präzise. Halte auch fest, was nicht funktioniert hat.»',
+      feedbackMeta: 'A. Hofmann · 15.08.2026',
+    };
+  }
+
+  renderVals() {
+    const teacher = this.state.role === 'lehrperson';
+    const meta = [
+      {label:'Anmelden', hint:'Microsoft-Konto der bwd', screen:'auth'},
+      {label:'Profil', hint:'Klasse und Einstellungen', screen:'profile'},
+      {label:'Start', hint:'Der Tag auf einen Blick'},
+      {label:'Noten', hint:'Schnitt und Prüfungen'},
+      {label:'Stundenplan', hint:'Ausfälle und Räume'},
+      {label:'SOL', hint:'Slot, Ziele, Rückmeldung'},
+    ];
+    const devices = meta.map((m, i) => {
+      const tab = this.state.tabs[i];
+      const auth = m.screen === 'auth', profile = m.screen === 'profile';
+      const base = {
+        label: m.label, hint: m.hint,
+        showChrome: true, isAuth: false, isProfile: false,
+        roleLabel: teacher ? 'Lehrperson' : 'Lernende',
+        roleInitials: teacher ? 'AH' : 'LM',
+        onToggleRole: () => this.setState({ role: teacher ? 'lernende' : 'lehrperson' }),
+        isHome: !auth && !profile && tab === 'home',
+        isNoten: !auth && !profile && tab === 'noten',
+        isPlan: !auth && !profile && tab === 'plan',
+        isSol: !auth && !profile && tab === 'sol',
+        sheetY: '101%', scrimOpacity: '0', sheetEvents: 'none', onCloseDetail: () => {},
+        chromeBg: 'rgba(242,242,247,.82)',
+        groundBg: '#F2F2F7',
+        tabs: TABS.map(t => ({
+          label: t.label, path: t.path,
+          pill: t.key === tab ? 'rgba(11,60,76,.09)' : 'transparent',
+          ink: t.key === tab ? NAVY : '#8A9499',
+          stroke: t.key === tab ? '2' : '1.6',
+          weight: t.key === tab ? '600' : '500',
+          onPick: () => this.set('tabs', i, t.key),
+        })),
+      };
+      if (auth) return Object.assign(base, { isHome: false, chromeBg: 'rgba(255,255,255,.82)', groundBg: '#fff' }, this.authVals(teacher));
+      if (profile) return Object.assign(base, { isHome: false }, this.profileVals(teacher));
+      if (tab === 'home') Object.assign(base, this.homeVals(teacher, i));
+      if (tab === 'noten') Object.assign(base, this.notenVals(i, teacher), this.detailVals(i));
+      if (tab === 'plan') Object.assign(base, this.planVals(i));
+      if (tab === 'sol') Object.assign(base, this.solVals(teacher));
+      return base;
+    });
+    return { devices };
+  }
+}
+</script>
+</body>
+</html>
