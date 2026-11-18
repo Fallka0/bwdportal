@@ -14,16 +14,25 @@ export function authProvider(env: ServerEnv): AuthProvider {
   return env.authMode === "mock" ? new MockAuthProvider(env) : new MicrosoftAuthProvider(env);
 }
 
-/** Session-ID aus dem Cookie (Web) oder dem Bearer-Token (App). */
-export async function sessionToken(): Promise<string | null> {
+/**
+ * Session-ID aus dem Bearer-Token (App), dem Cookie (Web) oder, nur für Downloads unter /api/v1/files,
+ * aus dem Parameter `t`: Links aus der App können keinen Header mitsenden.
+ */
+export async function sessionToken(req?: Request): Promise<string | null> {
   const h = await headers();
   const auth = h.get("authorization");
   if (auth?.startsWith("Bearer ")) return auth.slice(7).trim() || null;
-  return (await cookies()).get(SESSION_COOKIE)?.value ?? null;
+  const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (cookie) return cookie;
+  if (req) {
+    const url = new URL(req.url);
+    if (url.pathname.startsWith("/api/v1/files/")) return url.searchParams.get("t");
+  }
+  return null;
 }
 
-export async function currentUserId(env: ServerEnv): Promise<string | null> {
-  const t = await sessionToken();
+export async function currentUserId(env: ServerEnv, req?: Request): Promise<string | null> {
+  const t = await sessionToken(req);
   return t ? authProvider(env).getSession(t) : null;
 }
 

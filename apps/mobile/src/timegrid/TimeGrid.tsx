@@ -59,7 +59,7 @@ export function TimeGrid({ grid, now: initialNow, live, title, sub, prev, next, 
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: sp[6] }}>
         <View style={{ width: aside ? 64 : 44 }}>{prev && <NavBtn icon="chev-l" {...prev} />}</View>
         <View style={{ flex: 1, alignItems: "center" }}>
-          <T accessibilityRole="header" accessibilityLiveRegion="polite" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontFamily: font.display400, fontSize: fs.h2, letterSpacing: -0.7, lineHeight: 26 }}>
+          <T accessibilityRole="header" accessibilityLiveRegion="polite" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontFamily: font.display400, fontSize: variant === "sol" ? fs.h3 + 1 : fs.h2, letterSpacing: -0.7, lineHeight: 26 }}>
             {title}
           </T>
           {sub && <T style={{ fontSize: fs.base }}>{sub}</T>}

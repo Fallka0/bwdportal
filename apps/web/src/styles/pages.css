@@ -532,3 +532,344 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ---------- SOL ---------- */
+.stabs {
+  display: flex;
+  gap: 0 var(--sp-9);
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--sp-1);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text2);
+  text-decoration: none;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.stabs a:hover {
+  color: var(--ink);
+}
+
+.stabs a[aria-current="page"] {
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+.ftabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text2);
+  text-decoration: none;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+
+.ftabs a[aria-current="true"] {
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+.sol-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-7);
+  margin-bottom: var(--sp-2);
+}
+
+.sol-bar .tabs {
+  margin-bottom: 0;
+}
+
+.sg {
+  margin-bottom: 22px;
+}
+
+.sg-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-5);
+  margin: var(--sp-4) 0 var(--sp-3);
+}
+
+.sg-h h2 {
+  font: 400 var(--fs-h3) / 1.1 var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.sg-l {
+  padding-top: var(--sp-1);
+  padding-bottom: var(--sp-1);
+}
+
+.so {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 72px 128px 84px;
+  gap: var(--sp-6);
+  align-items: center;
+  min-height: 56px;
+  border-top: 1px solid var(--rule);
+}
+
+.so:first-child {
+  border-top: 0;
+}
+
+.code {
+  font: 600 var(--fs-m) / 1 var(--font-body);
+  color: var(--text2);
+}
+
+.so-t {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-l);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.so.done .so-t {
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.so-min {
+  font-size: var(--fs-m);
+  color: var(--text2);
+}
+
+.so-p {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  font-size: var(--fs-m);
+  color: var(--text2);
+}
+
+.so-a {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-0);
+}
+
+/* Fortschritt als Regler in der Optik des Balkens.
+   Die Füllung ist eine einfarbige Fläche (gleiche Farbe am Anfang und Ende), kein sichtbarer Verlauf. */
+.prog {
+  --p: 0%;
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.prog::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(var(--ink), var(--ink)) 0 / var(--p) 100% no-repeat, var(--panel2);
+}
+
+.prog::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel2);
+}
+
+.prog::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.prog::-webkit-slider-thumb {
+  appearance: none;
+  width: 4px;
+  height: 4px;
+  margin-top: 0;
+  border: 0;
+  background: transparent;
+}
+
+.prog::-moz-range-thumb {
+  width: 4px;
+  height: 4px;
+  border: 0;
+  background: transparent;
+}
+
+.prog:hover::-webkit-slider-thumb,
+.prog:focus-visible::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.so.done .prog::-webkit-slider-runnable-track {
+  background: linear-gradient(var(--text2), var(--text2)) 0 / var(--p) 100% no-repeat, var(--panel2);
+}
+
+.so.done .prog::-moz-range-progress {
+  background: var(--text2);
+}
+
+.cal,
+.pfw {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--sp-8);
+  align-items: start;
+}
+
+.pfw {
+  grid-template-columns: minmax(0, 1fr) 400px;
+}
+
+.form-card {
+  display: grid;
+  gap: var(--sp-6);
+}
+
+.pf-e h3 {
+  margin: var(--sp-6) 0 var(--sp-1);
+  font-size: var(--fs-s);
+  font-weight: 700;
+  color: var(--text2);
+}
+
+.pf-e p {
+  max-width: 68ch;
+  font-size: var(--fs-l);
+  line-height: 1.55;
+}
+
+.pf-e .row-h {
+  margin-bottom: 0;
+}
+
+.tg-b.k-plan {
+  cursor: pointer;
+}
+
+@container main (max-width: 1100px) {
+  .cal,
+  .pfw {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .stabs {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .stabs a {
+    font-size: var(--fs-m);
+  }
+
+  .sol-bar {
+    display: block;
+  }
+
+  .sol-bar .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .so {
+    grid-template-columns: 36px minmax(0, 1fr) 40px;
+    grid-template-rows: auto auto;
+    row-gap: 2px;
+    padding: var(--sp-4) 0;
+  }
+
+  .so .code {
+    grid-row: 1 / 3;
+  }
+
+  .so-t {
+    grid-column: 2;
+    font-size: var(--fs-base);
+  }
+
+  .so-min {
+    display: none;
+  }
+
+  .so-p {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: var(--fs-s);
+  }
+
+  .so-p .prog {
+    max-width: 120px;
+  }
+
+  .so-a {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+
+  .so-a .ib:last-child {
+    display: none;
+  }
+
+  .sol-dl {
+    display: none;
+  }
+
+  /* Portfolio: Formular für den nächsten SOL-Tag zuerst */
+  .pfw .form-card {
+    order: -1;
+  }
+}
+
+.app-only {
+  display: none;
+}
+
+@media (max-width: 599px) {
+  .app-only {
+    display: flex;
+  }
+
+  .web-only {
+    display: none;
+  }
+}
+
+.plan-list summary {
+  min-height: var(--size-touch-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.plan-list ul {
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.plan-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  font-size: var(--fs-m);
+}
