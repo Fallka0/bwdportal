@@ -85,3 +85,19 @@ export function fmtPeriods(periods: number[]): string {
   if (p.length === 1) return `${p[0]} Lektion`;
   return `${p.slice(0, -1).join(", ")} und ${p.at(-1)} Lektion`;
 }
+
+export type BodyBlock = { type: "p"; text: string } | { type: "ul"; items: string[] };
+
+/** Einfacher Text der Mitteilungen: Absätze durch Leerzeile, Listen mit "- ". Kein HTML. */
+export function parseBody(md: string | null): BodyBlock[] {
+  if (!md) return [];
+  return md
+    .split(/\n{2,}/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const lines = chunk.split("\n");
+      if (lines.every((l) => l.startsWith("- "))) return { type: "ul", items: lines.map((l) => l.slice(2).trim()) };
+      return { type: "p", text: lines.join(" ") };
+    });
+}

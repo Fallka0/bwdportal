@@ -557,3 +557,28 @@ export async function putSolPortfolio(db: Db, userId: string, solDayId: string, 
     .values({ id: `pf-${day.date}-${userId}`, userId, solDayId, ...values })
     .onConflictDoUpdate({ target: [s.solPortfolio.userId, s.solPortfolio.solDayId], set: values });
 }
+
+// ---------- Suche ----------
+
+export type SearchResults = {
+  subjects: { code: string; name: string; average: number | null }[];
+  documents: DocumentItem[];
+  links: LinkItem[];
+  news: NewsItem[];
+};
+
+/** Suche über Fächer, Dokumente, Links und Mitteilungen (Gross-/Kleinschreibung egal). */
+export async function search(db: Db, userId: string, now: Now, q: string): Promise<SearchResults> {
+  const needle = q.trim().toLocaleLowerCase("de-CH");
+  if (needle.length < 2) return { subjects: [], documents: [], links: [], news: [] };
+  const has = (...v: (string | null | undefined)[]) => v.some((x) => (x ?? "").toLocaleLowerCase("de-CH").includes(needle));
+  const grades = await getGrades(db, userId, 1);
+  const allSubjects = await db.select().from(s.subjects);
+  const subjects = allSubjects
+    .filter((x) => x.code !== "SOL" && has(x.name, x.short, x.code))
+    .map((x) => ({ code: x.code, name: x.name, average: grades.subjects.find((g) => g.code === x.code)?.average ?? null }));
+  const docs = (await getDocuments(db, now)).groups.flatMap((g) => g.items).filter((d) => has(d.title, d.note, d.group));
+  const links = (await getLinks(db)).filter((l) => has(l.title, l.sub));
+  const news = (await getNews(db, userId)).filter((n) => has(n.title, n.teaser));
+  return { subjects, documents: docs, links, news };
+}

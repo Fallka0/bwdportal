@@ -105,6 +105,7 @@ export function createApiClient(opts: ApiClientOptions) {
     links: () => call(z.object({ items: z.array(LinkItem) }), "GET", "/links"),
     notifications: () => call(z.object({ items: z.array(NotificationItem) }), "GET", "/notifications"),
     markAllRead: () => call(Ok, "POST", "/notifications/read"),
+    markRead: (ids: string[]) => call(Ok, "POST", "/notifications/read", { ids }),
     /** Absolute URL für Dateien (Download mit Token als Query, weil Links keinen Header senden können). */
     fileUrl: (path: string) => `${opts.baseUrl}/api/v1${path}`,
   };

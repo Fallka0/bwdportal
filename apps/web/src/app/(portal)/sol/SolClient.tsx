@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import { fromMin, toMin } from "@bwd/shared";
 import { Button, Icon, SelectField, StaticField, TextArea, TextField, useToast } from "@/components/ui";
 
@@ -25,16 +25,22 @@ export function BlockSelect({ blocks, value, tab }: { blocks: number[]; value: n
 /** Fortschritt eines Auftrags: sieht aus wie der Balken, lässt sich mit Maus, Touch und Pfeiltasten in 10er-Schritten setzen. */
 export function ProgressSlider({ id, title, value }: { id: string; title: string; value: number }) {
   const [v, setV] = useState(value);
-  const [saved, setSaved] = useState(value);
   const router = useRouter();
-  const commit = async (n: number) => {
-    if (n === saved) return;
-    setSaved(n);
-    const r = await fetch(`/api/v1/sol/tasks/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ percent: n }) }).catch(() => null);
-    if (!r?.ok) {
-      setV(saved);
-      setSaved(saved);
-    } else if ((n === 100) !== (saved === 100)) router.refresh();
+  // Anfragen nacheinander senden, damit die letzte Eingabe gewinnt (keine Wettläufe bei schnellen Tasten).
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const saved = useRef(value);
+  const commit = (n: number) => {
+    queue.current = queue.current.then(async () => {
+      if (n === saved.current) return;
+      const before = saved.current;
+      const r = await fetch(`/api/v1/sol/tasks/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ percent: n }) }).catch(() => null);
+      if (!r?.ok) {
+        setV(before);
+        return;
+      }
+      saved.current = n;
+      if ((n === 100) !== (before === 100)) router.refresh();
+    });
   };
   return (
     <span className="so-p">
