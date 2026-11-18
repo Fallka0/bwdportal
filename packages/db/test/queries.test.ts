@@ -233,3 +233,14 @@ describe("Leeres Konto (Mia Steiner)", () => {
     expect((await q.getSolPortfolio(db, m, NOW)).entries).toEqual([]);
   });
 });
+
+describe("Suche", () => {
+  it("findet Fach, Dokument, Link und Mitteilung", async () => {
+    const r = await q.search(db, U, NOW, "prüfungsplan");
+    expect(r.documents.map((d) => d.title)).toContain("Prüfungsplan 1. Semester 2026/27");
+    expect(r.news.map((n) => n.id)).toContain("pp");
+    expect((await q.search(db, U, NOW, "Mathe")).subjects.map((s) => s.code)).toEqual(["MA"]);
+    expect((await q.search(db, U, NOW, "moodle")).links.map((l) => l.title)).toEqual(["Moodle"]);
+    expect((await q.search(db, U, NOW, "x")).documents).toEqual([]);
+  });
+});

@@ -9,7 +9,8 @@ export function LogoutButton() {
   const [busy, setBusy] = useState(false);
   return (
     <Button
-      variant="out"
+      wide
+      variant="line"
       icon="logout"
       busy={busy}
       onClick={async () => {

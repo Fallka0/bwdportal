@@ -74,3 +74,16 @@ describe("lessonRun", () => {
     expect(lessonRun(lessons, copy).map((l) => l.id)).toEqual(["a", "b"]);
   });
 });
+
+import { parseBody } from "../src/domain";
+
+describe("parseBody", () => {
+  it("Absätze und Listen", () => {
+    expect(parseBody("Eins.\n\nZwei\nzeilig.\n\n- a\n- b")).toEqual([
+      { type: "p", text: "Eins." },
+      { type: "p", text: "Zwei zeilig." },
+      { type: "ul", items: ["a", "b"] },
+    ]);
+    expect(parseBody(null)).toEqual([]);
+  });
+});
