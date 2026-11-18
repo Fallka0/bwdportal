@@ -1,1 +1,3 @@
-export { tokens } from "./tokens";
+export * from "./tokens";
+export * from "./icons";
+export * from "./color";

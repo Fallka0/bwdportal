@@ -14,6 +14,7 @@
     "lint": "pnpm -r --parallel lint",
     "test": "pnpm -r test",
     "tokens": "node tools/scripts/gen-tokens.mjs",
+    "icons": "node tools/scripts/gen-icons.mjs",
     "db:generate": "pnpm --filter @bwd/db generate",
     "db:seed-sql": "pnpm --filter @bwd/db seed-sql",
     "db:reset": "pnpm --filter @bwd/web db:reset"
