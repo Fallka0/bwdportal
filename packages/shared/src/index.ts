@@ -6,3 +6,4 @@ export * from "./time";
 export * from "./grades";
 export * from "./schemas";
 export * from "./domain";
+export * from "./timegrid";

@@ -9,6 +9,8 @@ export type ServerEnv = {
   d1: D1Database;
   files: R2Bucket;
   now: Now;
+  /** true mit DEMO_NOW: Zeit steht still (Jetzt-Linie wie im Design) */
+  demo: boolean;
   authMode: "mock" | "microsoft";
   isProd: boolean;
 };
@@ -22,6 +24,7 @@ export async function serverEnv(): Promise<ServerEnv> {
     d1: e.DB,
     files: e.FILES,
     now: getNow(e.DEMO_NOW),
+    demo: !!e.DEMO_NOW,
     authMode: e.AUTH_MODE === "microsoft" ? "microsoft" : "mock",
     isProd: process.env.NODE_ENV === "production",
   };

@@ -910,3 +910,11 @@ dialog.dlg::backdrop {
   display: inline-flex;
   gap: var(--sp-5);
 }
+
+.sk-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: center;
+  padding: var(--sp-3) 0;
+}
