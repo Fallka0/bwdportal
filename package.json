@@ -1,0 +1,21 @@
+{
+  "name": "bwd-portal",
+  "private": true,
+  "description": "Portal für Lernende der bwd Bern. Schulprojekt. Web (Next.js) und App (Expo).",
+  "packageManager": "pnpm@12.21.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @bwd/web dev",
+    "dev:mobile": "pnpm --filter @bwd/mobile start",
+    "build": "pnpm --filter @bwd/web build",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "pnpm -r --parallel lint",
+    "test": "pnpm -r test",
+    "tokens": "node tools/scripts/gen-tokens.mjs",
+    "db:generate": "pnpm --filter @bwd/db generate",
+    "db:seed-sql": "pnpm --filter @bwd/db seed-sql",
+    "db:reset": "pnpm --filter @bwd/web db:reset"
+  }
+}

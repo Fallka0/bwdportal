@@ -1,0 +1,1115 @@
+{
+ "_info": "Beispieldaten aus dem Design. Stichtag Montag 26.10.2026, 10:20 Uhr, Klasse IM24b. Alle Personen sind erfunden.",
+ "user": {
+  "name": "Selin Hofer",
+  "firstName": "Selin",
+  "initials": "SH",
+  "classCode": "IM24b",
+  "email": "selin.hofer@bwdbern.ch",
+  "classTeacher": "R. Keller",
+  "program": "Informatikmittelschule mit BM Wirtschaft"
+ },
+ "periods": [
+  {
+   "n": 1,
+   "from": "08:00",
+   "to": "08:45"
+  },
+  {
+   "n": 2,
+   "from": "08:50",
+   "to": "09:35"
+  },
+  {
+   "n": 3,
+   "from": "09:55",
+   "to": "10:40"
+  },
+  {
+   "n": 4,
+   "from": "10:45",
+   "to": "11:30"
+  },
+  {
+   "n": 5,
+   "from": "11:35",
+   "to": "12:20"
+  },
+  {
+   "n": 6,
+   "from": "13:15",
+   "to": "14:00"
+  },
+  {
+   "n": 7,
+   "from": "14:05",
+   "to": "14:50"
+  },
+  {
+   "n": 8,
+   "from": "15:05",
+   "to": "15:50"
+  }
+ ],
+ "subjects": [
+  {
+   "code": "SOL",
+   "name": "SOL",
+   "short": "SOL"
+  },
+  {
+   "code": "MA",
+   "name": "Mathematik",
+   "short": "Mathe"
+  },
+  {
+   "code": "DE",
+   "name": "Deutsch",
+   "short": "Deutsch"
+  },
+  {
+   "code": "EN",
+   "name": "Englisch",
+   "short": "Englisch"
+  },
+  {
+   "code": "FR",
+   "name": "Französisch",
+   "short": "Franz"
+  },
+  {
+   "code": "FRW",
+   "name": "Finanz- und Rechnungswesen",
+   "short": "FRW"
+  },
+  {
+   "code": "WR",
+   "name": "Wirtschaft und Recht",
+   "short": "W&R"
+  },
+  {
+   "code": "GP",
+   "name": "Geschichte und Politik",
+   "short": "G&P"
+  },
+  {
+   "code": "IN",
+   "name": "Informatik",
+   "short": "Informatik"
+  },
+  {
+   "code": "NW",
+   "name": "Naturwissenschaften",
+   "short": "NW"
+  },
+  {
+   "code": "SP",
+   "name": "Sport",
+   "short": "Sport"
+  }
+ ],
+ "week": [
+  {
+   "weekday": "Mo",
+   "date": "2026-10-26",
+   "solDay": false,
+   "lessons": [
+    {
+     "period": 1,
+     "subject": "MA",
+     "room": "A 304",
+     "teacher": "KEL",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 2,
+     "subject": "MA",
+     "room": "A 304",
+     "teacher": "KEL",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 3,
+     "subject": "EN",
+     "room": "B 112",
+     "teacher": "MOR",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 4,
+     "subject": "WR",
+     "room": "B 015",
+     "teacher": "BRU",
+     "state": "room_changed",
+     "note": "statt A 207"
+    },
+    {
+     "period": 5,
+     "subject": "WR",
+     "room": "B 015",
+     "teacher": "BRU",
+     "state": "room_changed",
+     "note": "statt A 207"
+    },
+    {
+     "period": 6,
+     "subject": "DE",
+     "room": "A 101",
+     "teacher": "MAE",
+     "state": "cancelled",
+     "note": null
+    },
+    {
+     "period": 7,
+     "subject": "FR",
+     "room": "A 210",
+     "teacher": "DUP",
+     "state": "normal",
+     "note": null
+    }
+   ]
+  },
+  {
+   "weekday": "Di",
+   "date": "2026-10-27",
+   "solDay": false,
+   "lessons": [
+    {
+     "period": 1,
+     "subject": "IN",
+     "room": "C 02",
+     "teacher": "SCH",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 2,
+     "subject": "IN",
+     "room": "C 02",
+     "teacher": "SCH",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 3,
+     "subject": "FRW",
+     "room": "A 207",
+     "teacher": "BRU",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 4,
+     "subject": "FRW",
+     "room": "A 207",
+     "teacher": "BRU",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 5,
+     "subject": "GP",
+     "room": "A 101",
+     "teacher": "WEB",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 7,
+     "subject": "SP",
+     "room": "Halle 2",
+     "teacher": "ZUR",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 8,
+     "subject": "SP",
+     "room": "Halle 2",
+     "teacher": "ZUR",
+     "state": "normal",
+     "note": null
+    }
+   ]
+  },
+  {
+   "weekday": "Mi",
+   "date": "2026-10-28",
+   "solDay": false,
+   "lessons": [
+    {
+     "period": 1,
+     "subject": "DE",
+     "room": "A 101",
+     "teacher": "MAE",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 2,
+     "subject": "DE",
+     "room": "A 101",
+     "teacher": "MAE",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 3,
+     "subject": "NW",
+     "room": "L 3",
+     "teacher": "GRA",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 4,
+     "subject": "NW",
+     "room": "L 3",
+     "teacher": "GRA",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 5,
+     "subject": "EN",
+     "room": "B 112",
+     "teacher": "MOR",
+     "state": "normal",
+     "note": null
+    }
+   ]
+  },
+  {
+   "weekday": "Do",
+   "date": "2026-10-29",
+   "solDay": false,
+   "lessons": [
+    {
+     "period": 1,
+     "subject": "FR",
+     "room": "A 210",
+     "teacher": "DUP",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 2,
+     "subject": "MA",
+     "room": "A 304",
+     "teacher": "KEL",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 3,
+     "subject": "MA",
+     "room": "A 304",
+     "teacher": "KEL",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 4,
+     "subject": "WR",
+     "room": "A 207",
+     "teacher": "BRU",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 5,
+     "subject": "GP",
+     "room": "A 101",
+     "teacher": "WEB",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 6,
+     "subject": "IN",
+     "room": "C 02",
+     "teacher": "SCH",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 7,
+     "subject": "IN",
+     "room": "C 02",
+     "teacher": "SCH",
+     "state": "normal",
+     "note": null
+    }
+   ]
+  },
+  {
+   "weekday": "Fr",
+   "date": "2026-10-30",
+   "solDay": true,
+   "lessons": [
+    {
+     "period": 1,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 2,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 3,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 4,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 5,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 6,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    },
+    {
+     "period": 7,
+     "subject": "SOL",
+     "room": "SOL-Tag",
+     "teacher": "",
+     "state": "normal",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "gradeSummary": [
+  {
+   "subject": "IN",
+   "average": 5.6,
+   "exams": 4,
+   "teacher": "B. Schneider"
+  },
+  {
+   "subject": "EN",
+   "average": 5.4,
+   "exams": 3,
+   "teacher": "J. Moret"
+  },
+  {
+   "subject": "DE",
+   "average": 5.2,
+   "exams": 3,
+   "teacher": "C. Mäder"
+  },
+  {
+   "subject": "GP",
+   "average": 5.1,
+   "exams": 2,
+   "teacher": "L. Weber"
+  },
+  {
+   "subject": "FRW",
+   "average": 5,
+   "exams": 3,
+   "teacher": "T. Brunner"
+  },
+  {
+   "subject": "WR",
+   "average": 4.8,
+   "exams": 3,
+   "teacher": "T. Brunner"
+  },
+  {
+   "subject": "MA",
+   "average": 4.6,
+   "exams": 3,
+   "teacher": "R. Keller"
+  },
+  {
+   "subject": "FR",
+   "average": 4.3,
+   "exams": 2,
+   "teacher": "A. Dupont"
+  },
+  {
+   "subject": "NW",
+   "average": 3.8,
+   "exams": 2,
+   "teacher": "S. Graf"
+  }
+ ],
+ "recentGrades": [
+  {
+   "subject": "EN",
+   "title": "Unit 4 Test",
+   "date": "22.10.",
+   "grade": 5.5
+  },
+  {
+   "subject": "MA",
+   "title": "Funktionen",
+   "date": "20.10.",
+   "grade": 4.5
+  },
+  {
+   "subject": "NW",
+   "title": "Zellbiologie",
+   "date": "16.10.",
+   "grade": 3.5
+  }
+ ],
+ "examsMath": [
+  {
+   "title": "Funktionen",
+   "date": "Di 20.10.2026",
+   "grade": 4.5,
+   "weight": 1,
+   "classAverage": 4.4
+  },
+  {
+   "title": "Gleichungssysteme",
+   "date": "Di 22.09.2026",
+   "grade": 5,
+   "weight": 1,
+   "classAverage": 4.7
+  },
+  {
+   "title": "Prozentrechnen",
+   "date": "Di 01.09.2026",
+   "grade": 4,
+   "weight": 0.5,
+   "classAverage": 4.1
+  }
+ ],
+ "absences": [
+  {
+   "date": "Do 22.10.",
+   "lessons": "2 Lektionen",
+   "subjects": "Französisch, Mathematik",
+   "status": "open",
+   "note": "bis 5.11. entschuldigen"
+  },
+  {
+   "date": "Mo 19.10.",
+   "lessons": "1 Lektion",
+   "subjects": "Englisch",
+   "status": "open",
+   "note": "bis 2.11. entschuldigen"
+  },
+  {
+   "date": "Fr 09.10.",
+   "lessons": "4 Lektionen",
+   "subjects": "Vormittag",
+   "status": "excused",
+   "note": "Krankheit"
+  },
+  {
+   "date": "Di 29.09.",
+   "lessons": "1 Lektion",
+   "subjects": "Sport",
+   "status": "unexcused",
+   "note": "Frist verpasst"
+  },
+  {
+   "date": "Mi 16.09.",
+   "lessons": "2 Lektionen",
+   "subjects": "Deutsch",
+   "status": "excused",
+   "note": "Arzttermin"
+  }
+ ],
+ "documents": [
+  {
+   "group": "Prüfungspläne",
+   "items": [
+    {
+     "title": "Prüfungsplan 1. Semester 2026/27",
+     "type": "PDF",
+     "size": "240 KB",
+     "note": "aktualisiert 20.10.2026",
+     "isNew": true
+    },
+    {
+     "title": "Prüfungsplan BM-Abschluss 2027",
+     "type": "PDF",
+     "size": "180 KB",
+     "note": "01.09.2026",
+     "isNew": false
+    }
+   ]
+  },
+  {
+   "group": "Formulare",
+   "items": [
+    {
+     "title": "Urlaubsgesuch",
+     "type": "PDF",
+     "size": "90 KB",
+     "note": "zum Ausfüllen",
+     "isNew": false
+    },
+    {
+     "title": "Gesuch um Dispensation",
+     "type": "PDF",
+     "size": "110 KB",
+     "note": "zum Ausfüllen",
+     "isNew": false
+    },
+    {
+     "title": "Arztzeugnis Vorlage",
+     "type": "PDF",
+     "size": "60 KB",
+     "note": null,
+     "isNew": false
+    }
+   ]
+  },
+  {
+   "group": "Reglemente",
+   "items": [
+    {
+     "title": "Absenzenreglement",
+     "type": "PDF",
+     "size": "320 KB",
+     "note": "gültig ab 1.8.2026",
+     "isNew": false
+    },
+    {
+     "title": "Promotionsreglement BM",
+     "type": "PDF",
+     "size": "410 KB",
+     "note": null,
+     "isNew": false
+    },
+    {
+     "title": "Hausordnung",
+     "type": "PDF",
+     "size": "150 KB",
+     "note": null,
+     "isNew": false
+    }
+   ]
+  },
+  {
+   "group": "Merkblätter",
+   "items": [
+    {
+     "title": "Merkblatt Nachprüfungen",
+     "type": "PDF",
+     "size": "120 KB",
+     "note": null,
+     "isNew": false
+    },
+    {
+     "title": "WLAN und Drucken",
+     "type": "PDF",
+     "size": "200 KB",
+     "note": null,
+     "isNew": false
+    }
+   ]
+  }
+ ],
+ "serviceUrls_PLACEHOLDER": {
+  "sharepoint": "https://bwdbern.sharepoint.com/sites/sol/",
+  "moodle": "https://moodle.bwdbern.ch/",
+  "untis": "https://bwd-bern.webuntis.com/",
+  "mediothek": "https://www.bwdbern.ch/mediothek"
+ },
+ "links": [
+  {
+   "group": "Microsoft 365",
+   "items": [
+    {
+     "badge": "Ou",
+     "title": "Outlook",
+     "sub": "E-Mail und Kalender",
+     "url": "https://outlook.office.com/mail/"
+    },
+    {
+     "badge": "Te",
+     "title": "Teams",
+     "sub": "Klassen-Teams und Chats",
+     "url": "https://teams.microsoft.com/"
+    },
+    {
+     "badge": "OD",
+     "title": "OneDrive",
+     "sub": "Deine Dateien",
+     "url": "https://www.office.com/launch/onedrive"
+    },
+    {
+     "badge": "ON",
+     "title": "OneNote",
+     "sub": "Notizbücher",
+     "url": "https://www.onenote.com/notebooks"
+    }
+   ]
+  },
+  {
+   "group": "Lernen",
+   "items": [
+    {
+     "badge": "Mo",
+     "title": "Moodle",
+     "sub": "Kurse und Abgaben",
+     "url": "https://moodle.bwdbern.ch/"
+    }
+   ]
+  },
+  {
+   "group": "Schule",
+   "items": [
+    {
+     "badge": "Un",
+     "title": "WebUntis",
+     "sub": "Stundenplan im Original",
+     "url": "https://bwd-bern.webuntis.com/"
+    },
+    {
+     "badge": "bw",
+     "title": "bwdbern.ch",
+     "sub": "Website der Schule",
+     "url": "https://www.bwdbern.ch/"
+    },
+    {
+     "badge": "Me",
+     "title": "Mediothek",
+     "sub": "Bücher und Medien",
+     "url": "https://www.bwdbern.ch/mediothek"
+    }
+   ]
+  }
+ ],
+ "sol": {
+  "block": 3,
+  "tasks": [
+   {
+    "subject": "MA",
+    "teacher": "R. Keller",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Repetition Terme II",
+      "minutes": 90,
+      "progress": 100
+     },
+     {
+      "code": "3.02",
+      "title": "Lineare Optimierung I",
+      "minutes": 45,
+      "progress": 50
+     },
+     {
+      "code": "3.03",
+      "title": "Lineare Optimierung II",
+      "minutes": 45,
+      "progress": 0
+     },
+     {
+      "code": "3.04",
+      "title": "Lineare Optimierung III",
+      "minutes": 45,
+      "progress": 0
+     }
+    ]
+   },
+   {
+    "subject": "EN",
+    "teacher": "J. Moret",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Listening",
+      "minutes": 45,
+      "progress": 100
+     },
+     {
+      "code": "3.02",
+      "title": "Reading and Use of English",
+      "minutes": 70,
+      "progress": 0
+     },
+     {
+      "code": "3.03",
+      "title": "Writing Part 2: Article",
+      "minutes": 50,
+      "progress": 0
+     },
+     {
+      "code": "3.04",
+      "title": "Speaking",
+      "minutes": 60,
+      "progress": 0
+     }
+    ]
+   },
+   {
+    "subject": "DE",
+    "teacher": "C. Mäder",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Erörterung: Aufbau",
+      "minutes": 60,
+      "progress": 0
+     },
+     {
+      "code": "3.02",
+      "title": "Argumente belegen",
+      "minutes": 45,
+      "progress": 0
+     },
+     {
+      "code": "3.03",
+      "title": "Kurzgeschichte analysieren",
+      "minutes": 90,
+      "progress": 0
+     }
+    ]
+   },
+   {
+    "subject": "FRW",
+    "teacher": "T. Brunner",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Kontenrahmen KMU",
+      "minutes": 60,
+      "progress": 30
+     },
+     {
+      "code": "3.02",
+      "title": "Abschreibungen",
+      "minutes": 45,
+      "progress": 0
+     }
+    ]
+   },
+   {
+    "subject": "WR",
+    "teacher": "T. Brunner",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Kaufvertrag",
+      "minutes": 90,
+      "progress": 0
+     }
+    ]
+   },
+   {
+    "subject": "FR",
+    "teacher": "A. Dupont",
+    "items": [
+     {
+      "code": "3.01",
+      "title": "Compréhension orale",
+      "minutes": 45,
+      "progress": 0
+     }
+    ]
+   }
+  ],
+  "plan": [
+   {
+    "from": "08:00",
+    "to": "08:45",
+    "subject": "MA",
+    "code": "3.02",
+    "title": "Lineare Optimierung I"
+   },
+   {
+    "from": "08:50",
+    "to": "09:35",
+    "subject": "MA",
+    "code": "3.03",
+    "title": "Lineare Optimierung II"
+   },
+   {
+    "from": "09:45",
+    "to": "10:55",
+    "subject": "EN",
+    "code": "3.02",
+    "title": "Reading and Use of English"
+   },
+   {
+    "from": "11:00",
+    "to": "12:00",
+    "subject": "DE",
+    "code": "3.01",
+    "title": "Erörterung: Aufbau"
+   },
+   {
+    "from": "13:00",
+    "to": "13:50",
+    "subject": "EN",
+    "code": "3.03",
+    "title": "Writing Part 2: Article"
+   },
+   {
+    "from": "14:00",
+    "to": "15:30",
+    "subject": "WR",
+    "code": "3.01",
+    "title": "Kaufvertrag"
+   },
+   {
+    "from": "15:40",
+    "to": "16:25",
+    "subject": "FRW",
+    "code": "3.02",
+    "title": "Abschreibungen"
+   }
+  ],
+  "teacherPresence": [
+   {
+    "lane": 0,
+    "teacher": "Keller",
+    "subject": "MA",
+    "from": "08:00",
+    "to": "09:40"
+   },
+   {
+    "lane": 0,
+    "teacher": "Keller",
+    "subject": "MA",
+    "from": "14:20",
+    "to": "16:55"
+   },
+   {
+    "lane": 1,
+    "teacher": "Moret",
+    "subject": "EN",
+    "from": "08:00",
+    "to": "09:40"
+   },
+   {
+    "lane": 1,
+    "teacher": "Moret",
+    "subject": "EN",
+    "from": "10:50",
+    "to": "12:00"
+   },
+   {
+    "lane": 2,
+    "teacher": "Mäder",
+    "subject": "DE",
+    "from": "08:00",
+    "to": "10:40"
+   },
+   {
+    "lane": 2,
+    "teacher": "Brunner",
+    "subject": "WR",
+    "from": "13:00",
+    "to": "14:10"
+   },
+   {
+    "lane": 3,
+    "teacher": "Dupont",
+    "subject": "FR",
+    "from": "09:55",
+    "to": "11:35"
+   },
+   {
+    "lane": 3,
+    "teacher": "Brunner",
+    "subject": "FRW",
+    "from": "14:20",
+    "to": "16:55"
+   }
+  ],
+  "portfolio": [
+   {
+    "day": "Freitag, 16. Oktober",
+    "checkIn": "Deutsch 3.01 am Morgen, danach Mathe 3.01 und am Nachmittag Englisch Listening. Handy bleibt im Schliessfach.",
+    "checkOut": "Mathe und Englisch fertig, Deutsch nur halb. Am Nachmittag war ich weniger konzentriert. Nächstes Mal die schweren Fächer am Morgen."
+   },
+   {
+    "day": "Freitag, 18. September",
+    "checkIn": "WR 2.01 und 2.02, dazu FRW Übungen. Nach jedem Auftrag kurz Pause.",
+    "checkOut": "WR erledigt, FRW angefangen. Kurze Pausen helfen, ein Platzwechsel am Nachmittag auch."
+   }
+  ]
+ },
+ "news": [
+  {
+   "id": "pp",
+   "title": "Prüfungsplan 1. Semester ist online",
+   "teaser": "Alle Prüfungstermine bis Ende Januar. Bitte kontrolliere deine Klasse und melde Überschneidungen bis 6. November.",
+   "date": "20.10.2026",
+   "author": "Schulleitung",
+   "pinned": true,
+   "unread": true
+  },
+  {
+   "id": "ia",
+   "title": "Informationsabend BM 2 am 5. November",
+   "teaser": "Für alle, die nach der Lehre die BM 2 machen möchten. 18:30 in der Aula, Anmeldung nicht nötig.",
+   "date": "19.10.2026",
+   "author": "BM-Abteilung",
+   "pinned": false,
+   "unread": true
+  },
+  {
+   "id": "me",
+   "title": "Mensa: neue Öffnungszeiten ab November",
+   "teaser": "Die Mensa öffnet neu um 07:15 und ist am Mittwochnachmittag geschlossen.",
+   "date": "16.10.2026",
+   "author": "Hausdienst",
+   "pinned": false,
+   "unread": false
+  },
+  {
+   "id": "sp",
+   "title": "Herbstsporttag: Anmeldung bis 30. Oktober",
+   "teaser": "Wähle dein Angebot im Formular. Ohne Anmeldung wirst du einer Gruppe zugeteilt.",
+   "date": "14.10.2026",
+   "author": "Fachschaft Sport",
+   "pinned": false,
+   "unread": false
+  }
+ ],
+ "notifications": [
+  {
+   "group": "Heute",
+   "items": [
+    {
+     "icon": "swap",
+     "kind": "warn",
+     "title": "Raumänderung",
+     "text": "Wirtschaft und Recht, 4. und 5. Lektion in B 015 statt A 207",
+     "time": "09:45",
+     "unread": true
+    },
+    {
+     "icon": "cancel",
+     "kind": "warn",
+     "title": "Lektion entfällt",
+     "text": "Deutsch heute 13:15 bei C. Mäder",
+     "time": "07:20",
+     "unread": true
+    }
+   ]
+  },
+  {
+   "group": "Gestern",
+   "items": [
+    {
+     "icon": "chart",
+     "kind": "ok",
+     "title": "Neue Note in Englisch",
+     "text": "Unit 4 Test: 5.5",
+     "time": "18:02",
+     "unread": true
+    }
+   ]
+  },
+  {
+   "group": "Diese Woche",
+   "items": [
+    {
+     "icon": "clock",
+     "kind": "warn",
+     "title": "Absenz entschuldigen",
+     "text": "Do 22.10., 2 Lektionen, bis 5.11.",
+     "time": "Fr 23.10.",
+     "unread": false
+    },
+    {
+     "icon": "megaphone",
+     "kind": "info",
+     "title": "Neue Mitteilung",
+     "text": "Prüfungsplan 1. Semester ist online",
+     "time": "Di 20.10.",
+     "unread": false
+    }
+   ]
+  }
+ ],
+ "nav": [
+  {
+   "group": "Schule",
+   "items": [
+    {
+     "route": "home",
+     "label": "Übersicht",
+     "icon": "home"
+    },
+    {
+     "route": "timetable",
+     "label": "Stundenplan",
+     "icon": "cal"
+    },
+    {
+     "route": "grades",
+     "label": "Noten",
+     "icon": "chart"
+    },
+    {
+     "route": "sol",
+     "label": "SOL",
+     "icon": "book"
+    },
+    {
+     "route": "absences",
+     "label": "Absenzen",
+     "icon": "clock"
+    }
+   ]
+  },
+  {
+   "group": "Infos",
+   "items": [
+    {
+     "route": "news",
+     "label": "Mitteilungen",
+     "icon": "megaphone"
+    },
+    {
+     "route": "documents",
+     "label": "Dokumente",
+     "icon": "folder"
+    },
+    {
+     "route": "links",
+     "label": "Links",
+     "icon": "grid4"
+    },
+    {
+     "route": "notifications",
+     "label": "Benachrichtigungen",
+     "icon": "bell"
+    }
+   ]
+  }
+ ]
+}
