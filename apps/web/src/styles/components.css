@@ -490,6 +490,10 @@ dialog.dlg[open] {
   animation: dlg-in var(--motion-base) var(--ease);
 }
 
+dialog.dlg:focus {
+  outline: none;
+}
+
 dialog.dlg::backdrop {
   background: var(--scrim);
 }

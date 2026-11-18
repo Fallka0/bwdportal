@@ -43,7 +43,8 @@ export function periodOf(start: string): number | null {
 export function lessonRun(lessons: Lesson[], first: Lesson): Lesson[] {
   const day = lessons.filter((l) => l.date === first.date).sort((a, b) => a.start.localeCompare(b.start));
   const out = [first];
-  for (let i = day.indexOf(first) + 1; i < day.length; i++) {
+  // Nach ID suchen: in der App kommen `first` und `lessons` als getrennte JSON-Objekte an.
+  for (let i = day.findIndex((l) => l.id === first.id) + 1; i < day.length; i++) {
     const l = day[i]!;
     if (l.subject?.code === first.subject?.code && l.room === first.room && l.state === first.state) out.push(l);
     else break;
@@ -75,4 +76,12 @@ export function fmtSize(bytes: number | null): string {
 
 export function initials(first: string, last: string): string {
   return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+}
+
+/** "1. Lektion", "4. und 5. Lektion", "1., 2. und 3. Lektion" */
+export function fmtPeriods(periods: number[]): string {
+  const p = periods.map((n) => `${n}.`);
+  if (p.length === 0) return "";
+  if (p.length === 1) return `${p[0]} Lektion`;
+  return `${p.slice(0, -1).join(", ")} und ${p.at(-1)} Lektion`;
 }

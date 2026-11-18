@@ -14,7 +14,11 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) {
+      d.showModal();
+      // Fokus auf den Dialog selbst (kein Ring auf dem Schliessen-Knopf); Tab führt zum ersten Element.
+      d.focus();
+    }
     if (!open && d.open) d.close();
   }, [open]);
 
@@ -22,6 +26,7 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
     <dialog
       ref={ref}
       className="dlg"
+      tabIndex={-1}
       aria-labelledby={titleId}
       onClose={onClose}
       onClick={(e) => {
