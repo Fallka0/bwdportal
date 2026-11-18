@@ -7,6 +7,9 @@ export const config = raw as {
   services: { webuntis: string; moodle: string; sharepointSol: string; mediothek: string; teams: string; outlook: string; onedrive: string; onenote: string };
   periods: { n: number; from: string; to: string }[];
   lunch: { from: string; to: string };
+  solLunch: { from: string; to: string };
+  timeGridEnd: string;
+  homeGridEnd: string;
   absenceDeadlineDays: number;
   secondSemesterStart: string;
 };

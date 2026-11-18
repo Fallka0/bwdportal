@@ -10,6 +10,7 @@ import "../styles/tokens.gen.css";
 import "../styles/base.css";
 import "../styles/components.css";
 import "../styles/shell.css";
+import "../styles/timegrid.css";
 
 // Schriften liegen im Repo (variable woff2, Lizenz OFL) und werden selbst ausgeliefert.
 const unbounded = localFont({ src: "../fonts/unbounded-latin-wght.woff2", weight: "200 900", variable: "--font-unbounded", display: "swap" });
