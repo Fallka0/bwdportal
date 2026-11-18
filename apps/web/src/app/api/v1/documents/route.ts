@@ -1,0 +1,7 @@
+import { getDocuments } from "@bwd/db";
+import { withUser } from "@/lib/api";
+
+export const GET = withUser(({ env, req }) => {
+  const sp = new URL(req.url).searchParams;
+  return getDocuments(env.db, env.now, sp.get("q") ?? "", sp.get("group") ?? undefined);
+});

@@ -345,10 +345,9 @@ export const TABLE_ORDER = [
 
 const lit = (v: Row[string]) => (v === null || v === undefined ? "NULL" : typeof v === "number" ? String(v) : typeof v === "boolean" ? (v ? "1" : "0") : `'${String(v).replace(/'/g, "''")}'`);
 
-/** SQL zum Leeren und Füllen aller Tabellen. Läuft mit `wrangler d1 execute`. */
-export function seedSql(data: SeedData = buildSeed()): string {
-  const out = ["-- GENERIERT mit `pnpm db:seed-sql` aus handoff/data/fixtures.json und config/portal.json. Alle Daten erfunden.", "PRAGMA defer_foreign_keys = on;"];
-  out.push("DELETE FROM sessions;");
+/** Einzelne SQL-Anweisungen zum Leeren und Füllen aller Tabellen (ohne Sessions). */
+export function seedStatements(data: SeedData = buildSeed()): string[] {
+  const out: string[] = [];
   for (const t of [...TABLE_ORDER].reverse()) out.push(`DELETE FROM ${t};`);
   for (const t of TABLE_ORDER) {
     for (const r of data[t] ?? []) {
@@ -356,5 +355,10 @@ export function seedSql(data: SeedData = buildSeed()): string {
       out.push(`INSERT INTO ${t} (${cols.join(", ")}) VALUES (${cols.map((c) => lit(r[c]!)).join(", ")});`);
     }
   }
-  return out.join("\n") + "\n";
+  return out;
+}
+
+/** seed.sql für `wrangler d1 execute`: leert auch die Sessions. */
+export function seedSql(data: SeedData = buildSeed()): string {
+  return ["-- GENERIERT mit `pnpm db:seed-sql` aus handoff/data/fixtures.json und config/portal.json. Alle Daten erfunden.", "PRAGMA defer_foreign_keys = on;", "DELETE FROM sessions;", ...seedStatements(data)].join("\n") + "\n";
 }
