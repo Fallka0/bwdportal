@@ -1,0 +1,13 @@
+packages:
+  - apps/*
+  - packages/*
+  - tools/import
+
+# React Native libraries are not all compatible with isolated installs (Expo monorepo guide).
+nodeLinker: hoisted
+
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: false
+  unrs-resolver: true

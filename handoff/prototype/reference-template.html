@@ -1,0 +1,306 @@
+<div class="pl {{ themeCls }}" ref="{{ setRoot }}" lang="de" style="--vh: {{ vh }}">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol><symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></symbol><symbol id="i-arrow-l" viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></symbol><symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M21.5 20c-.5-2.6-2-4.3-4-5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.2 4.1-6.5 8-6.5s7 2.3 8 6.5"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol><symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/></symbol><symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.8 7l8.2 6 8.2-6"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></symbol><symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol><symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><path d="M7 6h10a5 5 0 0 1 4.9 6l-.8 3.8a2.9 2.9 0 0 1-5.1 1.3L14.5 15h-5L8 17.1a2.9 2.9 0 0 1-5.1-1.3L2.1 12A5 5 0 0 1 7 6z"/><path d="M7 10.5h3M8.5 9v3M15.5 10h.01M17.5 12h.01"/></symbol><symbol id="i-bracket" viewBox="0 0 24 24"><path d="M4 5h5v6H4M9 8h4M4 13h5v6H4M9 16h4M13 8v8M13 12h7"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/></symbol><symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-org" viewBox="0 0 24 24"><path d="M4 21V6.5L12 3l8 3.5V21"/><path d="M9 21v-5h6v5M8 9h.01M12 9h.01M16 9h.01M8 12.5h.01M12 12.5h.01M16 12.5h.01M2.5 21h19"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l2.5-8h13L21 13v6a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></symbol><symbol id="i-scroll" viewBox="0 0 24 24"><path d="M7 3h11a2 2 0 0 1 2 2v2h-4"/><path d="M16 7v12a2 2 0 0 1-4 0v-1H4v1a2 2 0 0 0 2 2h8"/><path d="M7 3a2 2 0 0 0-2 2v13M9 8h4M9 12h4"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></symbol><symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.3v.1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></symbol><symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5l-8.3 8.3a5 5 0 0 1-7-7l8.3-8.3a3.3 3.3 0 0 1 4.7 4.7l-8.3 8.3a1.7 1.7 0 0 1-2.4-2.4l7.6-7.6"/></symbol><symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol><symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol><symbol id="i-chip" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></symbol><symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="1.5"/><path d="M2.5 9h19v3.5h-19zM12 9v11.5M12 9c-1.5-3-5-4-5-1.5S11 9 12 9zM12 9c1.5-3 5-4 5-1.5S13 9 12 9z"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M9 12h6M9 16h4"/></symbol><symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="7" rx="2"/><rect x="3.5" y="13" width="17" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol><symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="9" r="2.5"/><path d="M6 8.5v7M18 11.5c0 3-3 4-9.5 5"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol><symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-invoice" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol><symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/></symbol><symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5V20H14.5v-5.5h-5V20H4z"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5h9.5a3 3 0 0 1 3 3V20h-10A2.5 2.5 0 0 1 5 17.5z"/><path d="M5 17.5A2.5 2.5 0 0 1 7.5 15h10"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></symbol><symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M4 10v4h3l8 4.5v-13L7 10z"/><path d="M18.5 9.5a3.5 3.5 0 0 1 0 5M7 14l1.5 5h2.5l-1-4.5"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16v-5M12 16V7M17 16v-8"/></symbol><symbol id="i-door" viewBox="0 0 24 24"><path d="M6 20V4.5h10V20M4 20h16M13 12.5h.01"/></symbol><symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4L3.5 7.5 7 11M3.5 7.5H17M17 13l3.5 3.5L17 20M20.5 16.5H7"/></symbol><symbol id="i-cancel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></symbol><symbol id="i-grid4" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol><symbol id="i-stetho" viewBox="0 0 24 24"><path d="M6 3v6a4 4 0 0 0 8 0V3M10 13v2a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="11" r="2"/></symbol></defs></svg>
+<div class="site">
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}"><div class="sbar"><span>9:41</span><i><s style="height: 5px"></s><s style="height: 7px"></s><s style="height: 9px"></s><s style="height: 11px"></s><b></b></i></div></sc-if>
+<div class="lg">
+<div class="lg-l">
+<span class="bw-wm"><span class="bw-mark" style="background: var(--btn); color: var(--btn-fg)">bwd</span>Portal</span>
+<div class="lg-c">
+<h1>Alles für die Schule an einem Ort.</h1>
+<sc-if value="{{ loginErr }}" hint-placeholder-val="{{ false }}"><div class="note-err" role="alert"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.3v.1"/></svg><span><b>Dieses Konto gehört nicht zur bwd.</b> Melde dich mit deiner Adresse vorname.nachname@bwdbern.ch an.</span></div></sc-if>
+<button class="btn btn-ink ms" type="button" onClick="{{ login }}"><span class="msq" aria-hidden="true"><i style="background: #f25022"></i><i style="background: #7fba00"></i><i style="background: #00a4ef"></i><i style="background: #ffb900"></i></span>Mit Microsoft anmelden</button>
+<p class="lg-f" style="font-size: 13px">vorname.nachname@bwdbern.ch</p>
+</div>
+<div class="lg-f"><a class="ul" href="/hilfe">Hilfe bei der Anmeldung</a><a class="ul" href="/datenschutz">Datenschutz</a></div>
+</div>
+<sc-if value="{{ isWeb }}" hint-placeholder-val="{{ true }}">
+<div class="lg-r" aria-hidden="true">
+<div class="tiles"><span class="a"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V7M17 16v-8"/></svg></span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></span><span class="a"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l8 4.5v-13L7 10z"/><path d="M18.5 9.5a3.5 3.5 0 0 1 0 5M7 14l1.5 5h2.5l-1-4.5"/></svg></span></div>
+<h2>Stundenplan, Noten, Absenzen und Links in einer App.</h2>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ inApp }}" hint-placeholder-val="{{ true }}">
+<div class="{{ shellCls }}">
+
+<sc-if value="{{ webShell }}" hint-placeholder-val="{{ true }}">
+<aside class="sb" aria-label="Navigation">
+<div class="sb-brand"><a class="bw-wm" href="/" aria-label="bwd Portal, Übersicht" onClick="{{ goHome }}"><span class="bw-mark">bwd</span>Portal</a></div>
+<sc-for list="{{ nav }}" as="g" hint-placeholder-count="2">
+<nav aria-label="{{ g.g }}"><span class="sb-g">{{ g.g }}</span>
+<sc-for list="{{ g.items }}" as="n" hint-placeholder-count="4"><a class="nl {{ n.on }}" href="/{{ n.id }}" title="{{ n.label }}" aria-current="{{ n.cur }}" onClick="{{ n.go }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{ n.ic }}"/></svg><span>{{ n.label }}</span><sc-if value="{{ n.hasN }}" hint-placeholder-val="{{ false }}"><span class="n">{{ n.n }}</span></sc-if></a></sc-for>
+</nav>
+</sc-for>
+<a class="sb-me" href="/profil" aria-label="Profil von {{ me.name }}" onClick="{{ goProfile }}" style="text-decoration: none; color: inherit"><span class="av">{{ me.ini }}</span><div><b>{{ me.name }}</b><span>{{ me.cls }}</span></div><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+</aside>
+</sc-if>
+
+<div class="mn">
+<sc-if value="{{ webShell }}" hint-placeholder-val="{{ true }}">
+<header class="tb">
+<label class="srch"><span class="sr">Suchen</span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="inp" type="search" placeholder="Suchen: Fächer, Dokumente, Links"><kbd>/</kbd></label>
+<div class="tb-r">
+<span class="tb-t">Mo, 26. Oktober · Woche 44</span>
+<button class="ib" type="button" aria-label="{{ themeLabel }}" onClick="{{ toggleTheme }}"><sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></sc-if><sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></sc-if></button>
+<a class="ib bell" href="/benachrichtigungen" onClick="{{ goNotifications }}" aria-label="{{ bellLabel }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span class="bdg" aria-hidden="true">3</span></sc-if></a>
+</div>
+</header>
+</sc-if>
+
+<sc-if value="{{ appShell }}" hint-placeholder-val="{{ false }}">
+<div class="sbar"><span>9:41</span><i><s style="height: 5px"></s><s style="height: 7px"></s><s style="height: 9px"></s><s style="height: 11px"></s><b></b></i></div>
+<div class="abar">
+<sc-if value="{{ hasBack }}" hint-placeholder-val="{{ false }}"><a class="back" href="/zurueck" onClick="{{ goBack }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>{{ backLabel }}</a></sc-if>
+<sc-if value="{{ noBack }}" hint-placeholder-val="{{ true }}"><span class="bw-wm" style="font-size: 15px"><span class="bw-mark" style="width: 26px; height: 26px; background: var(--btn); color: var(--btn-fg); font-size: 8px">bwd</span>Portal</span></sc-if>
+<span class="grow"></span>
+<a class="ib bell" href="/benachrichtigungen" onClick="{{ goNotifications }}" aria-label="{{ bellLabel }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span class="bdg" aria-hidden="true">3</span></sc-if></a>
+<a class="av av-ink" href="/profil" onClick="{{ goProfile }}" aria-label="Profil" style="text-decoration: none">{{ me.ini }}</a>
+</div>
+<sc-if value="{{ showTitle }}" hint-placeholder-val="{{ false }}"><h1 class="atitle">{{ title }}</h1></sc-if>
+</sc-if>
+
+<main class="{{ mainCls }}" id="main" tabindex="-1">
+
+<sc-if value="{{ pHome }}" hint-placeholder-val="{{ true }}">
+<div class="hi"><div><h1>Guten Morgen, {{ me.first }}.</h1><p>Montag, 26. Oktober · {{ me.cls }}</p></div></div>
+<div class="g12">
+<div class="stack">
+<section class="next h-next" aria-labelledby="nx-h"><span class="k" id="nx-h">Als Nächstes · in 25 Minuten</span>
+<div class="next-t"><b>Wirtschaft und Recht</b><span>10:45</span></div>
+<div class="next-m"><span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20V4.5h10V20M4 20h16M13 12.5h.01"/></svg>B 015</span><span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.2 4.1-6.5 8-6.5s7 2.3 8 6.5"/></svg>T. Brunner</span><span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>4. und 5. Lektion</span></div>
+<div class="next-chg"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4L3.5 7.5 7 11M3.5 7.5H17M17 13l3.5 3.5L17 20M20.5 16.5H7"/></svg>Raumänderung: B 015 statt A 207</div>
+</section>
+<section class="card cal-day tg-card h-today" aria-labelledby="td-h">
+<div class="cal-h cal-h2"><span></span><div><b id="td-h">Heute</b><span class="s">Montag, 26. Oktober</span></div><a class="alink" href="/stundenplan" onClick="{{ goTimetable }}">Woche<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a></div>
+<div class="tg {{ homeTg.cls }}" style="--n: {{ homeTg.n }}">
+<sc-if value="{{ homeTg.many }}" hint-placeholder-val="{{ true }}"><div class="tg-hd" aria-hidden="true"><span></span><sc-for list="{{ homeTg.days }}" as="d" hint-placeholder-count="5"><span class="tg-d {{ d.cls }}">{{ d.d }} <b>{{ d.n }}</b></span></sc-for></div></sc-if>
+<div class="tg-bd" style="height: {{ homeTg.h }}">
+<div class="tg-ax" aria-hidden="true"><sc-for list="{{ homeTg.hours }}" as="hh" hint-placeholder-count="9"><span style="top: {{ hh.top }}">{{ hh.h }}</span></sc-for></div>
+<div class="tg-cols"><div class="tl-lunch tg-lunch" style="{{ homeTg.lunch }}" aria-hidden="true">Mittag</div><sc-for list="{{ homeTg.days }}" as="d" hint-placeholder-count="5"><div class="tg-col {{ d.cls }}" role="list" aria-label="{{ d.al }}"><sc-for list="{{ d.blocks }}" as="b" hint-placeholder-count="7"><div class="tg-b {{ b.cls }}" style="{{ b.st }}" role="listitem"><b>{{ b.subj }}</b><span class="tg-s">{{ b.sub }}</span><span class="tm">{{ b.tm }}</span></div></sc-for></div></sc-for>
+<sc-if value="{{ homeTg.hasNow }}" hint-placeholder-val="{{ true }}"><div class="tg-now" style="top: {{ homeTg.nowTop }}" role="note" aria-label="Jetzt {{ homeTg.now }}"><span class="tg-nl">{{ homeTg.now }}</span><i style="left: {{ homeTg.dotL }}"></i></div></sc-if>
+</div></div></div>
+</section>
+</div>
+<div class="stack">
+<section class="h-qa" aria-labelledby="qa-h"><h2 id="qa-h" class="sr">Schnellzugriff</h2>
+<div class="qa"><a href="/absenzen/melden" onClick="{{ openDlg }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Absenz melden</a><a href="{{ u.moodle }}" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Moodle</a><a href="{{ u.teams }}" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Teams</a><a href="/sol" onClick="{{ goSol }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h9.5a3 3 0 0 1 3 3V20h-10A2.5 2.5 0 0 1 5 17.5z"/><path d="M5 17.5A2.5 2.5 0 0 1 7.5 15h10"/></svg>SOL</a></div></section>
+<section class="card h-abs" aria-labelledby="ab-h"><div class="row-h"><h2 id="ab-h" class="box-t">Offene Absenzen</h2><a class="alink" href="/absenzen" onClick="{{ goAbsences }}">Alle<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a></div>
+<sc-if value="{{ noOpen }}" hint-placeholder-val="{{ false }}"><p class="empty-s"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Keine offenen Absenzen.</p></sc-if><div class="abl"><sc-for list="{{ openAbs }}" as="a" hint-placeholder-count="2"><div class="ab" style="grid-template-columns: minmax(0,1fr) auto"><span class="ab-m"><b>{{ a.w }} · {{ a.l }}</b><span>{{ a.subj }} · {{ a.note }}</span></span><button class="btn btn-ink btn-s" type="button" onClick="{{ a.go }}">Entschuldigen</button></div></sc-for></div></section>
+<section class="card h-gr" aria-labelledby="gr-h"><div class="row-h"><h2 id="gr-h" class="box-t">Neue Noten</h2><a class="alink" href="/noten" onClick="{{ goGrades }}">Alle Noten<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a></div>
+<div><sc-for list="{{ recent }}" as="r" hint-placeholder-count="3"><div class="gr-row" style="grid-template-columns: minmax(0,1fr) auto"><span><b>{{ r.n }}</b><span class="s">{{ r.t }} · {{ r.d }}</span></span><span class="gv {{ r.cls }}">{{ r.g }}</span></div></sc-for></div></section>
+<section class="card h-nw" aria-labelledby="nw-h"><div class="row-h"><h2 id="nw-h" class="box-t">Mitteilungen</h2><a class="alink" href="/mitteilungen" onClick="{{ goNews }}">Alle<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a></div>
+<div><sc-for list="{{ newsTop }}" as="n" hint-placeholder-count="2"><a class="gr-row" href="/mitteilungen/pruefungsplan" onClick="{{ n.go }}" style="grid-template-columns: minmax(0,1fr) auto"><span><b>{{ n.t }}</b><span class="s">{{ n.who }} · {{ n.d }}</span></span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></sc-for></div></section>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ homeLoad }}" hint-placeholder-val="{{ false }}">
+<div class="sk-wrap" aria-busy="true" aria-label="Übersicht wird geladen"><div class="hi"><div><h1>Guten Morgen, {{ me.first }}.</h1><p>Montag, 26. Oktober · {{ me.cls }}</p></div></div>
+<div class="g12"><div class="stack"><div class="sk sk-next h-next"><i class="sk-l" style="width: 30%"></i><i class="sk-l sk-xl" style="width: 70%"></i><i class="sk-l" style="width: 50%"></i></div>
+<div class="card h-today"><i class="sk-l" style="width: 18%; margin-bottom: 18px"></i><sc-for list="{{ sk }}" as="k" hint-placeholder-count="5"><div class="sk-row"><i class="sk-l" style="width: 42px"></i><i class="sk-bar"></i><span><i class="sk-l" style="width: 60%"></i><i class="sk-l sk-s" style="width: 30%"></i></span></div></sc-for></div></div>
+<div class="stack"><div class="qa h-qa"><span class="sk sk-tile"></span><span class="sk sk-tile"></span><span class="sk sk-tile"></span><span class="sk sk-tile"></span></div><div class="card h-abs"><i class="sk-l" style="width: 40%; margin-bottom: 16px"></i><i class="sk-l" style="width: 80%"></i><i class="sk-l sk-s" style="width: 55%"></i></div><div class="card h-gr"><i class="sk-l" style="width: 35%; margin-bottom: 16px"></i><i class="sk-l" style="width: 70%"></i><i class="sk-l sk-s" style="width: 40%"></i></div></div></div>
+<p class="sr" role="status">Übersicht wird geladen</p></div>
+</sc-if>
+
+<sc-if value="{{ pTimetable }}" hint-placeholder-val="{{ false }}">
+<div class="{{ ttCls }}">
+<div class="ph web-only"><div><h1>Stundenplan</h1></div><div class="ph-a"><a class="alink" href="{{ u.untis }}" target="_blank" rel="noopener">In WebUntis öffnen<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a><div class="seg" role="group" aria-label="Ansicht"><button class="{{ segDay }}" type="button" onClick="{{ goDay }}">Tag</button><button class="{{ segWeek }}" type="button" onClick="{{ goWeek }}">Woche</button></div></div></div>
+<div class="seg2 app-only" role="group" aria-label="Ansicht"><button class="{{ segDay }}" type="button" onClick="{{ goDay }}">Tag</button><button class="{{ segWeek }}" type="button" onClick="{{ goWeek }}">Woche</button></div>
+<sc-if value="{{ ttErr }}" hint-placeholder-val="{{ false }}"><div class="banner-w" role="alert"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.3v.1"/></svg><span><b>WebUntis antwortet gerade nicht.</b> Du siehst den Stundenplan von heute 07:58. Änderungen seither fehlen.</span><button class="btn btn-line btn-s" type="button" onClick="{{ retry }}">Erneut laden</button></div></sc-if>
+<section class="card cal-day tg-card" aria-label="{{ ttTitle }}">
+<div class="cal-h"><button class="ib" type="button" aria-label="{{ ttPrevL }}" onClick="{{ ttPrev }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><div><b aria-live="polite">{{ ttTitle }}</b><span class="s">{{ ttSub }}</span><sc-if value="{{ ttOff }}" hint-placeholder-val="{{ false }}"><button class="alink cal-back" type="button" onClick="{{ ttHome }}">Zu heute</button></sc-if></div><button class="ib" type="button" aria-label="{{ ttNextL }}" onClick="{{ ttNext }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
+<div class="tg {{ ttTg.cls }}" style="--n: {{ ttTg.n }}">
+<sc-if value="{{ ttTg.many }}" hint-placeholder-val="{{ true }}"><div class="tg-hd" aria-hidden="true"><span></span><sc-for list="{{ ttTg.days }}" as="d" hint-placeholder-count="5"><span class="tg-d {{ d.cls }}">{{ d.d }} <b>{{ d.n }}</b></span></sc-for></div></sc-if>
+<div class="tg-bd" style="height: {{ ttTg.h }}">
+<div class="tg-ax" aria-hidden="true"><sc-for list="{{ ttTg.hours }}" as="hh" hint-placeholder-count="9"><span style="top: {{ hh.top }}">{{ hh.h }}</span></sc-for></div>
+<div class="tg-cols"><div class="tl-lunch tg-lunch" style="{{ ttTg.lunch }}" aria-hidden="true">Mittag</div><sc-for list="{{ ttTg.days }}" as="d" hint-placeholder-count="5"><div class="tg-col {{ d.cls }}" role="list" aria-label="{{ d.al }}"><sc-for list="{{ d.blocks }}" as="b" hint-placeholder-count="7"><div class="tg-b {{ b.cls }}" style="{{ b.st }}" role="listitem"><b>{{ b.subj }}</b><span class="tg-s">{{ b.sub }}</span><span class="tm">{{ b.tm }}</span></div></sc-for></div></sc-for>
+<sc-if value="{{ ttTg.hasNow }}" hint-placeholder-val="{{ true }}"><div class="tg-now" style="top: {{ ttTg.nowTop }}" role="note" aria-label="Jetzt {{ ttTg.now }}"><span class="tg-nl">{{ ttTg.now }}</span><i style="left: {{ ttTg.dotL }}"></i></div></sc-if>
+</div></div></div>
+</section>
+<sc-if value="{{ ttWeek }}" hint-placeholder-val="{{ true }}"><div class="legend"><span><i class="nowl"></i>Jetzt</span><span><i class="chg"></i>Raumänderung</span><span><i class="off"></i>Entfällt</span></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ pGrades }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Noten</h1></div><div class="ph-a"><div class="seg" role="group" aria-label="Semester"><button class="{{ sem1 }}" type="button" aria-pressed="{{ sem1p }}" onClick="{{ goSem1 }}">1. Semester</button><button class="{{ sem2 }}" type="button" aria-pressed="{{ sem2p }}" onClick="{{ goSem2 }}">2. Semester</button></div></div></div>
+<div class="seg2 app-only" role="group" aria-label="Semester"><button class="{{ sem1 }}" type="button" aria-pressed="{{ sem1p }}" onClick="{{ goSem1 }}">1. Semester</button><button class="{{ sem2 }}" type="button" aria-pressed="{{ sem2p }}" onClick="{{ goSem2 }}">2. Semester</button></div>
+<sc-if value="{{ noGrades }}" hint-placeholder-val="{{ false }}"><div class="empty"><span class="empty-i"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V7M17 16v-8"/></svg></span><b>Noch keine Noten im 2. Semester.</b><p>Das 2. Semester beginnt am 8. Februar 2027.</p><button class="btn btn-line btn-s" type="button" onClick="{{ goSem1 }}">1. Semester ansehen</button></div></sc-if>
+<sc-if value="{{ hasGrades }}" hint-placeholder-val="{{ true }}">
+<div class="avg"><div><span>Gesamtschnitt</span><b>4.9</b></div><div><span>Prüfungen</span><b>25</b></div><div><span>Ungenügend</span><b style="color: var(--err)">1</b></div></div>
+<section class="card"><div class="subj"><sc-for list="{{ subj }}" as="x" hint-placeholder-count="9"><a class="sj {{ x.flag }}" href="/noten/{{ x.k }}" onClick="{{ x.go }}"><span class="sj-i">{{ x.short }}</span><span class="sj-m"><b>{{ x.n }}</b><span>{{ x.s }}</span></span><span class="gb {{ x.cls }}"><i style="width: {{ x.w }}"></i></span><span class="gv {{ x.cls }}">{{ x.avg }}</span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></sc-for></div></section>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ pSubject }}" hint-placeholder-val="{{ false }}">
+<p class="crumb web-only"><a class="ul" href="/noten" onClick="{{ goGrades }}">Noten</a><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>Mathematik</p>
+<div class="ph"><div><h1>Mathematik</h1><p>R. Keller · 3 Prüfungen</p></div></div>
+<div class="g12">
+<section class="card"><h2 class="box-t" style="margin-bottom: 12px">Prüfungen</h2>
+<div class="exams"><sc-for list="{{ exams }}" as="e" hint-placeholder-count="3"><div class="ex"><span><b>{{ e.t }}</b><span class="s">{{ e.d }} · {{ e.w }}</span></span><span class="ex-c"><span class="w" style="display: block">{{ e.cl }}</span></span><span class="gv {{ e.cls }}">{{ e.g }}</span></div></sc-for></div></section>
+<div class="stack">
+<section class="next"><span class="k">Schnitt</span><div class="next-t"><b>4.6</b><span style="font-size: 14px; opacity: .75">Klasse 4.4</span></div></section>
+<section class="card"><h2 class="box-t">Verlauf</h2><div class="spark" aria-hidden="true"><i style="height: 60%"></i><i style="height: 80%"></i><i class="last" style="height: 70%"></i></div><div class="spark-l"><span>Sep.</span><span>Okt.</span></div></section>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ pAbsences }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Absenzen</h1></div><div class="ph-a"><button class="btn btn-ink" type="button" onClick="{{ openDlg }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Absenz melden</button></div></div>
+<div class="ab-sum"><div class="warn"><span>Offen</span><b>{{ nOpen }}</b></div><div><span>Unentschuldigt</span><b>1</b></div><div><span>Entschuldigt</span><b>2</b></div></div>
+<button class="btn btn-ink app-only" type="button" style="width: 100%; margin-bottom: 12px" onClick="{{ openDlg }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Absenz melden</button>
+<section class="card"><div class="abl"><sc-for list="{{ abs }}" as="a" hint-placeholder-count="5"><div class="ab"><span class="ab-d"><b>{{ a.d }}</b><span>{{ a.m }}</span></span><span class="ab-m"><b>{{ a.l }} · {{ a.subj }}</b><span>{{ a.note }}</span><span class="stat {{ a.chip }} app-only"><i></i>{{ a.stl }}</span></span><span class="stat {{ a.chip }} web-only"><i></i>{{ a.stl }}</span><span class="hide-a"><sc-if value="{{ a.isOpen }}" hint-placeholder-val="{{ false }}"><button class="btn btn-line btn-s" type="button" onClick="{{ a.go }}" aria-label="{{ a.w }} entschuldigen">Entschuldigen</button></sc-if></span></div></sc-for></div></section>
+</sc-if>
+
+<sc-if value="{{ pDocuments }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Dokumente</h1></div></div>
+<label class="srchbig"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sr">Dokumente suchen</span><input type="search" placeholder="Dokumente suchen" value="{{ q }}" onInput="{{ onQ }}"></label>
+<div class="fchips" role="group" aria-label="Kategorie"><sc-for list="{{ docChips }}" as="g" hint-placeholder-count="5"><button class="fc {{ g.cls }}" type="button" aria-pressed="{{ g.pr }}" onClick="{{ g.go }}">{{ g.g }} <span class="c">{{ g.c }}</span></button></sc-for></div>
+<sc-if value="{{ noDocs }}" hint-placeholder-val="{{ false }}"><div class="empty"><span class="empty-i"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><b>Kein Dokument für «{{ q }}».</b><button class="btn btn-line btn-s" type="button" onClick="{{ clearQ }}">Suche zurücksetzen</button></div></sc-if>
+<sc-for list="{{ docs }}" as="g" hint-placeholder-count="4"><section class="dl-g"><h2 class="k" style="margin-bottom: 6px">{{ g.g }}</h2><div class="card" style="padding-top: 8px; padding-bottom: 8px"><sc-for list="{{ g.items }}" as="d" hint-placeholder-count="3"><div class="dl"><span class="dl-i">{{ d.type }}</span><span><b>{{ d.t }}<sc-if value="{{ d.isNew }}" hint-placeholder-val="{{ false }}"> <span class="new">Neu</span></sc-if></b><span class="s">{{ d.size }}<sc-if value="{{ d.hasS }}" hint-placeholder-val="{{ true }}"> · {{ d.s }}</sc-if></span></span><a class="alink hide-a" href="{{ d.href }}" target="_blank" rel="noopener">Öffnen</a><a class="ib" href="{{ d.href }}" download aria-label="{{ d.dl }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></a></div></sc-for></div></section></sc-for>
+</sc-if>
+
+<sc-if value="{{ pLinks }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Links</h1></div></div>
+<sc-for list="{{ links }}" as="g" hint-placeholder-count="3"><section class="dl-g"><h2 class="k" style="margin-bottom: 8px">{{ g.g }}</h2><div class="lk"><sc-for list="{{ g.items }}" as="l" hint-placeholder-count="3"><a class="lc" href="{{ l.href }}" target="_blank" rel="noopener" aria-label="{{ l.al }}"><span class="lc-i {{ l.cls }}">{{ l.ini }}</span><span><b>{{ l.t }}</b><span class="s">{{ l.s }}</span></span><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a></sc-for></div></section></sc-for>
+</sc-if>
+
+<sc-if value="{{ pNews }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Mitteilungen</h1></div></div>
+<div class="news"><sc-for list="{{ news }}" as="n" hint-placeholder-count="4"><a class="nw {{ n.cls }}" href="/mitteilungen/pruefungsplan" onClick="{{ n.go }}"><b>{{ n.t }}</b><sc-if value="{{ n.isPin }}" hint-placeholder-val="{{ false }}"><span class="pinned"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Angeheftet</span></sc-if><p>{{ n.p }}</p><span class="meta">{{ n.who }} · {{ n.d }}</span></a></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ pArticle }}" hint-placeholder-val="{{ false }}">
+<p class="crumb web-only"><a class="ul" href="/mitteilungen" onClick="{{ goNews }}">Mitteilungen</a><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>Prüfungsplan</p>
+<article class="art"><span class="pinned"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Angeheftet</span><h1>Prüfungsplan 1. Semester ist online</h1>
+<p class="meta"><span>Schulleitung</span><span>·</span><span>Dienstag, 20. Oktober 2026</span></p>
+<div class="body"><p>Der Prüfungsplan für das 1. Semester 2026/27 ist ab sofort verfügbar. Er enthält alle Prüfungen bis Ende Januar für alle Klassen.</p>
+<p>Bitte kontrolliere die Termine deiner Klasse. Wenn sich zwei Prüfungen am selben Tag überschneiden oder du an einem Termin fehlen musst, melde dich bis 6. November bei deiner Klassenlehrperson.</p>
+<ul><li>Nachprüfungen finden am Mittwochnachmittag statt.</li><li>Für Dispensationen gibt es ein Formular unter Dokumente.</li></ul></div>
+<a class="att2" href="{{ u.pdf }}" target="_blank" rel="noopener"><span class="dl-i">PDF</span><span class="grow" style="flex: 1"><b>Prüfungsplan 1. Semester 2026/27</b><span class="s">240 KB</span></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></a>
+</article>
+</sc-if>
+
+<sc-if value="{{ pNotifications }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Benachrichtigungen</h1></div><div class="ph-a"><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><button class="btn btn-ghost btn-s" type="button" onClick="{{ markRead }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Alle als gelesen markieren</button></sc-if></div></div>
+<div style="max-width: 760px"><sc-for list="{{ notes }}" as="g" hint-placeholder-count="3"><h2 class="nt-d">{{ g.day }}</h2><sc-for list="{{ g.items }}" as="n" hint-placeholder-count="2"><a class="nt {{ n.un }}" href="/benachrichtigungen" onClick="{{ n.go }}"><span class="nt-i {{ n.cls }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{ n.ic }}"/></svg></span><span><b>{{ n.t }}</b><p>{{ n.p }}</p></span><time>{{ n.time }}</time></a></sc-for></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ pProfile }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>Profil</h1></div></div>
+<div class="g12">
+<div class="stack">
+<section class="pf"><span class="av av-ink">{{ me.ini }}</span><div><h2>{{ me.name }}</h2><p>{{ me.cls }} · {{ me.mail }}</p></div></section>
+<section class="card"><h2 class="box-t" style="margin-bottom: 14px">Benachrichtigungen</h2>
+<div class="set"><sc-for list="{{ sws }}" as="w" hint-placeholder-count="5"><div class="st"><span><b>{{ w.t }}</b><sc-if value="{{ w.hasS }}" hint-placeholder-val="{{ false }}"><span class="s">{{ w.s }}</span></sc-if></span><button class="sw {{ w.cls }}" type="button" role="switch" aria-checked="{{ w.pr }}" aria-label="{{ w.t }}" onClick="{{ w.go }}"></button></div></sc-for></div></section>
+</div>
+<div class="stack">
+<section class="card"><h2 class="box-t" style="margin-bottom: 14px">Konto</h2><dl class="kv2"><dt>Klasse</dt><dd>{{ me.cls }}</dd><dt>Lehrgang</dt><dd>{{ me.prog }}</dd><dt>Klassenlehrperson</dt><dd>{{ me.lead }}</dd><dt>Anmeldung</dt><dd>Microsoft-Schulkonto</dd></dl></section>
+<section class="card"><h2 class="box-t" style="margin-bottom: 14px">Darstellung</h2>
+<div class="set"><div class="st"><span><b>Design</b></span><div class="seg" role="group" aria-label="Design"><sc-for list="{{ dms }}" as="o" hint-placeholder-count="3"><button class="{{ o.cls }}" type="button" aria-pressed="{{ o.pr }}" onClick="{{ o.go }}">{{ o.t }}</button></sc-for></div></div></div></section>
+<button class="btn btn-out" type="button" onClick="{{ logout }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>Abmelden</button>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{ pSol }}" hint-placeholder-val="{{ false }}">
+<div class="ph web-only"><div><h1>SOL</h1></div><div class="ph-a"><label class="blk"><span class="sr">Block</span><select class="inp"><option>Block 3</option><option>Block 2</option><option>Block 1</option></select></label></div></div>
+<div class="stabs" role="tablist" aria-label="SOL"><sc-for list="{{ solTabs }}" as="t" hint-placeholder-count="3"><button class="{{ t.cls }}" type="button" role="tab" aria-selected="{{ t.cur }}" onClick="{{ t.go }}">{{ t.t }}</button></sc-for></div>
+
+<sc-if value="{{ stTasks }}" hint-placeholder-val="{{ true }}">
+<div class="sol-bar"><div class="fchips" role="group" aria-label="Fach"><sc-for list="{{ solFilt }}" as="f" hint-placeholder-count="7"><button class="fc {{ f.cls }}" type="button" aria-pressed="{{ f.pr }}" onClick="{{ f.go }}">{{ f.t }}</button></sc-for></div><a class="alink web-only" href="/sol/block-3.zip" download>Block 3 herunterladen<svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></a></div>
+<sc-for list="{{ sgroups }}" as="g" hint-placeholder-count="2"><section class="sg"><div class="sg-h"><h2>{{ g.n }}</h2><span class="s">{{ g.by }}</span></div>
+<div class="card sg-l"><sc-for list="{{ g.items }}" as="x" hint-placeholder-count="4"><div class="so {{ x.cls }}"><span class="code">{{ x.code }}</span><b class="so-t">{{ x.t }}</b><span class="so-min">{{ x.min }}</span><span class="so-p"><span class="bar" aria-hidden="true"><i style="width: {{ x.pw }}"></i></span>{{ x.p }}</span><span class="so-a"><a class="ib" href="{{ x.sp }}" target="_blank" rel="noopener" aria-label="{{ x.spl }}" title="SharePoint"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a><a class="ib" href="{{ x.dl }}" download aria-label="{{ x.dll }}" title="Herunterladen"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></a></span></div></sc-for></div></section></sc-for>
+</sc-if>
+
+<sc-if value="{{ stCal }}" hint-placeholder-val="{{ false }}">
+<div class="cal">
+<section class="card cal-day" aria-label="Freitag, 30. Oktober">
+<div class="cal-h"><button class="ib" type="button" aria-label="Vorheriger SOL-Tag"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><div><b>{{ calTitle }}</b><span class="s">{{ calSub }}</span></div><button class="ib" type="button" aria-label="Nächster SOL-Tag"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
+<div class="tl-cols"><span></span><span>Mein Plan</span><span>Lehrpersonen</span></div>
+<div class="tl" style="{{ tlH }}">
+<div class="tl-h" aria-hidden="true"><sc-for list="{{ hours }}" as="h" hint-placeholder-count="10"><span style="top: {{ h.top }}">{{ h.h }}</span></sc-for></div>
+<div class="tl-lunch" style="{{ lunch }}">Mittag</div>
+<div class="tl-me"><sc-for list="{{ plan }}" as="p" hint-placeholder-count="7"><div class="pb {{ p.sm }} {{ p.past }}" style="{{ p.st }}"><b>{{ p.short }}</b><span class="pb-t">{{ p.t }}</span><span class="tm">{{ p.from }} bis {{ p.to }}</span></div></sc-for></div>
+<sc-if value="{{ solToday }}" hint-placeholder-val="{{ false }}"><div class="tg-now tl-now" style="top: {{ solNowTop }}" role="note" aria-label="Jetzt {{ solNow }}"><span class="tg-nl">{{ solNow }}</span></div></sc-if>
+<div class="tl-t"><sc-for list="{{ teach }}" as="t" hint-placeholder-count="8"><div class="tb2" style="{{ t.st }}" title="{{ t.al }}"><b class="nm">{{ t.n }}</b><b class="cd">{{ t.cd }}</b><span class="sn">{{ t.k }}</span><span class="kk">{{ t.kk }}</span><span class="tm">{{ t.from }} bis {{ t.to }}</span></div></sc-for></div>
+</div>
+</section>
+<section class="card cal-form web-only" aria-labelledby="pl-h"><h2 id="pl-h" class="box-t">Einplanen</h2>
+<label class="f"><span class="f-l">Auftrag</span><select class="inp"><option>Französisch 3.01 · Compréhension orale · 45 Min.</option><option>Mathematik 3.04 · Lineare Optimierung III · 45 Min.</option><option>Englisch 3.04 · Speaking · 60 Min.</option><option>Deutsch 3.02 · Argumente belegen · 45 Min.</option></select></label>
+<div class="f"><span class="f-l">SOL-Tag</span><div class="inp" style="display: flex; align-items: center; gap: 10px"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Freitag, 30. Oktober</div></div>
+<div class="g2t"><label class="f"><span class="f-l">Von</span><input class="inp" type="text" inputmode="numeric" value="16:30"></label><label class="f"><span class="f-l">Bis</span><input class="inp" type="text" inputmode="numeric" value="17:00"></label></div>
+<label class="f"><span class="f-l">Notiz</span><textarea class="inp" rows="3" style="height: auto; padding-top: 12px"></textarea></label>
+<button class="btn btn-ink" type="button" style="width: 100%" onClick="{{ doPlan }}">Einplanen</button>
+</section>
+</div>
+<button class="btn btn-ink app-only" type="button" style="width: 100%; margin-top: 12px" onClick="{{ openPlan }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Einplanen</button>
+</sc-if>
+
+<sc-if value="{{ stPf }}" hint-placeholder-val="{{ false }}">
+<button class="btn btn-ink app-only" type="button" style="width: 100%; margin-bottom: 12px" onClick="{{ openPf }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Eintrag für Freitag</button>
+<div class="pfw">
+<div class="stack"><sc-for list="{{ pf }}" as="x" hint-placeholder-count="2"><article class="card pf-e"><div class="row-h"><h2 class="box-t">{{ x.d }}</h2><button class="ib" type="button" aria-label="{{ x.el }}" onClick="{{ x.edit }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button></div>
+<h3>Check-in</h3><p>{{ x.ci }}</p><sc-if value="{{ x.hasCo }}" hint-placeholder-val="{{ true }}"><h3>Check-out</h3><p>{{ x.co }}</p></sc-if></article></sc-for></div>
+<section class="card pf-form web-only" aria-labelledby="pf-h"><h2 id="pf-h" class="box-t">{{ pfTitle }}</h2>
+<label class="f"><span class="f-l">Check-in</span><textarea class="inp" rows="5" style="height: auto; padding-top: 12px" placeholder="Was nimmst du dir heute vor?">{{ pfCi }}</textarea></label>
+<label class="f"><span class="f-l">Check-out</span><textarea class="inp" rows="5" style="height: auto; padding-top: 12px" placeholder="Was hast du erreicht, was machst du nächstes Mal anders?">{{ pfCo }}</textarea></label>
+<button class="btn btn-ink" type="button" style="width: 100%" onClick="{{ savePf }}">Speichern</button>
+</section>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ pMore }}" hint-placeholder-val="{{ false }}">
+<div class="more"><sc-for list="{{ more }}" as="m" hint-placeholder-count="6"><a href="/mehr" onClick="{{ m.go }}"><span class="mi"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{ m.ic }}"/></svg></span><span><b>{{ m.t }}</b><sc-if value="{{ m.hasS }}" hint-placeholder-val="{{ false }}"><span class="s">{{ m.s }}</span></sc-if></span><sc-if value="{{ m.hasTag }}" hint-placeholder-val="{{ false }}"><span class="dot warn"></span></sc-if><sc-if value="{{ m.noTag }}" hint-placeholder-val="{{ true }}"><span></span></sc-if><svg class="ic ic-s chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ p404 }}" hint-placeholder-val="{{ false }}">
+<div class="nf"><span class="nf-n" aria-hidden="true">404</span><h1>Diese Seite gibt es nicht.</h1><p>Vielleicht wurde der Link geändert oder die Seite ist nicht mehr im Portal.</p>
+<div class="nf-a"><button class="btn btn-ink" type="button" onClick="{{ goHome }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6.5 8 6.5V20H14.5v-5.5h-5V20H4z"/></svg>Zur Übersicht</button><button class="btn btn-line" type="button" onClick="{{ goTimetable }}">Stundenplan</button><button class="btn btn-line" type="button" onClick="{{ goDocuments }}">Dokumente</button></div></div>
+</sc-if>
+</main>
+
+<sc-if value="{{ appShell }}" hint-placeholder-val="{{ false }}">
+<nav class="tabbar" aria-label="Hauptnavigation"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4"><a class="{{ t.on }}" href="/{{ t.label }}" aria-current="{{ t.cur }}" onClick="{{ t.go }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{ t.ic }}"/></svg>{{ t.label }}<sc-if value="{{ t.bdg }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span class="bdg" aria-label="3 neu">3</span></sc-if></sc-if></a></sc-for></nav>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div class="toast" role="status"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>{{ toast }}</span><button class="ib" type="button" aria-label="Meldung schliessen" onClick="{{ closeToast }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></sc-if>
+<sc-if value="{{ psheet }}" hint-placeholder-val="{{ false }}"><div class="app-only">
+<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ps-h">
+<div class="dlg-h"><h2 id="ps-h">Einplanen</h2><button class="ib" type="button" aria-label="Schliessen" onClick="{{ closePlan }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<label class="f"><span class="f-l">Auftrag</span><select class="inp"><option>Französisch 3.01 · 45 Min.</option><option>Mathematik 3.04 · 45 Min.</option><option>Englisch 3.04 · 60 Min.</option></select></label>
+<div class="f"><span class="f-l">SOL-Tag</span><div class="inp" style="display: flex; align-items: center; gap: 10px"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Freitag, 30. Oktober</div></div>
+<div class="g2t"><label class="f"><span class="f-l">Von</span><input class="inp" type="text" inputmode="numeric" value="16:30"></label><label class="f"><span class="f-l">Bis</span><input class="inp" type="text" inputmode="numeric" value="17:00"></label></div>
+<div class="dlg-a"><button class="btn btn-ghost" type="button" onClick="{{ closePlan }}">Abbrechen</button><button class="btn btn-ink" type="button" onClick="{{ doPlan }}">Einplanen</button></div>
+</div></div></div>
+</sc-if>
+<sc-if value="{{ pfSheet }}" hint-placeholder-val="{{ false }}"><div class="app-only">
+<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pfs-h">
+<div class="dlg-h"><h2 id="pfs-h">{{ pfTitle }}</h2><button class="ib" type="button" aria-label="Schliessen" onClick="{{ closePf }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<label class="f"><span class="f-l">Check-in</span><textarea class="inp" rows="4" style="height: auto; padding-top: 12px" placeholder="Was nimmst du dir heute vor?">{{ pfCi }}</textarea></label>
+<label class="f"><span class="f-l">Check-out</span><textarea class="inp" rows="4" style="height: auto; padding-top: 12px" placeholder="Was hast du erreicht?">{{ pfCo }}</textarea></label>
+<div class="dlg-a"><button class="btn btn-ghost" type="button" onClick="{{ closePf }}">Abbrechen</button><button class="btn btn-ink" type="button" onClick="{{ savePf }}">Speichern</button></div>
+</div></div></div>
+</sc-if>
+<sc-if value="{{ dlg }}" hint-placeholder-val="{{ false }}">
+<div class="scrim"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dl-h">
+<div class="dlg-h"><h2 id="dl-h">Absenz entschuldigen</h2><button class="ib" type="button" aria-label="Schliessen" onClick="{{ closeDlg }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div class="f"><span class="f-l">Datum</span><div class="inp" style="display: flex; align-items: center; gap: 10px"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span style="white-space: nowrap">Do, 22. Oktober 2026</span><span class="grow" style="flex: 1"></span><span class="s" style="white-space: nowrap">Frist 5.11.</span></div></div>
+<fieldset class="f"><legend class="f-l">Lektionen</legend><div class="lessons"><sc-for list="{{ lessons }}" as="l" hint-placeholder-count="7"><button class="{{ l.cls }}" type="button" aria-pressed="{{ l.on }}" onClick="{{ l.go }}"><b>{{ l.n }}</b><span>{{ l.s }}</span></button></sc-for></div></fieldset>
+<fieldset class="f"><legend class="f-l">Grund</legend><div class="seg" style="justify-self: start"><sc-for list="{{ reasons }}" as="o" hint-placeholder-count="4"><button class="{{ o.cls }}" type="button" aria-pressed="{{ o.pr }}" onClick="{{ o.go }}">{{ o.t }}</button></sc-for></div></fieldset>
+<label class="upl"><input class="sr" type="file" accept=".pdf,.jpg,.png"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-8.3 8.3a5 5 0 0 1-7-7l8.3-8.3a3.3 3.3 0 0 1 4.7 4.7l-8.3 8.3a1.7 1.7 0 0 1-2.4-2.4l7.6-7.6"/></svg><span><b>Bestätigung anhängen</b> · ab 3 Tagen ein Arztzeugnis</span></label>
+<div class="dlg-a"><button class="btn btn-ghost" type="button" onClick="{{ closeDlg }}">Abbrechen</button><button class="btn btn-ink" type="button" disabled="{{ cantSend }}" onClick="{{ send }}"><svg class="ic ic-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>{{ sendLabel }}</button></div>
+</div></div>
+</sc-if>
+</div>
+</div>
+
+</x-dc>

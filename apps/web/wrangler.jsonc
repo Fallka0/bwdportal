@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "bwd-portal",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Self-Referenz für OpenNext, Name muss dem Worker entsprechen
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "bwd-portal"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bwd-portal",
+      // Lokal beliebig. Für das Deployment mit `wrangler d1 create bwd-portal` ersetzen.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      // Anhänge (Arztzeugnisse) und Dokumente
+      "binding": "FILES",
+      "bucket_name": "bwd-portal-files"
+    }
+  ],
+  "vars": {
+    "AUTH_MODE": "mock",
+    "DEMO_NOW": "2026-10-26T10:20:00"
+  }
+}
