@@ -17,6 +17,14 @@
   display: grid;
   grid-template-columns: var(--size-sidebar) minmax(0, 1fr);
   align-items: start;
+  /* Spalte der Sidebar bleibt auf ganzer Höhe dunkel, auch wenn der Inhalt länger ist */
+  background: var(--sb-bg);
+}
+
+.shell > .mn {
+  align-self: stretch;
+  min-height: calc(100dvh - 2 * var(--sp-6));
+  background: var(--bg);
 }
 
 /* ---------- Sidebar ---------- */
@@ -416,6 +424,7 @@
 
   .shell {
     display: block;
+    background: var(--bg);
   }
 
   .sb,

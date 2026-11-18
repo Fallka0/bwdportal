@@ -20,7 +20,7 @@ export function withUser(fn: Handler) {
   return async (req: Request) => {
     try {
       const env = await serverEnv();
-      const userId = await currentUserId(env);
+      const userId = await currentUserId(env, req);
       if (!userId) return apiError(401, "unauthorized", "Bitte melde dich an.");
       const out = await fn({ env, userId, req });
       return out instanceof Response ? out : json(out);
