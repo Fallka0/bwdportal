@@ -5,8 +5,10 @@
 import { z } from "zod";
 import {
   AbsencesOverview,
-  AbsenceSubmit,
-  Absence,
+  AbsenceNotice,
+  AbsenceNoticeSubmit,
+  Dispensation,
+  DispensationSubmit,
   ApiError,
   DemoAccount,
   DocumentGroups,
@@ -80,7 +82,10 @@ export function createApiClient(opts: ApiClientOptions) {
   };
 
   return {
+    authConfig: () => call(z.object({ mock: z.boolean(), microsoft: z.boolean() }), "GET", "/auth/config"),
     accounts: () => call(z.object({ accounts: z.array(DemoAccount) }), "GET", "/auth/accounts"),
+    /** Einmal-Code aus dem Microsoft-Login gegen das Session-Token tauschen. */
+    exchange: (code: string) => call(z.object({ token: z.string() }), "POST", "/auth/exchange", { code }),
     signInMock: (accountId: string) => call(Token, "POST", "/auth/mock", { accountId }),
     logout: () => call(Ok, "POST", "/auth/logout"),
     me: () => call(Me, "GET", "/me"),
@@ -91,7 +96,12 @@ export function createApiClient(opts: ApiClientOptions) {
     subject: (code: string) => call(SubjectGrades, "GET", `/grades/${encodeURIComponent(code)}`),
     absences: () => call(AbsencesOverview, "GET", "/absences"),
     absenceLessons: (date: string) => call(z.object({ lessons: z.array(z.object({ period: z.number(), subjectCode: z.string().nullable(), subjectName: z.string().nullable(), subjectShort: z.string().nullable() })) }), "GET", `/absences/lessons${q({ date })}`),
-    submitAbsence: (input: AbsenceSubmit) => call(Absence, "POST", "/absences", input),
+    submitAbsenceNotice: (input: AbsenceNoticeSubmit) => call(AbsenceNotice, "POST", "/absences/notices", input),
+    updateAbsenceNotice: (id: string, input: AbsenceNoticeSubmit) => call(AbsenceNotice, "PATCH", `/absences/notices/${encodeURIComponent(id)}`, input),
+    deleteAbsenceNotice: (id: string) => call(Ok, "DELETE", `/absences/notices/${encodeURIComponent(id)}`),
+    submitDispensation: (input: DispensationSubmit) => call(Dispensation, "POST", "/absences/dispensations", input),
+    updateDispensation: (id: string, input: DispensationSubmit) => call(Dispensation, "PATCH", `/absences/dispensations/${encodeURIComponent(id)}`, input),
+    deleteDispensation: (id: string) => call(Ok, "DELETE", `/absences/dispensations/${encodeURIComponent(id)}`),
     solTasks: (block?: number) => call(SolTasks, "GET", `/sol/tasks${q({ block })}`),
     setSolProgress: (id: string, percent: number) => call(Ok, "PATCH", `/sol/tasks/${encodeURIComponent(id)}`, { percent }),
     solCalendar: (day?: string) => call(SolCalendar, "GET", `/sol/plan${q({ day })}`),
@@ -104,6 +114,8 @@ export function createApiClient(opts: ApiClientOptions) {
     documents: (search = "", group?: string) => call(DocumentGroups, "GET", `/documents${q({ q: search, group })}`),
     links: () => call(z.object({ items: z.array(LinkItem) }), "GET", "/links"),
     notifications: () => call(z.object({ items: z.array(NotificationItem) }), "GET", "/notifications"),
+    calendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "GET", "/me/calendar"),
+    resetCalendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "POST", "/me/calendar"),
     markAllRead: () => call(Ok, "POST", "/notifications/read"),
     markRead: (ids: string[]) => call(Ok, "POST", "/notifications/read", { ids }),
     /** Absolute URL für Dateien (Download mit Token als Query, weil Links keinen Header senden können). */

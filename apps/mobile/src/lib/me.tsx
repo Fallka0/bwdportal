@@ -7,7 +7,7 @@ const MeCtx = createContext<ApiState<Me> | null>(null);
 
 /** Angemeldete Person mit Zählern (Glocke, Mehr). Wird nach Aktionen neu geladen. */
 export function MeProvider({ children }: { children: ReactNode }) {
-  const state = useApi(() => api.me(), []);
+  const state = useApi(() => api.me(), [], { cache: "me" });
   return <MeCtx.Provider value={state}>{children}</MeCtx.Provider>;
 }
 

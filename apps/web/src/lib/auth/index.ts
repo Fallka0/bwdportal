@@ -10,9 +10,14 @@ import type { AuthProvider } from "./types";
 
 export const SESSION_COOKIE = "bwd_session";
 
-export function authProvider(env: ServerEnv): AuthProvider {
-  return env.authMode === "mock" ? new MockAuthProvider(env) : new MicrosoftAuthProvider(env);
+/** Anbieter für eine Anmeldeart. Sessions sind bei beiden gleich, darum genügt für getSession/signOut einer. */
+export function authProvider(env: ServerEnv, kind?: "mock" | "microsoft"): AuthProvider {
+  const k = kind ?? (env.authMode === "microsoft" ? "microsoft" : "mock");
+  return k === "mock" ? new MockAuthProvider(env) : new MicrosoftAuthProvider(env);
 }
+
+export const mockAllowed = (env: ServerEnv) => env.authMode === "mock" || env.authMode === "both";
+export const microsoftAllowed = (env: ServerEnv) => env.authMode === "microsoft" || env.authMode === "both";
 
 /**
  * Session-ID aus dem Bearer-Token (App), dem Cookie (Web) oder, nur für Downloads unter /api/v1/files,
@@ -40,7 +45,7 @@ export async function currentUserId(env: ServerEnv, req?: Request): Promise<stri
 export async function requireUser(): Promise<{ env: ServerEnv; me: Me }> {
   const env = await serverEnv();
   const id = await currentUserId(env);
-  const me = id ? await getMe(env.db, id) : null;
+  const me = id ? await getMe(env.db, id, env.now) : null;
   if (!me) redirect("/login");
   return { env, me };
 }

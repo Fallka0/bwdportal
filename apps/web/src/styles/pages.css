@@ -756,6 +756,9 @@
   max-width: 68ch;
   font-size: var(--fs-l);
   line-height: 1.55;
+  /* Zeilenumbrüche aus dem Eingabefeld bleiben sichtbar */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .pf-e .row-h {
@@ -1349,4 +1352,11 @@
   .pf h2 {
     font-size: var(--fs-h2);
   }
+}
+
+.cal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
 }

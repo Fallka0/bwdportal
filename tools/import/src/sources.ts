@@ -73,4 +73,18 @@ export const icalSource: TimetableSource = {
   },
 };
 
-export const SOURCES = { mock: mockSource, webuntis: webuntisSource, ical: icalSource };
+/**
+ * Lektionen aus einer JSON-Datei (Liste von LessonInput), z. B. von Hand aus WebUntis übertragen.
+ * Pfad in TIMETABLE_FILE oder über --file. Echte Daten liegen ausserhalb des Repos oder in tools/import/.local/.
+ */
+export const fileSource: TimetableSource = {
+  name: "file",
+  async fetchLessons({ from, to }: Range) {
+    const { readFileSync } = await import("node:fs");
+    const lessons = JSON.parse(readFileSync(need("TIMETABLE_FILE"), "utf8")) as LessonInput[];
+    if (!Array.isArray(lessons)) throw new Error("TIMETABLE_FILE: erwartet eine Liste von Lektionen");
+    return lessons.filter((l) => l.date >= from && l.date <= to);
+  },
+};
+
+export const SOURCES = { mock: mockSource, webuntis: webuntisSource, ical: icalSource, file: fileSource };

@@ -72,7 +72,7 @@ export function TimeGrid({ grid, now: initialNow, live, title, sub, prev, next, 
         <View style={{ width: aside ? 64 : 44, alignItems: "flex-end" }}>{aside ?? (next && <NavBtn icon="chev-r" {...next} />)}</View>
       </View>
 
-      <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <View testID="tg-body" onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         {multi && width > 0 && (
           <View style={{ height: 34, borderBottomWidth: 1, borderBottomColor: c.rule, marginBottom: sp[4] }} importantForAccessibility="no-hide-descendants">
             {cols.map(({ col, left, width: w }) => (

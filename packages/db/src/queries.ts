@@ -3,19 +3,33 @@
  * Rückgaben entsprechen den Schemas in @bwd/shared.
  */
 import {
-  absenceDueDate,
+  absenceContingent,
   absenceSubjectsLabel,
+  attachmentRequired,
+  getNow,
+  isLateDispensation,
+  noticeEditable,
+  periodEnd,
+  periodStart,
+  semesterOf,
+  type AbsenceLessonState,
+  type SubjectLimit,
+  type AbsenceNotice,
+  type AbsenceNoticeSubmit,
+  type Dispensation,
+  type DispensationSubmit,
   addDays,
   config,
   daysBetween,
+  weekday,
   fmtGrade,
   initials,
   isNewDocument,
   round1,
   weightedAverage,
   type Absence,
+  type IcsEvent,
   type AbsencesOverview,
-  type AbsenceSubmit,
   type DemoAccount,
   type DocumentGroups,
   type DocumentItem,
@@ -77,12 +91,12 @@ export async function updateSettings(db: Db, userId: string, patch: Partial<Sett
   return next;
 }
 
-export async function getMe(db: Db, userId: string): Promise<Me | null> {
+export async function getMe(db: Db, userId: string, now: Now = getNow()): Promise<Me | null> {
   const row = (await db.select({ u: s.users, c: s.classes }).from(s.users).leftJoin(s.classes, eq(s.users.classId, s.classes.id)).where(eq(s.users.id, userId)).limit(1))[0];
   if (!row) return null;
   const { u, c } = row;
   const [unread] = await db.select({ n: sql<number>`count(*)` }).from(s.notifications).where(and(eq(s.notifications.userId, userId), isNull(s.notifications.readAt)));
-  const [open] = await db.select({ n: sql<number>`count(*)` }).from(s.absences).where(and(eq(s.absences.userId, userId), eq(s.absences.status, "open")));
+  const { contingent } = await getAbsences(db, userId, now);
   const [newsTotal] = await db.select({ n: sql<number>`count(*)` }).from(s.news);
   const [newsRead] = await db.select({ n: sql<number>`count(*)` }).from(s.newsRead).where(eq(s.newsRead.userId, userId));
   return {
@@ -96,7 +110,7 @@ export async function getMe(db: Db, userId: string): Promise<Me | null> {
     program: c?.program ?? null,
     classTeacher: c?.classTeacher ?? null,
     settings: await getSettings(db, userId),
-    counts: { unreadNotifications: Number(unread?.n ?? 0), openAbsences: Number(open?.n ?? 0), unreadNews: Number(newsTotal?.n ?? 0) - Number(newsRead?.n ?? 0) },
+    counts: { unreadNotifications: Number(unread?.n ?? 0), contingentAvailable: contingent.available, contingentSize: contingent.size, unreadNews: Number(newsTotal?.n ?? 0) - Number(newsRead?.n ?? 0) },
   };
 }
 
@@ -170,7 +184,9 @@ export async function timetableSource(db: Db, now: Now): Promise<Timetable["sour
   const ok = bool(latest.ok);
   const at = lastOk ? (lastOk.finishedAt ?? lastOk.startedAt) : null;
   const age = at ? daysBetween(at.slice(0, 10), now.date) : Infinity;
-  return { name: latest.source, lastRunAt: at, ok, stale: !ok || age > 1 };
+  // Veralten kann nur eine Quelle, die laufend abgleicht. Beispieldaten und Daten aus einer Datei bleiben gültig.
+  const syncs = latest.source === "webuntis" || latest.source === "ical";
+  return { name: latest.source, lastRunAt: at, ok, stale: !ok || (syncs && age > 1) };
 }
 
 export async function getTimetable(db: Db, userId: string, from: string, to: string, now: Now): Promise<Timetable> {
@@ -266,7 +282,11 @@ export { fmtGrade };
 
 // ---------- Absenzen ----------
 
-export async function getAbsences(db: Db, userId: string): Promise<AbsencesOverview> {
+/**
+ * Cockpit der Absenzendatenbank: Absenzen (von Lehrpersonen erfasst), Abmeldungen, Dispensationsgesuche,
+ * Kontingent und Fachkontingente. Der Zustand jeder Lektion folgt dem Absenzenreglement (siehe absenceContingent).
+ */
+export async function getAbsences(db: Db, userId: string, now: Now = getNow()): Promise<AbsencesOverview> {
   const rows = await db.select().from(s.absences).where(eq(s.absences.userId, userId)).orderBy(desc(s.absences.date));
   const ids = rows.map((r) => r.id);
   const les = ids.length
@@ -277,15 +297,102 @@ export async function getAbsences(db: Db, userId: string): Promise<AbsencesOverv
         .where(inArray(s.absenceLessons.absenceId, ids))
         .orderBy(asc(s.absenceLessons.period))
     : [];
+  // Lehrperson pro Fach der Klasse (Spalte wie in der Absenzendatenbank)
+  const teacherRows = await db
+    .select({ sub: s.classSubjects.subjectCode, name: s.teachers.name })
+    .from(s.classSubjects)
+    .leftJoin(s.teachers, eq(s.classSubjects.teacherCode, s.teachers.code))
+    .where(eq(s.classSubjects.classId, (await classOf(db, userId)) ?? ""));
+  const teacherOf = new Map(teacherRows.map((r) => [r.sub, r.name]));
+  const notices = await absenceNotices(db, userId, now);
+  const dispensations = await dispensationsOf(db, userId);
+  const missed = rows.flatMap((r) => les.filter((x) => x.al.absenceId === r.id).map((x) => ({ date: r.date, period: x.al.period })));
+  const dispensed = dispensations.filter((d) => d.status === "approved").flatMap((d) => d.lessons.map((l) => ({ date: d.date, period: l.period })));
+  const counted = absenceContingent(missed, notices, dispensed, now.date);
+  const rank: Record<AbsenceLessonState, number> = { dispensed: 0, contingent: 1, unexcused: 2 };
   const items: Absence[] = rows.map((r) => {
-    const lessons = les.filter((x) => x.al.absenceId === r.id).map((x) => ({ period: x.al.period, subjectCode: x.al.subjectCode, subjectName: x.sub?.name ?? null }));
-    return { id: r.id, date: r.date, status: r.status, reason: r.reason, dueDate: r.dueDate, lessons, subjectsLabel: absenceSubjectsLabel(lessons), hasAttachment: !!r.attachmentKey };
+    const lessons = les
+      .filter((x) => x.al.absenceId === r.id)
+      .map((x) => {
+        const c = counted.lesson({ date: r.date, period: x.al.period });
+        return { period: x.al.period, subjectCode: x.al.subjectCode, subjectName: x.sub?.name ?? null, teacher: x.al.subjectCode ? (teacherOf.get(x.al.subjectCode) ?? null) : null, state: c.state, weight: c.weight, notified: c.notified };
+      });
+    const status = lessons.reduce<AbsenceLessonState>((w, l) => (rank[l.state] > rank[w] ? l.state : w), "dispensed");
+    return { id: r.id, date: r.date, status, lessons, subjectsLabel: absenceSubjectsLabel(lessons) };
   });
-  const count = (st: Absence["status"]) => items.filter((i) => i.status === st).length;
-  return { counts: { open: count("open"), sent: count("sent"), excused: count("excused"), unexcused: count("unexcused") }, items };
+  return { contingent: counted.contingent, items, notices, dispensations, subjects: await subjectLimits(db, userId, items, now) };
 }
 
-/** Lektionen eines Tages für den Absenz-Dialog (Nummer und Fach). */
+/**
+ * Fachkontingent (Art. 3d): pro Fach und Semester höchstens die doppelte Zahl der Wochenlektionen auf Kontingent.
+ * Wochenlektionen: die Woche mit den meisten Lektionen des Fachs in den letzten vier Wochen.
+ */
+async function subjectLimits(db: Db, userId: string, items: Absence[], now: Now): Promise<SubjectLimit[]> {
+  const sem = semesterOf(now.date);
+  const from = addDays(now.date, -28 - weekdayMon(now.date));
+  const lessons = (await lessonsBetween(db, userId, from, addDays(from, 34))).filter((l) => l.state !== "cancelled" && l.state !== "sol" && l.subject);
+  const perWeek = new Map<string, Map<number, number>>();
+  const names = new Map<string, string>();
+  for (const l of lessons) {
+    const sub = l.subject!;
+    const code = sub.code;
+    names.set(code, sub.name);
+    const w = Math.floor(daysBetween(from, l.date) / 7);
+    const m = perWeek.get(code) ?? new Map<number, number>();
+    m.set(w, (m.get(w) ?? 0) + 1);
+    perWeek.set(code, m);
+  }
+  const used = new Map<string, number>();
+  for (const a of items) {
+    if (a.date < sem.from || a.date > sem.to) continue;
+    for (const l of a.lessons) {
+      if (!l.subjectCode || l.state === "dispensed") continue;
+      if (l.subjectName) names.set(l.subjectCode, l.subjectName);
+      used.set(l.subjectCode, (used.get(l.subjectCode) ?? 0) + 1);
+    }
+  }
+  return [...names.keys()]
+    .map((code) => ({ subjectCode: code, subjectName: names.get(code)!, used: used.get(code) ?? 0, max: 2 * Math.max(0, ...(perWeek.get(code)?.values() ?? [])) }))
+    .filter((x) => x.max > 0 || x.used > 0)
+    .sort((a, b) => a.subjectName.localeCompare(b.subjectName, "de"));
+}
+
+/** Wochentag mit Montag = 0. */
+const weekdayMon = (date: string) => (weekday(date) + 6) % 7;
+
+const periodTime = (n: number, end: "from" | "to") => (end === "from" ? periodStart(n) : periodEnd(n));
+
+async function absenceNotices(db: Db, userId: string, now: Now): Promise<AbsenceNotice[]> {
+  const rows = await db.select().from(s.absenceNotices).where(eq(s.absenceNotices.userId, userId)).orderBy(desc(s.absenceNotices.date), desc(s.absenceNotices.createdAt));
+  return rows.map((r) => ({ id: r.id, date: r.date, fromPeriod: r.fromPeriod, toPeriod: r.toPeriod, from: periodTime(r.fromPeriod, "from"), to: periodTime(r.toPeriod, "to"), note: r.note, createdAt: r.createdAt, editable: noticeEditable(r, now) }));
+}
+
+async function dispensationsOf(db: Db, userId: string): Promise<Dispensation[]> {
+  const rows = await db.select().from(s.dispensations).where(eq(s.dispensations.userId, userId)).orderBy(desc(s.dispensations.date), desc(s.dispensations.createdAt));
+  const ids = rows.map((r) => r.id);
+  const les = ids.length
+    ? await db
+        .select({ dl: s.dispensationLessons, sub: s.subjects })
+        .from(s.dispensationLessons)
+        .leftJoin(s.subjects, eq(s.dispensationLessons.subjectCode, s.subjects.code))
+        .where(inArray(s.dispensationLessons.dispensationId, ids))
+        .orderBy(asc(s.dispensationLessons.period))
+    : [];
+  return rows.map((r) => ({
+    id: r.id,
+    date: r.date,
+    reason: r.reason,
+    note: r.note,
+    status: r.status,
+    lessons: les.filter((x) => x.dl.dispensationId === r.id).map((x) => ({ period: x.dl.period, subjectCode: x.dl.subjectCode, subjectName: x.sub?.name ?? null })),
+    attachments: [r.attachmentKey, r.attachmentKey2].filter(Boolean).length,
+    createdAt: r.createdAt,
+    late: isLateDispensation(r.reason, r.date, r.createdAt),
+    editable: r.status === "submitted",
+  }));
+}
+
+/** Lektionen eines Tages (Nummer und Fach) für Abmeldung und Gesuch. */
 export async function lessonsForAbsence(db: Db, userId: string, date: string): Promise<{ period: number; subjectCode: string | null; subjectName: string | null; subjectShort: string | null }[]> {
   const lessons = (await lessonsBetween(db, userId, date, date)).filter((l) => l.state !== "cancelled");
   return lessons
@@ -303,43 +410,93 @@ export class DomainError extends Error {
   }
 }
 
-/** Absenz entschuldigen (bestehend) oder neu melden. Status danach: "sent" (In Prüfung). */
-export async function submitAbsence(db: Db, userId: string, input: AbsenceSubmit, now: Now): Promise<Absence> {
-  let id = input.absenceId;
-  let date = input.date;
-  if (id) {
-    const r = (await db.select().from(s.absences).where(and(eq(s.absences.id, id), eq(s.absences.userId, userId))).limit(1))[0];
-    if (!r) throw new DomainError("not_found", "Diese Absenz gibt es nicht.");
-    if (r.status !== "open") throw new DomainError("not_open", "Diese Absenz ist schon entschuldigt oder in Prüfung.");
-    date = r.date;
-  }
-  const dayLessons = await lessonsForAbsence(db, userId, date!);
-  const valid = new Set(dayLessons.map((l) => l.period));
-  for (const p of input.periods) if (!valid.has(p)) throw new DomainError("invalid_period", `An diesem Tag gibt es keine ${p}. Lektion.`, "periods");
-  if (!id) {
-    id = `a-${randomId(8)}`;
-    await db.insert(s.absences).values({ id, userId, date: date!, status: "sent", reason: input.reason, note: input.note ?? null, dueDate: absenceDueDate(date!), attachmentKey: input.attachmentKey ?? null, createdAt: now.stamp });
-  } else {
-    await db.update(s.absences).set({ status: "sent", reason: input.reason, note: input.note ?? null, attachmentKey: input.attachmentKey ?? null }).where(eq(s.absences.id, id));
-    await db.delete(s.absenceLessons).where(eq(s.absenceLessons.absenceId, id));
-  }
+/** Abmeldung erfassen: Datum, von Lektion bis Lektion, Bemerkung. Höchstens 14 Tage zurück. */
+export async function submitAbsenceNotice(db: Db, userId: string, input: AbsenceNoticeSubmit, now: Now): Promise<AbsenceNotice> {
+  if (input.date < addDays(now.date, -14)) throw new DomainError("too_old", "Abmeldungen gehen höchstens 14 Tage zurück.", "date");
+  const id = `an-${randomId(8)}`;
+  await db.insert(s.absenceNotices).values({ id, userId, date: input.date, fromPeriod: input.fromPeriod, toPeriod: input.toPeriod, note: input.note?.trim() || null, createdAt: now.stamp });
+  return (await absenceNotices(db, userId, now)).find((n) => n.id === id)!;
+}
+
+async function ownNotice(db: Db, userId: string, id: string, now: Now) {
+  const r = (await db.select().from(s.absenceNotices).where(and(eq(s.absenceNotices.id, id), eq(s.absenceNotices.userId, userId))).limit(1))[0];
+  if (!r) throw new DomainError("not_found", "Diese Abmeldung gibt es nicht.");
+  if (!noticeEditable(r, now)) throw new DomainError("locked", "Die Abmeldung hat schon begonnen und lässt sich nicht mehr ändern.");
+  return r;
+}
+
+/** Abmeldung ändern, solange ihre erste Lektion nicht begonnen hat. Das Erfassungsdatum bleibt. */
+export async function updateAbsenceNotice(db: Db, userId: string, id: string, input: AbsenceNoticeSubmit, now: Now): Promise<AbsenceNotice> {
+  await ownNotice(db, userId, id, now);
+  if (input.date < now.date) throw new DomainError("too_old", "Das Datum liegt in der Vergangenheit.", "date");
+  await db.update(s.absenceNotices).set({ date: input.date, fromPeriod: input.fromPeriod, toPeriod: input.toPeriod, note: input.note?.trim() || null }).where(eq(s.absenceNotices.id, id));
+  return (await absenceNotices(db, userId, now)).find((n) => n.id === id)!;
+}
+
+export async function deleteAbsenceNotice(db: Db, userId: string, id: string, now: Now): Promise<void> {
+  await ownNotice(db, userId, id, now);
+  await db.delete(s.absenceNotices).where(eq(s.absenceNotices.id, id));
+}
+
+async function dispensationValues(db: Db, userId: string, input: DispensationSubmit, now: Now, existing?: (string | null)[]) {
+  if (input.date < semesterOf(now.date).from) throw new DomainError("too_old", "Gesuche gehen nur für das laufende Semester.", "date");
+  const keys = [...(input.keepAttachments ? (existing ?? []).filter((k): k is string => !!k) : []), ...(input.attachmentKeys ?? [])];
+  if (keys.length > 2) throw new DomainError("too_many", "Höchstens zwei Anhänge.", "attachmentKeys");
+  if (attachmentRequired(input.reason) && keys.length === 0) throw new DomainError("attachment_required", "Hänge eine Bestätigung an.", "attachmentKeys");
+  const dayLessons = await lessonsForAbsence(db, userId, input.date);
   const bySubject = new Map(dayLessons.map((l) => [l.period, l.subjectCode]));
-  await db.insert(s.absenceLessons).values(input.periods.map((p) => ({ absenceId: id!, period: p, subjectCode: bySubject.get(p) ?? null })));
-  const all = await getAbsences(db, userId);
-  return all.items.find((a) => a.id === id)!;
+  return { keys, lessons: [...new Set(input.periods)].map((p) => ({ period: p, subjectCode: bySubject.get(p) ?? null })) };
+}
+
+/**
+ * Dispensationsgesuch einreichen (Art. 4): Grund, Lektionen aus dem Stundenplan des Tages (mit Sonderstundenplan
+ * alle 1 bis 12), Bestätigung als Anhang. Weniger als 5 Arbeitstage im Voraus gilt als verspätet.
+ */
+export async function submitDispensation(db: Db, userId: string, input: DispensationSubmit, now: Now): Promise<Dispensation> {
+  const v = await dispensationValues(db, userId, input, now);
+  const id = `di-${randomId(8)}`;
+  await db.insert(s.dispensations).values({ id, userId, date: input.date, reason: input.reason, note: input.note?.trim() || null, status: "submitted", attachmentKey: v.keys[0] ?? null, attachmentKey2: v.keys[1] ?? null, createdAt: now.stamp });
+  await db.insert(s.dispensationLessons).values(v.lessons.map((l) => ({ dispensationId: id, ...l })));
+  return (await dispensationsOf(db, userId)).find((d) => d.id === id)!;
+}
+
+async function ownDispensation(db: Db, userId: string, id: string) {
+  const r = (await db.select().from(s.dispensations).where(and(eq(s.dispensations.id, id), eq(s.dispensations.userId, userId))).limit(1))[0];
+  if (!r) throw new DomainError("not_found", "Dieses Gesuch gibt es nicht.");
+  if (r.status !== "submitted") throw new DomainError("locked", "Über dieses Gesuch wurde schon entschieden.");
+  return r;
+}
+
+/** Gesuch ändern, solange es eingereicht ist. Ersetzte Anhänge gibt die Antwort in `removedKeys` zurück. */
+export async function updateDispensation(db: Db, userId: string, id: string, input: DispensationSubmit, now: Now): Promise<{ dispensation: Dispensation; removedKeys: string[] }> {
+  const r = await ownDispensation(db, userId, id);
+  const old = [r.attachmentKey, r.attachmentKey2];
+  const v = await dispensationValues(db, userId, input, now, old);
+  await db.update(s.dispensations).set({ date: input.date, reason: input.reason, note: input.note?.trim() || null, attachmentKey: v.keys[0] ?? null, attachmentKey2: v.keys[1] ?? null }).where(eq(s.dispensations.id, id));
+  await db.delete(s.dispensationLessons).where(eq(s.dispensationLessons.dispensationId, id));
+  await db.insert(s.dispensationLessons).values(v.lessons.map((l) => ({ dispensationId: id, ...l })));
+  const removedKeys = old.filter((k): k is string => !!k && !v.keys.includes(k));
+  return { dispensation: (await dispensationsOf(db, userId)).find((d) => d.id === id)!, removedKeys };
+}
+
+/** Gesuch zurückziehen, solange es eingereicht ist. Gibt die Anhänge zurück, damit sie gelöscht werden. */
+export async function deleteDispensation(db: Db, userId: string, id: string): Promise<string[]> {
+  const r = await ownDispensation(db, userId, id);
+  await db.delete(s.dispensations).where(eq(s.dispensations.id, id));
+  return [r.attachmentKey, r.attachmentKey2].filter((k): k is string => !!k);
 }
 
 // ---------- Übersicht ----------
 
 export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
   const lessons = await lessonsBetween(db, userId, now.date, now.date);
-  const abs = await getAbsences(db, userId);
+  const abs = await getAbsences(db, userId, now);
   return {
     today: now.date,
     now: now.time,
     next: nextLesson(lessons, now.date, now.time),
     lessons,
-    openAbsences: abs.items.filter((a) => a.status === "open"),
+    absences: { contingent: abs.contingent, recent: abs.items.slice(0, 2) },
     recentGrades: await recentGrades(db, userId, 3),
     news: (await getNews(db, userId)).slice(0, 2),
   };
@@ -452,7 +609,7 @@ export async function getSolTasks(db: Db, userId: string, now: Now, blockN?: num
   const order: string[] = [];
   for (const { t } of tasks) if (!order.includes(t.subjectCode)) order.push(t.subjectCode);
   // Reihenfolge wie im Design: Fächer nach erstem Auftrag in der Seed-Reihenfolge
-  const subjectOrder = ["MA", "EN", "DE", "FRW", "WR", "FR"];
+  const subjectOrder = ["MA", "M", "EN", "E", "DE", "D", "FRW", "WR", "FR", "F"];
   order.sort((a, b) => (subjectOrder.indexOf(a) + 1 || 99) - (subjectOrder.indexOf(b) + 1 || 99));
   const groups = order.map((code) => {
     const mine = tasks.filter((x) => x.t.subjectCode === code);
@@ -586,4 +743,117 @@ export async function search(db: Db, userId: string, now: Now, q: string): Promi
   const links = (await getLinks(db)).filter((l) => has(l.title, l.sub));
   const news = (await getNews(db, userId)).filter((n) => has(n.title, n.teaser));
   return { subjects, documents: docs, links, news };
+}
+
+// ---------- Microsoft-Login ----------
+
+export async function userByEmail(db: Db, email: string) {
+  return (await db.select().from(s.users).where(eq(s.users.email, email.toLowerCase())).limit(1))[0] ?? null;
+}
+
+/**
+ * Konto zur E-Mail aus dem Microsoft-Token. Gibt es noch keins, wird es angelegt. Name aus den Claims.
+ * Klasse: classCode (Standardklasse aus der Konfiguration), bis die Zuordnung aus dem Schulsystem kommt.
+ * Ein bestehendes Konto ohne Klasse bekommt sie beim nächsten Login.
+ */
+export async function findOrCreateUser(db: Db, claims: { email: string; firstName: string; lastName: string; oid: string }, now: Now, classCode?: string | null) {
+  const classId = classCode ? await ensureClass(db, classCode) : null;
+  const existing = await userByEmail(db, claims.email);
+  if (existing) {
+    if (existing.classId || !classId) return existing;
+    await db.update(s.users).set({ classId }).where(eq(s.users.id, existing.id));
+    return (await userById(db, existing.id))!;
+  }
+  const id = `u-ms-${claims.oid}`;
+  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId, role: "student", createdAt: now.stamp });
+  await db.insert(s.settings).values({ userId: id }).onConflictDoNothing();
+  return (await userById(db, id))!;
+}
+
+/** Klasse über ihr Kürzel finden oder anlegen (id c-<kürzel>). Liefert die id. */
+export async function ensureClass(db: Db, code: string): Promise<string> {
+  await db.insert(s.classes).values({ id: `c-${code.toLowerCase()}`, code }).onConflictDoNothing();
+  return (await db.select({ id: s.classes.id }).from(s.classes).where(eq(s.classes.code, code)).limit(1))[0]!.id;
+}
+
+/** Einmal-Code für die App: zeigt auf eine Session, gilt 60 Sekunden. */
+export async function createLoginCode(db: Db, sessionId: string, now: Now): Promise<string> {
+  const code = randomId(24);
+  const exp = new Date(Date.parse(`${now.stamp}:00Z`) + 60_000).toISOString().slice(0, 19);
+  await db.insert(s.loginCodes).values({ code, sessionId, expiresAt: exp });
+  return code;
+}
+
+/** Code einlösen: liefert die Session-ID und löscht den Code (nur einmal gültig). */
+export async function consumeLoginCode(db: Db, code: string, now: Now): Promise<string | null> {
+  const r = (await db.select().from(s.loginCodes).where(eq(s.loginCodes.code, code)).limit(1))[0];
+  if (!r) return null;
+  await db.delete(s.loginCodes).where(eq(s.loginCodes.code, code));
+  return r.expiresAt >= `${now.stamp}:00` ? r.sessionId : null;
+}
+
+// ---------- Kalender-Abo ----------
+
+/** Token fürs Kalender-Abo, wird beim ersten Mal angelegt. */
+export async function calendarToken(db: Db, userId: string, now: Now): Promise<string> {
+  const r = (await db.select().from(s.calendarTokens).where(eq(s.calendarTokens.userId, userId)).limit(1))[0];
+  if (r) return r.token;
+  const token = randomId(24);
+  await db.insert(s.calendarTokens).values({ userId, token, createdAt: now.stamp });
+  return token;
+}
+
+/** Neuer Link: der alte funktioniert danach nicht mehr. */
+export async function resetCalendarToken(db: Db, userId: string, now: Now): Promise<string> {
+  const token = randomId(24);
+  await db
+    .insert(s.calendarTokens)
+    .values({ userId, token, createdAt: now.stamp })
+    .onConflictDoUpdate({ target: s.calendarTokens.userId, set: { token, createdAt: now.stamp } });
+  return token;
+}
+
+export async function userByCalendarToken(db: Db, token: string): Promise<string | null> {
+  return (await db.select({ u: s.calendarTokens.userId }).from(s.calendarTokens).where(eq(s.calendarTokens.token, token)).limit(1))[0]?.u ?? null;
+}
+
+/**
+ * Termine fürs Abo: Lektionen (eine Woche zurück bis acht Wochen voraus), Prüfungen, eigener SOL-Plan
+ * und Fristen offener Absenzen. UIDs sind stabil, damit Kalender Änderungen statt Duplikate zeigen.
+ */
+export async function calendarEvents(db: Db, userId: string, now: Now): Promise<IcsEvent[]> {
+  const from = addDays(now.date, -7);
+  const to = addDays(now.date, 56);
+  const events: IcsEvent[] = [];
+  for (const l of await lessonsBetween(db, userId, from, to)) {
+    if (l.state === "sol") {
+      events.push({ uid: `${l.id}@bwd-portal`, summary: "SOL-Tag", date: l.date, start: l.start, end: l.end, location: l.room });
+      continue;
+    }
+    const name = l.subject?.name ?? "Lektion";
+    const room = l.state === "room_changed" ? `${l.room} (statt ${l.originalRoom})` : l.room;
+    events.push({
+      uid: `${l.id}@bwd-portal`,
+      summary: l.state === "cancelled" ? `${name} (entfällt)` : name,
+      date: l.date,
+      start: l.start,
+      end: l.end,
+      location: room,
+      description: l.teacher?.name ?? null,
+      cancelled: l.state === "cancelled",
+    });
+  }
+  for (const r of await examsFor(db, userId)) {
+    const sub = (await db.select().from(s.subjects).where(eq(s.subjects.code, r.exam.subjectCode)).limit(1))[0];
+    events.push({ uid: `${r.exam.id}@bwd-portal`, summary: `Prüfung ${sub?.name ?? r.exam.subjectCode}: ${r.exam.title}`, date: r.exam.date, description: r.value !== null ? `Note ${fmtGrade(r.value)}` : null });
+  }
+  const plan = await db
+    .select({ p: s.solPlan, d: s.solDays, t: s.solTasks, sub: s.subjects })
+    .from(s.solPlan)
+    .innerJoin(s.solDays, eq(s.solPlan.solDayId, s.solDays.id))
+    .innerJoin(s.solTasks, eq(s.solPlan.taskId, s.solTasks.id))
+    .innerJoin(s.subjects, eq(s.solTasks.subjectCode, s.subjects.code))
+    .where(eq(s.solPlan.userId, userId));
+  for (const { p, d, t, sub } of plan) events.push({ uid: `${p.id}@bwd-portal`, summary: `SOL ${sub.short} ${t.code}: ${t.title}`, date: d.date, start: p.startTime, end: p.endTime, description: p.note });
+  return events;
 }

@@ -9,7 +9,7 @@ import { Empty, Icon, SkBox, SkeletonArea, T } from "@/ui";
 
 export default function News() {
   const { c } = useTheme();
-  const n = useApi(() => api.news(), []);
+  const n = useApi(() => api.news(), [], { cache: "news" });
   return (
     <Screen title="Mitteilungen" back={{ label: "Mehr", href: "/mehr" }} onRefresh={n.refresh} refreshing={n.refreshing}>
       {n.error && !n.data ? (

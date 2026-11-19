@@ -10,7 +10,7 @@ import { Card, Empty, Grade, SkBox, SkeletonArea, T } from "@/ui";
 export default function Subject() {
   const { c, scheme } = useTheme();
   const { fach } = useLocalSearchParams<{ fach: string }>();
-  const s = useApi(() => api.subject(String(fach)), [fach]);
+  const s = useApi(() => api.subject(String(fach)), [fach], { cache: "subject" });
   const d = s.data;
   const chrono = d ? [...d.exams].filter((e) => e.value !== null).reverse() : [];
   const dark = scheme === "dark";

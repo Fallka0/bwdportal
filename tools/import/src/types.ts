@@ -13,8 +13,8 @@ export type LessonInput = {
 
 export type Range = { from: string; to: string };
 
-/** Schnittstelle aus handoff/docs/WEBUNTIS.md. Drei Umsetzungen: mock, webuntis, ical. */
+/** Schnittstelle aus handoff/docs/WEBUNTIS.md. Umsetzungen: mock, webuntis, ical und file (JSON von Hand). */
 export interface TimetableSource {
-  name: "mock" | "webuntis" | "ical";
+  name: "mock" | "webuntis" | "ical" | "file";
   fetchLessons(range: Range): Promise<LessonInput[]>;
 }

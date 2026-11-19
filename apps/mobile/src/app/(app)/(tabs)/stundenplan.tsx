@@ -21,7 +21,7 @@ export default function Timetable() {
   const params = useLocalSearchParams<{ ansicht?: string }>();
   const [view, setView] = useState<"tag" | "woche">(params.ansicht === "woche" ? "woche" : "tag");
   const me = useMe();
-  const clock = useApi(() => api.home(), []);
+  const clock = useApi(() => api.home(), [], { cache: "home" });
   const today = clock.data?.today ?? getNow().date;
   const now = { date: today, time: clock.data?.now ?? getNow().time };
   const live = !clock.data;
@@ -29,7 +29,7 @@ export default function Timetable() {
   const d = schoolDay(date ?? today);
   const from = view === "woche" ? mondayOf(d) : d;
   const to = view === "woche" ? addDays(from, 4) : d;
-  const tt = useApi(() => api.timetable(from, to), [from, to]);
+  const tt = useApi(() => api.timetable(from, to), [from, to], { cache: "timetable" });
 
   const dates = view === "woche" ? [0, 1, 2, 3, 4].map((i) => addDays(from, i)) : [d];
   const columns = tt.data ? dayColumns(dates.map((x) => ({ date: x, header: WEEKDAYS_SHORT[weekday(x)], headerNum: String(Number(x.slice(8))) })), tt.data.lessons) : [];

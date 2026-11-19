@@ -5,8 +5,8 @@
 export type SignInRequest =
   /** Mock: gewähltes Demo-Konto. "foreign" simuliert ein Konto, das nicht zur Schule gehört. */
   | { kind: "mock"; accountId: string }
-  /** Microsoft: Code aus dem OIDC-Redirect */
-  | { kind: "oidc"; code: string; verifier: string };
+  /** Microsoft: geprüfte Angaben aus dem ID-Token (siehe microsoft.ts) */
+  | { kind: "oidc"; claims: { email: string; firstName: string; lastName: string; oid: string } };
 
 export type SignInResult = { ok: true; sessionId: string; expiresAt: string } | { ok: false; code: "foreign_account" | "unknown_account" | "not_configured"; message: string };
 

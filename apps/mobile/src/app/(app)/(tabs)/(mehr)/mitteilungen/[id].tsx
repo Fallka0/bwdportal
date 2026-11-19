@@ -17,7 +17,7 @@ export default function Article() {
     const r = await api.article(String(id));
     void me.refresh();
     return r;
-  }, [id]);
+  }, [id], { cache: "article" });
   const d = a.data;
   return (
     <Screen back={{ label: "Mitteilungen", href: "/mitteilungen" }} onRefresh={a.refresh} refreshing={a.refreshing}>

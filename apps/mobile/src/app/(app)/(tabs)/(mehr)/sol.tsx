@@ -15,7 +15,7 @@ type Tab = "auftraege" | "kalender" | "portfolio";
 export default function Sol() {
   const [tab, setTab] = useState<Tab>("auftraege");
   // Die App zeigt den aktuellen Block (wie im Design); Blockwahl gibt es im Web.
-  const tasks = useApi(() => api.solTasks(), []);
+  const tasks = useApi(() => api.solTasks(), [], { cache: "solTasks" });
   return (
     <Screen title="SOL" back={{ label: "Mehr", href: "/mehr" }} onRefresh={tasks.refresh} refreshing={tasks.refreshing}>
       <TextTabs<Tab>
@@ -87,7 +87,7 @@ function Tasks({ data, reload }: { data: SolTasks; reload: () => Promise<void> }
                       </View>
                     </View>
                   </Pressable>
-                  {t.sharepointUrl ? <IconButton icon="arrow-ur" label={`${t.title} in SharePoint öffnen`} onPress={() => Linking.openURL(t.sharepointUrl!)} /> : <IconButton icon="download" label={`${t.title} herunterladen`} onPress={() => openFile(`sol/${encodeURIComponent(t.id)}`)} />}
+                  {t.sharepointUrl ? <IconButton icon="arrow-ur" label={`${t.title} in SharePoint öffnen`} onPress={() => Linking.openURL(t.sharepointUrl!)} /> : t.hasFile ? <IconButton icon="download" label={`${t.title} herunterladen`} onPress={() => openFile(`sol/${encodeURIComponent(t.id)}`)} /> : null}
                 </View>
               );
             })}
@@ -133,8 +133,8 @@ function ProgressSheet({ edit, onClose, onSaved }: { edit: { id: string; title: 
 
 function Calendar({ tasks }: { tasks: SolTasks }) {
   const [dayId, setDayId] = useState<string | undefined>(undefined);
-  const cal = useApi(() => api.solCalendar(dayId), [dayId]);
-  const clock = useApi(() => api.home(), []);
+  const cal = useApi(() => api.solCalendar(dayId), [dayId], { cache: "solCalendar" });
+  const clock = useApi(() => api.home(), [], { cache: "home" });
   const [open, setOpen] = useState(false);
   if (cal.error && !cal.data) return <ErrorState message={cal.error} onRetry={cal.reload} />;
   if (!cal.data || !clock.data)
@@ -243,7 +243,7 @@ function PlanSheet({ day, plan, tasks, onClose, onSaved }: { day: { id: string; 
 
 function Portfolio() {
   const { c } = useTheme();
-  const pf = useApi(() => api.solPortfolio(), []);
+  const pf = useApi(() => api.solPortfolio(), [], { cache: "solPortfolio" });
   const [edit, setEdit] = useState<{ solDayId: string; date: string; checkIn: string; checkOut: string } | null>(null);
   if (pf.error && !pf.data) return <ErrorState message={pf.error} onRetry={pf.reload} />;
   if (!pf.data)

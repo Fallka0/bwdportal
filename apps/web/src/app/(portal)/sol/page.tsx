@@ -88,9 +88,11 @@ function Tasks({ tasks, fach, q }: { tasks: Awaited<ReturnType<typeof getSolTask
                       <Icon name="arrow-ur" small />
                     </a>
                   )}
-                  <a className="ib" href={`/api/v1/files/sol/${encodeURIComponent(t.id)}`} download aria-label={`${t.title} herunterladen`} title="Herunterladen">
-                    <Icon name="download" small />
-                  </a>
+                  {t.hasFile && (
+                    <a className="ib" href={`/api/v1/files/sol/${encodeURIComponent(t.id)}`} download aria-label={`${t.title} herunterladen`} title="Herunterladen">
+                      <Icon name="download" small />
+                    </a>
+                  )}
                 </span>
               </div>
             ))}

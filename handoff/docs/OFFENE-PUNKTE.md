@@ -10,7 +10,7 @@
 | Mediothek | https://www.bwdbern.ch/mediothek |
 | E-Mail-Muster | vorname.nachname@bwdbern.ch |
 | Klasse, Personen, Noten, Absenzen, Mitteilungen, Dokumente | erfunden (Selin Hofer, IM24b) |
-| Lektionenzeiten | 08:00 bis 15:50 in 8 Lektionen, angenommen |
+| Lektionenzeiten | geklärt: 08:00 bis 17:45 in 11 Lektionen, aus WebUntis (IM24A) |
 
 Alle Adressen kommen aus einer Konfigurationsdatei, nicht fest in den Code.
 
@@ -22,4 +22,4 @@ Alle Adressen kommen aus einer Konfigurationsdatei, nicht fest in den Code.
 5. Stimmen die Lektionenzeiten und die Fächer der Klasse?
 
 ## Später
-Microsoft-Login (Entra ID), Push-Nachrichten, Rolle Lehrperson.
+Push-Nachrichten, Rolle Lehrperson. Microsoft-Login ist gebaut; für Konten der bwd fehlt die Zustimmung der Schul-IT.

@@ -15,7 +15,7 @@ export default async function More() {
   const solSub = sol.day ? (sol.day.date === env.now.date ? "SOL-Tag heute" : daysBetween(env.now.date, sol.day.date) < 7 ? `SOL-Tag am ${WEEKDAYS[weekday(sol.day.date)]}` : "") : "";
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
     { href: "/sol", title: "SOL", sub: solSub, icon: "book" },
-    { href: "/absenzen", title: "Absenzen", sub: me.counts.openAbsences ? `${me.counts.openAbsences} offen` : "", icon: "clock", dot: me.counts.openAbsences > 0 },
+    { href: "/absenzen", title: "Absenzen", sub: `Kontingent ${me.counts.contingentAvailable} von ${me.counts.contingentSize}`, icon: "clock", dot: me.counts.contingentAvailable === 0 },
     { href: "/mitteilungen", title: "Mitteilungen", sub: me.counts.unreadNews ? `${me.counts.unreadNews} neu` : "", icon: "megaphone" },
     { href: "/dokumente", title: "Dokumente", icon: "folder" },
     { href: "/links", title: "Links", icon: "grid4" },

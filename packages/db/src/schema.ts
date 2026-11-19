@@ -127,8 +127,10 @@ export const grades = sqliteTable(
   (t) => [unique("grades_exam_user").on(t.examId, t.userId), check("grades_value_check", sql`${t.value} BETWEEN 1 AND 6`)],
 );
 
-export const absenceStatuses = ["open", "sent", "excused", "unexcused"] as const;
-
+/**
+ * Absenz, wie die Lehrperson sie erfasst (Absenzenreglement Art. 6a): Tag und Lektionen.
+ * Ob eine Lektion dispensiert, aufs Kontingent oder unentschuldigt zählt, ergibt sich aus Abmeldungen und Gesuchen.
+ */
 export const absences = sqliteTable(
   "absences",
   {
@@ -137,14 +139,9 @@ export const absences = sqliteTable(
       .notNull()
       .references(() => users.id),
     date: text("date").notNull(),
-    status: text("status", { enum: absenceStatuses }).notNull(),
-    reason: text("reason"),
-    note: text("note"),
-    dueDate: text("due_date"),
-    attachmentKey: text("attachment_key"),
     createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
   },
-  (t) => [check("absences_status_check", sql`${t.status} IN ('open','sent','excused','unexcused')`)],
+  (t) => [index("absences_user_date").on(t.userId, t.date)],
 );
 
 export const absenceLessons = sqliteTable(
@@ -157,6 +154,56 @@ export const absenceLessons = sqliteTable(
     subjectCode: text("subject_code"),
   },
   (t) => [primaryKey({ columns: [t.absenceId, t.period] })],
+);
+
+/** Abmeldung (Absenzendatenbank der Schule, Art. 2b): von Lektion bis Lektion, mit Bemerkung. */
+export const absenceNotices = sqliteTable(
+  "absence_notices",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: text("date").notNull(),
+    fromPeriod: integer("from_period").notNull(),
+    toPeriod: integer("to_period").notNull(),
+    note: text("note"),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [index("absence_notices_user_date").on(t.userId, t.date), check("absence_notices_periods_check", sql`${t.fromPeriod} <= ${t.toPeriod}`)],
+);
+
+export const dispensationStatuses = ["submitted", "approved", "rejected"] as const;
+
+/** Ergänzung (Absenzendatenbank der Schule): Dispensationsgesuch mit Grund, Lektionen und bis zu zwei Anhängen. */
+export const dispensations = sqliteTable(
+  "dispensations",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: text("date").notNull(),
+    reason: text("reason").notNull(),
+    note: text("note"),
+    status: text("status", { enum: dispensationStatuses }).notNull().default("submitted"),
+    attachmentKey: text("attachment_key"),
+    attachmentKey2: text("attachment_key2"),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [index("dispensations_user_date").on(t.userId, t.date), check("dispensations_status_check", sql`${t.status} IN ('submitted','approved','rejected')`)],
+);
+
+export const dispensationLessons = sqliteTable(
+  "dispensation_lessons",
+  {
+    dispensationId: text("dispensation_id")
+      .notNull()
+      .references(() => dispensations.id, { onDelete: "cascade" }),
+    period: integer("period").notNull(),
+    subjectCode: text("subject_code"),
+  },
+  (t) => [primaryKey({ columns: [t.dispensationId, t.period] })],
 );
 
 export const documents = sqliteTable("documents", {
@@ -311,3 +358,21 @@ export const solPortfolio = sqliteTable(
   },
   (t) => [unique("sol_portfolio_user_day").on(t.userId, t.solDayId)],
 );
+
+/** Einmal-Code für die App nach dem Microsoft-Login (60 Sekunden gültig, nur einmal einlösbar). */
+export const loginCodes = sqliteTable("login_codes", {
+  code: text("code").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id, { onDelete: "cascade" }),
+  expiresAt: text("expires_at").notNull(),
+});
+
+/** Geheimer Link fürs Kalender-Abo. Ein Token pro Person; neu erstellen macht den alten ungültig. */
+export const calendarTokens = sqliteTable("calendar_tokens", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  createdAt: text("created_at").notNull(),
+});

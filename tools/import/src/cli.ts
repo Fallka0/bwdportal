@@ -1,5 +1,5 @@
 /**
- * Stundenplan-Import: pnpm timetable:import --source webuntis [--from 2026-10-26 --to 2026-11-20] [--remote] [--dry-run]
+ * Stundenplan-Import: pnpm timetable:import --source webuntis|ical|file|mock [--file lektionen.json] [--class c-im24a] [--from 2026-10-26 --to 2026-11-20] [--remote] [--dry-run]
  * Holt Lektionen aus der Quelle und schreibt sie per wrangler in D1 (lokal, oder mit --remote ins Deployment).
  * Zugangsdaten nur in tools/import/.env.local. Das Portal selbst speichert keine WebUntis-Passwörter.
  */
@@ -14,11 +14,14 @@ import { SOURCES } from "./sources";
 import { failedRunSql, importSql } from "./sql";
 
 const { values } = parseArgs({
+  // pnpm reicht ein "--" durch: weglassen
+  args: process.argv.slice(2).filter((a) => a !== "--"),
   options: {
     source: { type: "string", default: "mock" },
     from: { type: "string" },
     to: { type: "string" },
     class: { type: "string", default: CLASS_ID },
+    file: { type: "string" },
     remote: { type: "boolean", default: false },
     "dry-run": { type: "boolean", default: false },
   },
@@ -29,6 +32,8 @@ if (!source) {
   console.error(`Unbekannte Quelle: ${values.source}. Möglich: ${Object.keys(SOURCES).join(", ")}`);
   process.exit(2);
 }
+
+if (values.file) process.env.TIMETABLE_FILE = resolve(values.file);
 
 const now = getNow(process.env.DEMO_NOW);
 const from = values.from ?? mondayOf(now.date);

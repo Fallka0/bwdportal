@@ -6,7 +6,7 @@ import { Wordmark } from "@/components/brand/Brand";
 import { Icon } from "@/components/ui";
 import { isActive, NAV } from "@/lib/nav";
 
-type Counts = { absences: number; notifications: number };
+type Counts = { notifications: number };
 
 export function Sidebar({ name, classCode, initials, counts }: { name: string; classCode: string; initials: string; counts: Counts }) {
   const path = usePathname();
@@ -26,7 +26,7 @@ export function Sidebar({ name, classCode, initials, counts }: { name: string; c
                 <Icon name={n.icon} />
                 <span className="nl-t">{n.label}</span>
                 {c > 0 && (
-                  <span className="n" aria-label={`${c} ${n.count === "absences" ? "offen" : "neu"}`}>
+                  <span className="n" aria-label={`${c} neu`}>
                     {c}
                   </span>
                 )}

@@ -11,3 +11,6 @@ allowBuilds:
   workerd: true
   sharp: false
   unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - jose@6.2.18
