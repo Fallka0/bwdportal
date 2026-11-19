@@ -215,8 +215,20 @@
   display: inline;
 }
 
+/* Vergangen: blasser Block. Statt opacity 0.5 (Design) eine Mischung der Fläche, damit der Text
+   den Kontrast von 4.5:1 hält (DESIGN.md, Standards 2026). */
 .tg-b.past {
-  opacity: 0.5;
+  background: color-mix(in srgb, var(--tt-bg) 70%, var(--panel));
+}
+
+.tg-b.past .tm {
+  opacity: 0.85;
+}
+
+.k-cancelled.past,
+.k-sol.past,
+.k-presence.past {
+  background: var(--panel2);
 }
 
 /* Raumänderung: Zusatz in live */
@@ -306,13 +318,10 @@
   padding: 0 5px;
   border-radius: var(--r-xs);
   background: var(--now);
-  color: var(--btn-fg);
+  /* Dunkle Schrift auf Rot: 4.9:1 (weiss wäre nur 3.9:1) */
+  color: var(--frame);
   font: 700 var(--fs-xs) / 18px var(--font-body);
   font-variant-numeric: tabular-nums;
-}
-
-[data-theme="dark"] .tg-nl {
-  color: var(--frame);
 }
 
 /* ---------- Legende ---------- */

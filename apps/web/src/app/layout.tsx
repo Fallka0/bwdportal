@@ -17,9 +17,17 @@ import "../styles/pages.css";
 const unbounded = localFont({ src: "../fonts/unbounded-latin-wght.woff2", weight: "200 900", variable: "--font-unbounded", display: "swap" });
 const manrope = localFont({ src: "../fonts/manrope-latin-wght.woff2", weight: "200 800", variable: "--font-manrope", display: "swap" });
 
+const description = "Stundenplan, Noten, Absenzen, SOL, Mitteilungen, Dokumente und Links für Lernende der bwd.";
+
 export const metadata: Metadata = {
+  // Öffentliche Adresse aus der Umgebung (wrangler vars SITE_URL), sonst lokal.
+  metadataBase: new URL(process.env.SITE_URL || "http://localhost:3100"),
   title: { default: "bwd Portal", template: "%s · bwd Portal" },
-  description: "Stundenplan, Noten, Absenzen, SOL, Mitteilungen, Dokumente und Links für Lernende der bwd.",
+  description,
+  applicationName: "bwd Portal",
+  openGraph: { type: "website", locale: "de_CH", siteName: "bwd Portal", title: "bwd Portal", description },
+  twitter: { card: "summary_large_image", title: "bwd Portal", description },
+  // Schulprojekt mit erfundenen Daten: nicht in Suchmaschinen.
   robots: { index: false, follow: false },
 };
 

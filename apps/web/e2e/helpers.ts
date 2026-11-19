@@ -6,7 +6,8 @@ export async function login(page: Page, name = "Selin Hofer") {
   await page.goto("/login");
   await page.getByRole("button", { name: "Mit Microsoft anmelden" }).click();
   await page.getByRole("dialog", { name: "Demo-Konto wählen" }).getByRole("button", { name: new RegExp(name) }).click();
-  await expect(page).toHaveURL("/");
+  // Nach dem Login rendert der Server die Übersicht; ein kalter Start kann einige Sekunden dauern.
+  await expect(page).toHaveURL("/", { timeout: 15_000 });
 }
 
 /** Setzt die Demo-Daten zurück, damit Tests sich nicht beeinflussen. */
