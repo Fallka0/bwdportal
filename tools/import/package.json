@@ -1,0 +1,28 @@
+{
+  "name": "@bwd/import",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Stundenplan-Import nach D1 (mock, WebUntis, iCal). Läuft lokal in Node, siehe README.",
+  "scripts": {
+    "import": "tsx --env-file-if-exists=.env.local src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bwd/db": "workspace:*",
+    "@bwd/shared": "workspace:*",
+    "node-ical": "^0.27.6",
+    "otplib": "^12.0.1",
+    "webuntis": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}
