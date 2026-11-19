@@ -57,6 +57,7 @@ BASE_URL=<Adresse> pnpm --filter @bwd/web e2e  # gegen ein Deployment mit DEMO_N
 | `pnpm db:seed-sql` | `packages/db/seed/seed.sql` aus den Fixtures erzeugen |
 | `pnpm db:reset` | lokales D1 neu aufsetzen |
 | `pnpm timetable:import -- --source webuntis` | Stundenplan importieren, siehe [tools/import](tools/import/README.md) |
+| `pnpm sol:import -- --file <datei>` | SOL-Daten einer Klasse importieren |
 | `pnpm --filter @bwd/web deploy` | Web auf Cloudflare bauen und veröffentlichen |
 
 ## Anmeldung

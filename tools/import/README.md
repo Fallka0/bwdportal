@@ -27,6 +27,15 @@ pnpm timetable:import -- --source file --file .local/im24a-lektionen.json --clas
 
 Echte Daten (Dateien für `file`) gehören in `tools/import/.local/`. Der Ordner ist von Git ausgeschlossen. `--class` wählt die Klasse (Standard: die Demo-Klasse); sie muss in D1 existieren.
 
+## SOL-Import
+
+```bash
+pnpm sol:import -- --file .local/im24a-sol.json --dry-run   # SQL nur anzeigen
+pnpm sol:import -- --file .local/im24a-sol.json --remote    # ins Deployment
+```
+
+Die Datei (Form `SolInput` in `src/sol.ts`) enthält die Klasse, den Wochentag des SOL-Tags, die Blöcke als Kalenderwochen (`2026-W47`), die Aufträge mit Zeitvorgabe, die Präsenzen der Lehrpersonen und die Lehrperson pro Fach. Daraus entstehen Blöcke (Montag der ersten bis Freitag der letzten Woche), SOL-Tage, Aufträge und Präsenzen. Blöcke, Tage und Aufträge werden per Upsert geschrieben, damit Fortschritt und Plan der Lernenden bleiben; die Präsenzen der Klasse werden ersetzt. Die Fächer müssen schon in D1 sein (kommen mit dem Stundenplan).
+
 ## Abbildung WebUntis
 | WebUntis | Portal |
 |---|---|

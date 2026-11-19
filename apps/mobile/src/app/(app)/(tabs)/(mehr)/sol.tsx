@@ -87,7 +87,7 @@ function Tasks({ data, reload }: { data: SolTasks; reload: () => Promise<void> }
                       </View>
                     </View>
                   </Pressable>
-                  {t.sharepointUrl ? <IconButton icon="arrow-ur" label={`${t.title} in SharePoint öffnen`} onPress={() => Linking.openURL(t.sharepointUrl!)} /> : <IconButton icon="download" label={`${t.title} herunterladen`} onPress={() => openFile(`sol/${encodeURIComponent(t.id)}`)} />}
+                  {t.sharepointUrl ? <IconButton icon="arrow-ur" label={`${t.title} in SharePoint öffnen`} onPress={() => Linking.openURL(t.sharepointUrl!)} /> : t.hasFile ? <IconButton icon="download" label={`${t.title} herunterladen`} onPress={() => openFile(`sol/${encodeURIComponent(t.id)}`)} /> : null}
                 </View>
               );
             })}

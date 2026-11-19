@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Stundenplan-Import nach D1 (mock, WebUntis, iCal). Läuft lokal in Node, siehe README.",
+  "description": "Stundenplan- und SOL-Import nach D1 (mock, WebUntis, iCal, Datei). Läuft lokal in Node, siehe README.",
   "scripts": {
     "import": "tsx --env-file-if-exists=.env.local src/cli.ts",
+    "sol": "tsx src/sol-cli.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run"

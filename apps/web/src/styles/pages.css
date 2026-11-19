@@ -756,6 +756,9 @@
   max-width: 68ch;
   font-size: var(--fs-l);
   line-height: 1.55;
+  /* Zeilenumbrüche aus dem Eingabefeld bleiben sichtbar */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .pf-e .row-h {
