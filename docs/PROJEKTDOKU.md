@@ -16,6 +16,7 @@ Nicht im Umfang: Ansicht für Lehrpersonen, echte Push-Nachrichten, echte Noten 
 |---|---|
 | Web | https://bwd-portal.planary.workers.dev |
 | App | Expo Go (`pnpm dev:mobile`, QR-Code scannen) oder Android-APK über EAS |
+| Web als App | Installierbar (PWA) über "Zum Home-Bildschirm" |
 | Code | Monorepo, siehe [README](../README.md) |
 
 ## 3. Architektur
@@ -42,7 +43,9 @@ flowchart LR
 - **Ein Monorepo** mit pnpm-Workspaces. `packages/shared` enthält alles, was Web und App gleich brauchen: Typen und Zod-Schemas, die Zeitraster-Rechnung, Datum und Noten, Design-Tokens, Icons und den API-Client. `packages/db` enthält Schema, Seed und eine Abfrage pro Screen.
 - **Web**: Next.js App Router. Seiten sind Server Components und lesen direkt aus D1. Interaktives (Dialoge, Formulare, Regler) sind Client Components, die die API aufrufen.
 - **App**: Expo Router mit vier Tabs. Jeder Tab hat einen eigenen Stack, darum bleibt die Tab-Bar auf Unterseiten sichtbar wie im Design. Die App liest alles über `/api/v1` und prüft jede Antwort mit Zod.
-- **Login**: Schnittstelle `AuthProvider` (`signIn`, `signOut`, `getSession`). Heute `MockAuthProvider` mit Demo-Konten (`AUTH_MODE=mock`). `MicrosoftAuthProvider` (Entra ID, OIDC) ist vorbereitet, die Screens ändern sich dafür nicht. Sessions liegen in D1: im Web als HttpOnly-Cookie, in der App als Bearer-Token im SecureStore.
+- **Login**: Schnittstelle `AuthProvider` (`signIn`, `signOut`, `getSession`) mit zwei Umsetzungen. `MockAuthProvider` mit Demo-Konten und `MicrosoftAuthProvider` (Entra ID, OpenID Connect mit PKCE): der Server tauscht den Code gegen ein ID-Token, prüft Signatur, Aussteller, Empfänger und Nonce und lässt nur die Schul-Domain zu. Die App meldet sich über das Portal an und bekommt einen Einmal-Code (60 Sekunden), den sie gegen ihr Token tauscht; Rücksprung nur in die App (kein offener Redirect). Sessions liegen in D1: im Web als HttpOnly-Cookie, in der App als Bearer-Token im SecureStore.
+- **Offline**: Die App speichert die letzte gute Antwort jeder Ansicht auf dem Gerät und zeigt sie ohne Verbindung mit dem Stand an. Beim Abmelden wird der Speicher gelöscht. Im Web speichert der Service Worker nur Skripte, Schriften und eine Offline-Seite, keine persönlichen Daten.
+- **Kalender-Abo**: Privater Link pro Person (`/api/v1/calendar/<token>.ics`) mit Lektionen, Prüfungen, SOL-Plan und Fristen im iCalendar-Format (Zeitzone Europe/Zurich). Ein neuer Link macht den alten ungültig.
 - **Zeit**: `DEMO_NOW` setzt die Zeit auf den Stichtag der Beispieldaten (26.10.2026, 10:20). Ohne die Variable gilt die echte Zeit in Europe/Zurich, und die Jetzt-Linie wandert jede Minute.
 - **Konfiguration**: Alle Adressen der Schule stehen in `config/portal.json`, die unbestätigten als Platzhalter markiert. Im Code steht keine Adresse fest.
 
@@ -89,6 +92,8 @@ Ergänzungen zum Vorschlag:
 | `sol_presence.lane` | Spur im SOL-Kalender (vier Spuren) |
 | `links.badge`, `links.accent` | Kürzel und Farbe der Kachel |
 | `documents.sort` | Reihenfolge wie im Design |
+| `login_codes` | Einmal-Code für die App nach dem Microsoft-Login |
+| `calendar_tokens` | Geheimer Link fürs Kalender-Abo |
 
 Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures Lücken haben, ist ergänzt und begründet (`packages/db/src/seed/build.ts`): Prüfungen der übrigen Fächer so, dass alle Schnitte genau dem Design entsprechen, Stundenplan der Wochen 41 bis 51 nach dem Muster der Woche 44, und ein zweites Demo-Konto ohne Noten und Absenzen für die Leerzustände.
 
@@ -101,7 +106,9 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 | Hosting | Cloudflare Workers, D1, R2 | Kostenlos für ein Schulprojekt, Datenbank und Dateien ohne eigenen Server |
 | Caching | `cacheComponents` aus | Jede Seite hängt von der Session ab, das alte Modell ist einfacher und läuft sicher auf OpenNext |
 | Proxy (Middleware) | entfernt | Node-Middleware ist auf OpenNext experimentell. Jede Seite prüft die Session selbst auf dem Server |
-| Login | Mock-Login | Für Entra ID braucht es eine App-Registrierung der Schule. Die Schnittstelle ist vorbereitet |
+| Login | Microsoft (Entra ID) und Demo-Konten | Der echte Login läuft mit einer eigenen Test-Registrierung; für die Schule genügt deren Client-ID. Demo-Konten bleiben für die Vorführung |
+| App-Login | über das Portal mit Einmal-Code | Die App braucht keine eigene Registrierung und kein Secret; der Code gilt 60 Sekunden und nur einmal |
+| Offline im Web | nur statische Dateien | Seiten mit Noten und Absenzen sollen nicht im Browser-Speicher liegen |
 | Stundenplan | Import statt Live-Zugriff | Das Paket `webuntis` läuft nur in Node, nicht auf Workers. Das Portal speichert keine WebUntis-Passwörter, und die Demo läuft auch ohne WebUntis |
 | Schriften | im Repo (woff2, OFL) | Keine Abhängigkeit von Google Fonts zur Build-Zeit, selbst gehostet wie verlangt |
 | Design-Werte | aus `tokens.json` erzeugt | `pnpm tokens` schreibt CSS-Variablen und das RN-Theme; ein Test prüft, dass beide synchron sind |
@@ -115,6 +122,8 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 | Rechnung | Vitest (`packages/shared`, 40 Tests) | Zeitraster (Massstab, Jetzt-Linie, vergangene Blöcke, Spuren), Datum und Formate, Notenschnitt und Rundung, Fristen, Tokens synchron |
 | Daten | Vitest (`packages/db`, 28 Tests) | Echte Migration und Seed in SQLite im Speicher. Kennzahlen wie im Design (4.9, 25 Prüfungen, 1 ungenügend), Schreiben (Absenz, Einplanen, Portfolio, Einstellungen), Suche, Stand des Imports |
 | Import | Vitest (`tools/import`, 8 Tests) | Abbildung WebUntis und iCal, Upsert-SQL |
+| App | Jest mit jest-expo und React Native Testing Library (12 Tests) | Zeitraster (Beschriftung, Jetzt-Linie, Kontrast vergangener Lektionen), Offline-Verhalten, Grundkomponenten (Rollen und Zustände) |
+| Login | Vitest (`apps/web`, 5 Tests) | PKCE, Authorize-URL, Domain-Prüfung, kein offener Redirect |
 | Wege im Web | Playwright (40 Tests, Desktop und Pixel 7) | Login und Abmelden, alle Routen mit genau einer H1, Stundenplan, Note ansehen, Absenz entschuldigen mit Anhang, SOL einplanen, Portfolio, Dokumente, Benachrichtigungen, Profil |
 | Barrierefreiheit | axe-core (7 Tests) | WCAG 2.2 AA auf allen Seiten in hell und dunkel, Desktop und Mobile; Skip-Link und sichtbarer Fokus |
 | CI | GitHub Actions | Typecheck, Lint, Unit-Tests bei jedem Push |
@@ -144,7 +153,7 @@ Die Playwright-Tests laufen lokal und gegen das Deployment (`BASE_URL=…`). Vor
 
 **Was nicht geklappt hat und warum**
 - **WebUntis nicht gegen den echten Server getestet**: Servername, Schulname und die Erlaubnis der Schule fehlen (offene Frage 3). Der Import ist gebaut und getestet, mit Zugang sollte er ohne Änderung laufen. Ohne Zugang schlägt er sauber fehl und der Stundenplan zeigt das Banner.
-- **Microsoft-Login** fehlt, weil es eine App-Registrierung in Entra ID der Schule braucht. Der Mock zeigt den Ablauf inklusive Fehlerfall.
+- **Microsoft-Login der Schule**: Der Login ist gebaut und läuft mit einer eigenen Test-Registrierung. Für Konten der bwd braucht es die Registrierung oder Zustimmung der Schule.
 - **Expo Router 58** hat die Navigation umgebaut. Die erste Tab-Leiste reagierte nicht, weil die Tabs ihre Auslöser direkt im JSX erwarten. Gelöst, aber es hat Zeit gekostet.
 - **Zwei Wettläufe** wurden erst durch Tests sichtbar: schnelle Änderungen am SOL-Fortschritt konnten sich überholen, und die App markierte beim Antippen einer Benachrichtigung alle als gelesen. Beide sind behoben.
 - **Design und Kontrast** widersprechen sich an zwei Stellen (vergangene Lektionen, Etikett der Jetzt-Linie). Ich habe mich für die Lesbarkeit entschieden und das dokumentiert.
@@ -155,4 +164,4 @@ Die Playwright-Tests laufen lokal und gegen das Deployment (`BASE_URL=…`). Vor
 
 ## 9. Offene Punkte
 
-Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Später: Microsoft-Login, echte Push-Nachrichten, Rolle Lehrperson.
+Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Später: Microsoft-Login mit der Registrierung der Schule, echte Push-Nachrichten, Rolle Lehrperson.
