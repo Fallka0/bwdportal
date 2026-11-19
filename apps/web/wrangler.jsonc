@@ -4,6 +4,9 @@
   "name": "bwd-portal",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Eigene Domain (in Cloudflare eingerichtet). bwd-portal.planary.workers.dev bleibt zusätzlich erreichbar.
+  "routes": [{ "pattern": "bwdportal.planary.ch", "custom_domain": true }],
+  "workers_dev": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -35,10 +38,13 @@
     // mock, microsoft oder both (Demo-Konten und Microsoft). Ohne MS_CLIENT_ID und Secret wie mock.
     "AUTH_MODE": "both",
     // Entra-ID-App-Registrierung (öffentlich). Das Secret MS_CLIENT_SECRET kommt per `wrangler secret put`.
-    "MS_CLIENT_ID": "",
+    "MS_CLIENT_ID": "ed293a80-42f1-4cb8-bba6-623d341e28cb",
     "MS_TENANT": "common",
-    "DEMO_NOW": "2026-10-26T10:20:00",
+    // Zusätzlich erlaubte Konto-Domains zum Testen (neben der Schul-Domain), kommagetrennt
+    "AUTH_EXTRA_DOMAINS": "gmail.com",
+    // Klasse für neue Microsoft-Konten, solange keine Zuordnung aus dem Schulsystem kommt
+    "DEFAULT_CLASS": "IM24a",
     // Öffentliche Adresse für Open Graph und Meta
-    "SITE_URL": "https://bwd-portal.planary.workers.dev"
+    "SITE_URL": "https://bwdportal.planary.ch"
   }
 }

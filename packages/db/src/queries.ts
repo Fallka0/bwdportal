@@ -172,7 +172,9 @@ export async function timetableSource(db: Db, now: Now): Promise<Timetable["sour
   const ok = bool(latest.ok);
   const at = lastOk ? (lastOk.finishedAt ?? lastOk.startedAt) : null;
   const age = at ? daysBetween(at.slice(0, 10), now.date) : Infinity;
-  return { name: latest.source, lastRunAt: at, ok, stale: !ok || age > 1 };
+  // Veralten kann nur eine Quelle, die laufend abgleicht. Beispieldaten und Daten aus einer Datei bleiben gültig.
+  const syncs = latest.source === "webuntis" || latest.source === "ical";
+  return { name: latest.source, lastRunAt: at, ok, stale: !ok || (syncs && age > 1) };
 }
 
 export async function getTimetable(db: Db, userId: string, from: string, to: string, now: Now): Promise<Timetable> {
@@ -597,16 +599,28 @@ export async function userByEmail(db: Db, email: string) {
 }
 
 /**
- * Konto zur E-Mail aus dem Microsoft-Token. Gibt es noch keins, wird es angelegt (ohne Klasse:
- * die Zuordnung käme später aus dem Schulsystem). Name aus den Claims.
+ * Konto zur E-Mail aus dem Microsoft-Token. Gibt es noch keins, wird es angelegt. Name aus den Claims.
+ * Klasse: classCode (Standardklasse aus der Konfiguration), bis die Zuordnung aus dem Schulsystem kommt.
+ * Ein bestehendes Konto ohne Klasse bekommt sie beim nächsten Login.
  */
-export async function findOrCreateUser(db: Db, claims: { email: string; firstName: string; lastName: string; oid: string }, now: Now) {
+export async function findOrCreateUser(db: Db, claims: { email: string; firstName: string; lastName: string; oid: string }, now: Now, classCode?: string | null) {
+  const classId = classCode ? await ensureClass(db, classCode) : null;
   const existing = await userByEmail(db, claims.email);
-  if (existing) return existing;
+  if (existing) {
+    if (existing.classId || !classId) return existing;
+    await db.update(s.users).set({ classId }).where(eq(s.users.id, existing.id));
+    return (await userById(db, existing.id))!;
+  }
   const id = `u-ms-${claims.oid}`;
-  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId: null, role: "student", createdAt: now.stamp });
+  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId, role: "student", createdAt: now.stamp });
   await db.insert(s.settings).values({ userId: id }).onConflictDoNothing();
   return (await userById(db, id))!;
+}
+
+/** Klasse über ihr Kürzel finden oder anlegen (id c-<kürzel>). Liefert die id. */
+export async function ensureClass(db: Db, code: string): Promise<string> {
+  await db.insert(s.classes).values({ id: `c-${code.toLowerCase()}`, code }).onConflictDoNothing();
+  return (await db.select({ id: s.classes.id }).from(s.classes).where(eq(s.classes.code, code)).limit(1))[0]!.id;
 }
 
 /** Einmal-Code für die App: zeigt auf eine Session, gilt 60 Sekunden. */

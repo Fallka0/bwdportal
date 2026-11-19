@@ -57,10 +57,10 @@ describe("Stundenplan", () => {
     expect(t.lessons.filter((l) => l.date === "2026-11-06").every((l) => l.state === "sol")).toBe(true);
   });
 
-  it("Als Nächstes um 10:20: Wirtschaft und Recht 10:45 in B 015", async () => {
+  it("Als Nächstes um 10:20: Wirtschaft und Recht 10:50 in B 015", async () => {
     const h = await q.getHome(db, U, NOW);
     expect(h.next?.subject?.name).toBe("Wirtschaft und Recht");
-    expect(h.next?.start).toBe("10:45");
+    expect(h.next?.start).toBe("10:50");
     expect(h.next?.room).toBe("B 015");
     expect(h.next?.teacher?.name).toBe("T. Brunner");
   });
@@ -253,9 +253,13 @@ describe("Stand des Imports", () => {
     expect(src).toMatchObject({ ok: false, stale: true, lastRunAt: "2026-10-26T07:58" });
   });
 
-  it("alter Stand gilt als veraltet", async () => {
-    const src = await q.timetableSource(db, { date: "2026-10-29", time: "08:00", stamp: "2026-10-29T08:00" });
-    expect(src.stale).toBe(true);
+  it("alter Stand aus WebUntis gilt als veraltet, Beispieldaten und Datei nicht", async () => {
+    const later = { date: "2026-10-29", time: "08:00", stamp: "2026-10-29T08:00" };
+    expect((await q.timetableSource(db, later)).stale).toBe(false);
+    await db.insert(schema.importRuns).values({ id: "r-file", source: "file", startedAt: "2026-10-26T09:00", finishedAt: "2026-10-26T09:00", ok: true, lessons: 1, error: null });
+    expect((await q.timetableSource(db, later)).stale).toBe(false);
+    await db.insert(schema.importRuns).values({ id: "r-untis", source: "webuntis", startedAt: "2026-10-26T09:01", finishedAt: "2026-10-26T09:01", ok: true, lessons: 1, error: null });
+    expect((await q.timetableSource(db, later)).stale).toBe(true);
   });
 });
 
@@ -266,6 +270,17 @@ describe("Microsoft-Login", () => {
     const neu = await q.findOrCreateUser(db, { email: "lena.muster@bwdbern.ch", firstName: "Lena", lastName: "Muster", oid: "abc" }, NOW);
     expect(neu).toMatchObject({ id: "u-ms-abc", firstName: "Lena", classId: null });
     expect((await q.getMe(db, neu.id))?.classCode).toBe("");
+  });
+
+  it("legt neue Konten in die Standardklasse und ergänzt sie bei Konten ohne Klasse", async () => {
+    const neu = await q.findOrCreateUser(db, { email: "tim.test@bwdbern.ch", firstName: "Tim", lastName: "Test", oid: "t1" }, NOW, "IM24a");
+    expect(neu.classId).toBe("c-im24a");
+    expect((await q.getMe(db, neu.id))?.classCode).toBe("IM24a");
+    const ohne = await q.findOrCreateUser(db, { email: "ohne.klasse@bwdbern.ch", firstName: "O", lastName: "K", oid: "t2" }, NOW);
+    expect(ohne.classId).toBeNull();
+    expect((await q.findOrCreateUser(db, { email: "ohne.klasse@bwdbern.ch", firstName: "O", lastName: "K", oid: "t2" }, NOW, "IM24a")).classId).toBe("c-im24a");
+    // Bestehende Klasse bleibt
+    expect((await q.findOrCreateUser(db, { email: "Selin.Hofer@bwdbern.ch", firstName: "X", lastName: "Y", oid: "1" }, NOW, "IM24a")).classId).toBe("c-im24b");
   });
 
   it("Einmal-Code: einlösbar genau einmal und nur 60 Sekunden", async () => {
@@ -292,7 +307,7 @@ describe("Kalender-Abo", () => {
   it("enthält Lektionen, Ausfall, Raumänderung, Prüfungen, SOL-Plan und Fristen", async () => {
     const ev = await q.calendarEvents(db, U, NOW);
     expect(ev.find((e) => e.summary === "Deutsch (entfällt)" && e.date === "2026-10-26")?.cancelled).toBe(true);
-    expect(ev.find((e) => e.date === "2026-10-26" && e.start === "10:45")?.location).toBe("B 015 (statt A 207)");
+    expect(ev.find((e) => e.date === "2026-10-26" && e.start === "10:50")?.location).toBe("B 015 (statt A 207)");
     expect(ev.find((e) => e.summary === "Prüfung Mathematik: Funktionen")).toMatchObject({ date: "2026-10-20", description: "Note 4.5" });
     expect(ev.some((e) => e.summary === "SOL Mathe 3.02: Lineare Optimierung I" && e.start === "08:00")).toBe(true);
     expect(ev.find((e) => e.summary === "Frist: Absenz vom 22.10. entschuldigen")?.date).toBe("2026-11-05");

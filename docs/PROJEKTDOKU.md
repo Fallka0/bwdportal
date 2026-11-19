@@ -1,6 +1,6 @@
 # bwd Portal: Projektdokumentation
 
-Schulprojekt. Alle Daten im Portal sind erfunden (Selin Hofer, Klasse IM24b). Stand: November 2026.
+Schulprojekt. Die Demo-Konten zeigen erfundene Daten (Selin Hofer, Klasse IM24b). Echt sind die Lektionenzeiten und der Stundenplan der Klasse IM24a, von Hand aus WebUntis übertragen. Stand: November 2026.
 
 ## 1. Ziel
 
@@ -14,7 +14,7 @@ Nicht im Umfang: Ansicht für Lehrpersonen, echte Push-Nachrichten, echte Noten 
 
 | Teil | Wo |
 |---|---|
-| Web | https://bwd-portal.planary.workers.dev |
+| Web | https://bwdportal.planary.ch |
 | App | Expo Go (`pnpm dev:mobile`, QR-Code scannen) oder Android-APK über EAS |
 | Web als App | Installierbar (PWA) über "Zum Home-Bildschirm" |
 | Code | Monorepo, siehe [README](../README.md) |
@@ -46,7 +46,9 @@ flowchart LR
 - **Login**: Schnittstelle `AuthProvider` (`signIn`, `signOut`, `getSession`) mit zwei Umsetzungen. `MockAuthProvider` mit Demo-Konten und `MicrosoftAuthProvider` (Entra ID, OpenID Connect mit PKCE): der Server tauscht den Code gegen ein ID-Token, prüft Signatur, Aussteller, Empfänger und Nonce und lässt nur die Schul-Domain zu. Die App meldet sich über das Portal an und bekommt einen Einmal-Code (60 Sekunden), den sie gegen ihr Token tauscht; Rücksprung nur in die App (kein offener Redirect). Sessions liegen in D1: im Web als HttpOnly-Cookie, in der App als Bearer-Token im SecureStore.
 - **Offline**: Die App speichert die letzte gute Antwort jeder Ansicht auf dem Gerät und zeigt sie ohne Verbindung mit dem Stand an. Beim Abmelden wird der Speicher gelöscht. Im Web speichert der Service Worker nur Skripte, Schriften und eine Offline-Seite, keine persönlichen Daten.
 - **Kalender-Abo**: Privater Link pro Person (`/api/v1/calendar/<token>.ics`) mit Lektionen, Prüfungen, SOL-Plan und Fristen im iCalendar-Format (Zeitzone Europe/Zurich). Ein neuer Link macht den alten ungültig.
-- **Zeit**: `DEMO_NOW` setzt die Zeit auf den Stichtag der Beispieldaten (26.10.2026, 10:20). Ohne die Variable gilt die echte Zeit in Europe/Zurich, und die Jetzt-Linie wandert jede Minute.
+- **Zeit**: Im Deployment gilt die echte Zeit in Europe/Zurich, die Jetzt-Linie wandert jede Minute. Lokal setzt `DEMO_NOW` (in `.dev.vars`) die Zeit auf den Stichtag der Beispieldaten (26.10.2026, 10:20), für Tests und Screenshots.
+- **Klasse**: Neue Microsoft-Konten kommen in die Klasse aus `DEFAULT_CLASS` (IM24a), bis die Zuordnung aus dem Schulsystem kommt.
+- **Stundenplan-Import**: Quellen `webuntis`, `ical`, `file` (JSON, von Hand übertragen) und `mock`. Das Banner "WebUntis antwortet gerade nicht" erscheint, wenn der letzte Lauf fehlschlug oder ein laufender Abgleich (WebUntis, iCal) älter als ein Tag ist. Daten aus einer Datei oder die Beispieldaten veralten nicht.
 - **Konfiguration**: Alle Adressen der Schule stehen in `config/portal.json`, die unbestätigten als Platzhalter markiert. Im Code steht keine Adresse fest.
 
 ## 4. Datenmodell
@@ -106,6 +108,8 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 | Hosting | Cloudflare Workers, D1, R2 | Kostenlos für ein Schulprojekt, Datenbank und Dateien ohne eigenen Server |
 | Caching | `cacheComponents` aus | Jede Seite hängt von der Session ab, das alte Modell ist einfacher und läuft sicher auf OpenNext |
 | Proxy (Middleware) | entfernt | Node-Middleware ist auf OpenNext experimentell. Jede Seite prüft die Session selbst auf dem Server |
+| Zeit im Deployment | echt, `DEMO_NOW` nur lokal | Der echte Stundenplan soll am richtigen Tag erscheinen. Lokal bleibt der Stichtag für Tests und den Vergleich mit dem Design |
+| Echter Stundenplan | von Hand aus WebUntis in eine JSON-Datei, Import mit `--source file` | Schneller als der API-Zugang; die Datei liegt in `tools/import/.local/` und nicht im Repo |
 | Login | Microsoft (Entra ID) und Demo-Konten | Der echte Login läuft mit einer eigenen Test-Registrierung; für die Schule genügt deren Client-ID. Demo-Konten bleiben für die Vorführung |
 | App-Login | über das Portal mit Einmal-Code | Die App braucht keine eigene Registrierung und kein Secret; der Code gilt 60 Sekunden und nur einmal |
 | Offline im Web | nur statische Dateien | Seiten mit Noten und Absenzen sollen nicht im Browser-Speicher liegen |
@@ -119,8 +123,8 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 
 | Ebene | Werkzeug | Was |
 |---|---|---|
-| Rechnung | Vitest (`packages/shared`, 40 Tests) | Zeitraster (Massstab, Jetzt-Linie, vergangene Blöcke, Spuren), Datum und Formate, Notenschnitt und Rundung, Fristen, Tokens synchron |
-| Daten | Vitest (`packages/db`, 28 Tests) | Echte Migration und Seed in SQLite im Speicher. Kennzahlen wie im Design (4.9, 25 Prüfungen, 1 ungenügend), Schreiben (Absenz, Einplanen, Portfolio, Einstellungen), Suche, Stand des Imports |
+| Rechnung | Vitest (`packages/shared`, 43 Tests) | Zeitraster (Massstab, Jetzt-Linie, vergangene Blöcke, Spuren), Datum und Formate, Notenschnitt und Rundung, Fristen, Tokens synchron |
+| Daten | Vitest (`packages/db`, 33 Tests) | Echte Migration und Seed in SQLite im Speicher. Kennzahlen wie im Design (4.9, 25 Prüfungen, 1 ungenügend), Schreiben (Absenz, Einplanen, Portfolio, Einstellungen), Suche, Stand des Imports, Standardklasse für Microsoft-Konten |
 | Import | Vitest (`tools/import`, 8 Tests) | Abbildung WebUntis und iCal, Upsert-SQL |
 | App | Jest mit jest-expo und React Native Testing Library (12 Tests) | Zeitraster (Beschriftung, Jetzt-Linie, Kontrast vergangener Lektionen), Offline-Verhalten, Grundkomponenten (Rollen und Zustände) |
 | Login | Vitest (`apps/web`, 5 Tests) | PKCE, Authorize-URL, Domain-Prüfung, kein offener Redirect |
@@ -128,7 +132,7 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 | Barrierefreiheit | axe-core (7 Tests) | WCAG 2.2 AA auf allen Seiten in hell und dunkel, Desktop und Mobile; Skip-Link und sichtbarer Fokus |
 | CI | GitHub Actions | Typecheck, Lint, Unit-Tests bei jedem Push |
 
-Die Playwright-Tests laufen lokal und gegen das Deployment (`BASE_URL=…`). Vor jedem Test werden die Demo-Daten zurückgesetzt (`POST /api/v1/dev/reset`, nur im Demo-Modus).
+Die Playwright-Tests laufen lokal mit `DEMO_NOW`. Vor jedem Test werden die Demo-Daten zurückgesetzt (`POST /api/v1/dev/reset`, nur im Demo-Modus). Das Deployment läuft mit echter Zeit, darum dort keine Playwright-Tests mehr.
 
 ## 7. Prüfung nach Checkliste
 
@@ -152,7 +156,8 @@ Die Playwright-Tests laufen lokal und gegen das Deployment (`BASE_URL=…`). Vor
 - Screenshots nach jedem Schritt und der Vergleich mit `handoff/design/screens` haben kleine Abweichungen sichtbar gemacht (Abstände, Fokusring im Dialog, Seitenleiste auf langen Seiten).
 
 **Was nicht geklappt hat und warum**
-- **WebUntis nicht gegen den echten Server getestet**: Servername, Schulname und die Erlaubnis der Schule fehlen (offene Frage 3). Der Import ist gebaut und getestet, mit Zugang sollte er ohne Änderung laufen. Ohne Zugang schlägt er sauber fehl und der Stundenplan zeigt das Banner.
+- **WebUntis nicht gegen den echten Server getestet**: Servername, Schulname und die Erlaubnis der Schule fehlen (offene Frage 3). Der Import ist gebaut und getestet, mit Zugang sollte er ohne Änderung laufen. Ohne Zugang schlägt er sauber fehl und der Stundenplan zeigt das Banner. Für die Klasse IM24a ist der Stundenplan darum von Hand aus WebUntis übertragen (Woche 49, wiederholt bis 18.12.2026).
+- **Lektionenzeiten**: Die angenommenen acht Lektionen stimmten nicht. Die echten elf Lektionen (08:00 bis 17:45, ohne feste Mittagspause) stehen jetzt in `config/portal.json`; das Band "Mittag" liegt in der Pause 12:30 bis 12:35.
 - **Microsoft-Login der Schule**: Der Login ist gebaut und läuft mit einer eigenen Test-Registrierung. Für Konten der bwd braucht es die Registrierung oder Zustimmung der Schule.
 - **Expo Router 58** hat die Navigation umgebaut. Die erste Tab-Leiste reagierte nicht, weil die Tabs ihre Auslöser direkt im JSX erwarten. Gelöst, aber es hat Zeit gekostet.
 - **Zwei Wettläufe** wurden erst durch Tests sichtbar: schnelle Änderungen am SOL-Fortschritt konnten sich überholen, und die App markierte beim Antippen einer Benachrichtigung alle als gelesen. Beide sind behoben.
@@ -164,4 +169,4 @@ Die Playwright-Tests laufen lokal und gegen das Deployment (`BASE_URL=…`). Vor
 
 ## 9. Offene Punkte
 
-Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Später: Microsoft-Login mit der Registrierung der Schule, echte Push-Nachrichten, Rolle Lehrperson.
+Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Weiter offen: SOL-Daten der Klasse IM24a aus SharePoint (Blöcke, Aufträge, Präsenzen), Stundenplan nach den Winterferien, Zustimmung der Schul-IT für Konten der bwd. Später: echte Push-Nachrichten, Rolle Lehrperson.

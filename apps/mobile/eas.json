@@ -4,7 +4,7 @@
     "preview": {
       "distribution": "internal",
       "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://bwd-portal.planary.workers.dev" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://bwdportal.planary.ch" }
     },
     "development": {
       "developmentClient": false,

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.PORT ?? 3100);
-/** BASE_URL testet ein Deployment (z. B. https://bwd-portal.planary.workers.dev), sonst lokal. */
+/** BASE_URL testet ein Deployment (z. B. https://bwdportal.planary.ch), sonst lokal. */
 const baseURL = process.env.BASE_URL ?? `http://localhost:${port}`;
 
 /** Wichtigste Wege im Web. Läuft gegen `next dev` mit lokalem D1 (pnpm db:reset vorher). */

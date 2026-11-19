@@ -21,6 +21,8 @@ export async function GET(req: Request) {
     res.cookies.set({ name: FLOW_COOKIE, value: "", path: "/api/v1/auth", maxAge: 0 });
     return res;
   };
+  const msError = url.searchParams.get("error");
+  if (msError) console.error("Microsoft-Login:", msError, url.searchParams.get("error_description") ?? "", url.searchParams.get("error_uri") ?? "");
   if (!flow || !msConfigured(env.ms) || url.searchParams.get("state") !== flow.state || !url.searchParams.get("code")) return fail("microsoft");
   try {
     const claims = await redeemCode(env.ms, { code: url.searchParams.get("code")!, verifier: flow.verifier, redirectUri: redirectUri(req), nonce: flow.nonce });

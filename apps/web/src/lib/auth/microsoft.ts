@@ -92,7 +92,7 @@ export class MicrosoftAuthProvider implements AuthProvider {
     if (!msConfigured(ms)) return { ok: false, code: "not_configured", message: "Die Anmeldung mit Microsoft ist noch nicht eingerichtet." };
     const claims = req.claims;
     if (!claims.email || !allowedDomain(claims.email, ms)) return { ok: false, code: "foreign_account", message: MSG_FOREIGN };
-    const user = await findOrCreateUser(this.env.db, claims, this.env.now);
+    const user = await findOrCreateUser(this.env.db, claims, this.env.now, this.env.defaultClass);
     const s = await createSession(this.env.db, user.id, this.env.now);
     return { ok: true, sessionId: s.id, expiresAt: s.expiresAt };
   }

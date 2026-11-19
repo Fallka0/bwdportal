@@ -4,7 +4,7 @@ Ein Portal für Lernende der bwd Bern: Stundenplan, Noten, Absenzen, SOL, Mittei
 
 Schulprojekt. **Alle Personen, Noten und Absenzen sind erfunden.** Kein offizielles Produkt der Schule.
 
-- Web: https://bwd-portal.planary.workers.dev (Demo-Anmeldung: "Mit Microsoft anmelden", dann "Selin Hofer"). Lässt sich als App installieren (PWA).
+- Web: https://bwdportal.planary.ch (Demo-Anmeldung: "Mit Microsoft anmelden", dann "Selin Hofer"). Lässt sich als App installieren (PWA).
 - Projektdoku: [docs/PROJEKTDOKU.md](docs/PROJEKTDOKU.md)
 - Vorgaben und Design: [handoff/](handoff/)
 
@@ -15,7 +15,7 @@ apps/web         Next.js 16 (App Router) auf Cloudflare Workers über OpenNext, 
 apps/mobile      Expo SDK 58 mit Expo Router (iOS, Android)
 packages/shared  Typen, Zod-Schemas, Zeitraster-Rechnung, Datum, Noten, Design-Tokens, Icons, API-Client
 packages/db      Drizzle-Schema, Migrationen, Seed, Abfragen für alle Screens
-tools/import     Stundenplan-Import (mock, WebUntis, iCal)
+tools/import     Stundenplan-Import (mock, WebUntis, iCal, Datei)
 config/          Adressen der Schule und Lektionenzeiten (Platzhalter markiert)
 handoff/         Brief, Design, Screenshots, Prototyp, Beispieldaten
 ```
@@ -37,14 +37,14 @@ Die App spricht standardmässig mit dem Deployment. Für das lokale Portal in `a
 EXPO_PUBLIC_API_URL=http://<IP dieses Rechners>:3000
 ```
 
-Mit `DEMO_NOW` (in `apps/web/wrangler.jsonc`) steht die Zeit auf Montag, 26.10.2026, 10:20, damit Jetzt-Linie und "Als Nächstes" wie im Design aussehen. Ohne die Variable gilt die echte Zeit in Europe/Zurich.
+Im Deployment gilt die echte Zeit in Europe/Zurich. Lokal setzt `DEMO_NOW` in `apps/web/.dev.vars` (siehe `.dev.vars.example`) die Zeit auf Montag, 26.10.2026, 10:20, damit Jetzt-Linie und "Als Nächstes" wie im Design aussehen und die Tests feste Daten haben. Das Zurücksetzen der Demo-Daten (`POST /api/v1/dev/reset`) geht nur mit `DEMO_NOW`.
 
 ## Prüfen
 
 ```bash
 pnpm typecheck && pnpm lint && pnpm test        # TypeScript, ESLint, Vitest, Jest (App)
 pnpm --filter @bwd/web e2e                      # Playwright gegen next dev
-BASE_URL=https://bwd-portal.planary.workers.dev pnpm --filter @bwd/web e2e   # gegen das Deployment
+BASE_URL=<Adresse> pnpm --filter @bwd/web e2e  # gegen ein Deployment mit DEMO_NOW
 ```
 
 ## Befehle
@@ -56,7 +56,7 @@ BASE_URL=https://bwd-portal.planary.workers.dev pnpm --filter @bwd/web e2e   # g
 | `pnpm db:generate` | Migration aus dem Drizzle-Schema erzeugen |
 | `pnpm db:seed-sql` | `packages/db/seed/seed.sql` aus den Fixtures erzeugen |
 | `pnpm db:reset` | lokales D1 neu aufsetzen |
-| `pnpm timetable:import --source webuntis` | Stundenplan importieren, siehe [tools/import](tools/import/README.md) |
+| `pnpm timetable:import -- --source webuntis` | Stundenplan importieren, siehe [tools/import](tools/import/README.md) |
 | `pnpm --filter @bwd/web deploy` | Web auf Cloudflare bauen und veröffentlichen |
 
 ## Anmeldung
@@ -69,7 +69,9 @@ BASE_URL=https://bwd-portal.planary.workers.dev pnpm --filter @bwd/web e2e   # g
 | `microsoft` | nur Microsoft (Entra ID) |
 | `both` | Demo-Konten und "Echtes Microsoft-Konto" (Vorführung) |
 
-Microsoft braucht eine App-Registrierung in Entra ID (Web, Redirect-URI `<Adresse>/api/v1/auth/callback`). Die Client-ID steht als `MS_CLIENT_ID` in `wrangler.jsonc`, das Secret kommt mit `npx wrangler secret put MS_CLIENT_SECRET` (lokal in `apps/web/.dev.vars`). Zugelassen sind nur Konten mit der Schul-Domain aus `config/portal.json`; zum Testen weitere über `AUTH_EXTRA_DOMAINS`. Ohne Client-ID und Secret verhält sich `both` wie `mock`.
+Microsoft braucht eine App-Registrierung in Entra ID (Web, Redirect-URIs `https://bwdportal.planary.ch/api/v1/auth/callback` und `http://localhost:3000/api/v1/auth/callback`). Die Client-ID steht als `MS_CLIENT_ID` in `wrangler.jsonc`, das Secret kommt mit `npx wrangler secret put MS_CLIENT_SECRET` (lokal in `apps/web/.dev.vars`). Zugelassen sind nur Konten mit der Schul-Domain aus `config/portal.json`; zum Testen weitere über `AUTH_EXTRA_DOMAINS`. Ohne Client-ID und Secret verhält sich `both` wie `mock`.
+
+Neue Microsoft-Konten kommen in die Klasse aus `DEFAULT_CLASS` (zurzeit `IM24a`), solange die Zuordnung nicht aus dem Schulsystem kommt. Die Klasse wird bei Bedarf angelegt; ein Konto ohne Klasse bekommt sie beim nächsten Login.
 
 ## Deployment (Cloudflare)
 
