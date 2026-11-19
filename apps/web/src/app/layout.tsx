@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { tokens } from "@bwd/shared";
+import { ServiceWorker } from "@/components/ServiceWorker";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/ui";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
   title: { default: "bwd Portal", template: "%s · bwd Portal" },
   description,
   applicationName: "bwd Portal",
+  appleWebApp: { capable: true, title: "bwd Portal", statusBarStyle: "black-translucent" },
   openGraph: { type: "website", locale: "de_CH", siteName: "bwd Portal", title: "bwd Portal", description },
   twitter: { card: "summary_large_image", title: "bwd Portal", description },
   // Schulprojekt mit erfundenen Daten: nicht in Suchmaschinen.
@@ -44,6 +46,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ThemeProvider initial={pref}>
           <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>
+        <ServiceWorker />
       </body>
     </html>
   );

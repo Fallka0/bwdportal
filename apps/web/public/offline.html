@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Keine Verbindung · bwd Portal</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: U; src: url(/fonts/unbounded-latin-wght.woff2) format("woff2"); font-weight: 200 900; font-display: swap; }
+@font-face { font-family: M; src: url(/fonts/manrope-latin-wght.woff2) format("woff2"); font-weight: 200 800; font-display: swap; }
+:root { --bg: #f5f5f7; --ink: #0b0b0f; --t2: #55555e; --btn: #1f1b3a; --fg: #f5f5f7; --focus: #8b5cf6; --frame: #0b0b0f; }
+@media (prefers-color-scheme: dark) { :root { --bg: #111115; --ink: #f1f1f4; --t2: #a3a3ad; --btn: #f1f1f4; --fg: #0b0b0f; } }
+* { box-sizing: border-box; margin: 0; }
+html { background: var(--frame); }
+body { min-height: 100dvh; padding: 14px; background: var(--frame); font: 14px/1.5 M, system-ui, sans-serif; color: var(--ink); }
+main { min-height: calc(100dvh - 28px); display: grid; align-content: center; justify-items: start; gap: 14px; padding: 40px; background: var(--bg); }
+h1 { font: 300 38px/1.05 U, sans-serif; letter-spacing: -0.045em; text-wrap: balance; }
+p { color: var(--t2); font-size: 16px; max-width: 44ch; }
+button { height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--btn); color: var(--fg); font: 600 14px/1 M, sans-serif; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 599px) { body { padding: 0; } main { min-height: 100dvh; padding: 24px; } h1 { font-size: 26px; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Keine Verbindung.</h1>
+<p>Das Portal ist gerade nicht erreichbar.</p>
+<button type="button" onclick="location.reload()">Erneut laden</button>
+</main>
+</body>
+</html>
