@@ -4,7 +4,7 @@ import { apiError, withUser } from "@/lib/api";
 export const MAX_BYTES = 5 * 1024 * 1024;
 const TYPES: Record<string, string> = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" };
 
-/** Bestätigung (Arztzeugnis) hochladen. Ablage in R2 unter absenzen/<person>/. Danach den Schlüssel bei POST /absences mitgeben. */
+/** Bestätigung (Arztzeugnis) hochladen. Ablage in R2 unter absenzen/<person>/. Danach den Schlüssel beim Dispensationsgesuch mitgeben. */
 export const POST = withUser(async ({ env, userId, req }) => {
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");

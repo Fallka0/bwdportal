@@ -1,4 +1,4 @@
-import { config, dayColumns, fmtDate, fmtLong, fmtPeriods, fmtShort, fmtShortLoose, fmtUntil, fmtWeekdayShort, greeting, lessonRun, periodOf, plural, toMin, type Home } from "@bwd/shared";
+import { config, dayColumns, fmtDate, fmtLong, fmtPeriods, fmtShort, fmtUntil, fmtWeekdayShort, greeting, lessonRun, periodOf, plural, toMin, type Home } from "@bwd/shared";
 import type { IconName } from "@bwd/shared/icons";
 import { router } from "expo-router";
 import { Linking, Pressable, View } from "react-native";
@@ -8,7 +8,7 @@ import { useApi } from "@/lib/useApi";
 import { ErrorState, Screen } from "@/shell/Screen";
 import { font, fs, radius, sp, tracking, useTheme } from "@/theme";
 import { TimeGrid } from "@/timegrid/TimeGrid";
-import { Button, Card, CardHead, Grade, Icon, ListRow, SkBox, SkeletonArea, SkLine, T } from "@/ui";
+import { Button, Card, CardHead, Grade, Icon, ListRow, SkBox, SkeletonArea, SkLine, Status, T } from "@/ui";
 
 export default function HomeScreen() {
   const me = useMe();
@@ -51,23 +51,22 @@ function HomeBody({ h, firstName, classCode }: { h: Home; firstName: string; cla
         }
       />
       <Card>
-        <CardHead title="Offene Absenzen" onLink={() => router.navigate("/absenzen")} />
-        {h.openAbsences.length === 0 ? (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: sp[3] }}>
-            <Icon name="check" small />
-            <T tone="text2">Keine offenen Absenzen.</T>
-          </View>
-        ) : (
-          h.openAbsences.map((a, i) => (
-            <ListRow
-              key={a.id}
-              first={i === 0}
-              title={`${fmtWeekdayShort(a.date)} · ${plural(a.lessons.length, "Lektion", "Lektionen")}`}
-              sub={`${a.subjectsLabel}${a.dueDate ? ` · bis ${fmtShortLoose(a.dueDate)} entschuldigen` : ""}`}
-              end={<Button label="Entschuldigen" small onPress={() => router.navigate(`/absenzen?entschuldigen=${a.id}`)} />}
-            />
-          ))
-        )}
+        <CardHead title="Absenzen" onLink={() => router.navigate("/absenzen")} />
+        <ListRow
+          first
+          title={`Kontingent: ${h.absences.contingent.available} von ${h.absences.contingent.size} verfügbar`}
+          sub={`${plural(h.absences.contingent.missed, "Lektion", "Lektionen")} gefehlt · ${h.absences.contingent.used} bezogen`}
+          end={<Button label="Abmelden" small onPress={() => router.navigate("/absenzen?neu=abmeldung")} />}
+        />
+        {h.absences.recent.map((a) => (
+          <ListRow
+            key={a.id}
+            onPress={() => router.navigate("/absenzen")}
+            title={`${fmtWeekdayShort(a.date)} · ${plural(a.lessons.length, "Lektion", "Lektionen")}`}
+            sub={a.subjectsLabel}
+            end={<Status tone={a.status === "unexcused" ? "err" : a.status === "dispensed" ? "ok" : "info"} label={a.status === "unexcused" ? "Unentschuldigt" : a.status === "dispensed" ? "Dispensiert" : "Kontingent"} />}
+          />
+        ))}
       </Card>
       <Card>
         <CardHead title="Neue Noten" linkLabel="Alle Noten" onLink={() => router.navigate("/noten")} />

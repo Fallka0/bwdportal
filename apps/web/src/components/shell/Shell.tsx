@@ -14,7 +14,7 @@ export function Shell({ me, now, children }: { me: Me; now: Now; children: React
         Zum Inhalt
       </a>
       <div className="site shell">
-        <Sidebar name={me.name} classCode={me.classCode} initials={me.initials} counts={{ absences: me.counts.openAbsences, notifications: unread }} />
+        <Sidebar name={me.name} classCode={me.classCode} initials={me.initials} counts={{ notifications: unread }} />
         <div className="mn">
           <Topbar dateLabel={`${fmtMedium(now.date)} · Woche ${isoWeek(now.date)}`} unread={unread} />
           <AppBar initials={me.initials} unread={unread} />

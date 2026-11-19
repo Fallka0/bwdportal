@@ -13,7 +13,7 @@ export function CalendarSetting({ initial }: { initial: { url: string; webcal: s
       <div className="st">
         <span>
           <b>Kalender abonnieren</b>
-          <span className="s">Stundenplan, Prüfungen, SOL-Plan und Fristen</span>
+          <span className="s">Stundenplan, Prüfungen und SOL-Plan</span>
         </span>
       </div>
       <div className="cal-actions">

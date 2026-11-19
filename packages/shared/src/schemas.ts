@@ -32,7 +32,7 @@ export const Me = z.object({
   program: z.string().nullable(),
   classTeacher: z.string().nullable(),
   settings: Settings,
-  counts: z.object({ unreadNotifications: z.number(), openAbsences: z.number(), unreadNews: z.number() }),
+  counts: z.object({ unreadNotifications: z.number(), contingentAvailable: z.number(), contingentSize: z.number(), unreadNews: z.number() }),
 });
 export type Me = z.infer<typeof Me>;
 
@@ -100,41 +100,101 @@ export const SubjectGrades = z.object({
 });
 export type SubjectGrades = z.infer<typeof SubjectGrades>;
 
-export const AbsenceStatus = z.enum(["open", "sent", "excused", "unexcused"]);
-export type AbsenceStatus = z.infer<typeof AbsenceStatus>;
+/** Zustand einer gefehlten Lektion: dispensiert, aufs Kontingent oder unentschuldigt (über dem Kontingent). */
+export const AbsenceLessonState = z.enum(["dispensed", "contingent", "unexcused"]);
+export type AbsenceLessonState = z.infer<typeof AbsenceLessonState>;
 
 export const Absence = z.object({
   id: z.string(),
   date,
-  status: AbsenceStatus,
-  reason: z.string().nullable(),
-  dueDate: date.nullable(),
-  lessons: z.array(z.object({ period: z.number(), subjectCode: z.string().nullable(), subjectName: z.string().nullable() })),
+  /** schlechtester Zustand der Lektionen */
+  status: AbsenceLessonState,
+  lessons: z.array(
+    z.object({
+      period: z.number(),
+      subjectCode: z.string().nullable(),
+      subjectName: z.string().nullable(),
+      teacher: z.string().nullable(),
+      state: AbsenceLessonState,
+      /** Kontingentslektionen: 0 dispensiert, 1, 2 ohne Abmeldung */
+      weight: z.number(),
+      notified: z.boolean(),
+    }),
+  ),
   subjectsLabel: z.string(),
-  hasAttachment: z.boolean(),
 });
 export type Absence = z.infer<typeof Absence>;
 
+/** Abmeldung (Absenzendatenbank): Datum, von Lektion bis Lektion, Bemerkung. */
+export const AbsenceNotice = z.object({ id: z.string(), date, fromPeriod: z.number(), toPeriod: z.number(), from: z.string(), to: z.string(), note: z.string().nullable(), createdAt: stamp, editable: z.boolean() });
+export type AbsenceNotice = z.infer<typeof AbsenceNotice>;
+
+export const DispensationStatus = z.enum(["submitted", "approved", "rejected"]);
+export type DispensationStatus = z.infer<typeof DispensationStatus>;
+
+/** Gründe wie in der Absenzendatenbank der Schule. */
+export const DISPENSATION_REASONS = [
+  "Dispensation 1. Krankheitstag mit Arztzeugnis",
+  "Dispensation ab 2. Krankheitstag",
+  "Teilnahme an wichtigem Familienanlass",
+  "Todesfall in der Familie",
+  "Körperliche Behinderung (Sportunterricht); regelmässiger Therapiebesuch",
+  "Aktive Teilnahme an kulturellem, religiösem, politischem und sportlichem Anlass",
+  "Aufgebot durch Amts- und Dienststellen",
+  "Prüfung für den Eintritt in andere Schule",
+  "Spital- und Kuraufenthalt",
+  "Berufskundliche Veranstaltung im Hinblick auf die Berufswahl; Vorstellungsgespräche",
+  "Verspätung infolge ungünstiger Zugsverbindungen",
+  "Sportdispensation",
+] as const;
+
+export const Dispensation = z.object({
+  id: z.string(),
+  date,
+  reason: z.string(),
+  note: z.string().nullable(),
+  status: DispensationStatus,
+  lessons: z.array(z.object({ period: z.number(), subjectCode: z.string().nullable(), subjectName: z.string().nullable() })),
+  attachments: z.number(),
+  createdAt: stamp,
+  /** weniger als 5 Arbeitstage im Voraus (Art. 4d) */
+  late: z.boolean(),
+  /** änderbar, solange eingereicht */
+  editable: z.boolean(),
+});
+export type Dispensation = z.infer<typeof Dispensation>;
+
+export const AbsenceContingent = z.object({ semester: z.number(), size: z.number(), missed: z.number(), used: z.number(), available: z.number() });
+export type AbsenceContingent = z.infer<typeof AbsenceContingent>;
+
+/** Fachkontingent: höchstens doppelte Zahl der Wochenlektionen auf Kontingent (Art. 3d). */
+export const SubjectLimit = z.object({ subjectCode: z.string(), subjectName: z.string(), used: z.number(), max: z.number() });
+export type SubjectLimit = z.infer<typeof SubjectLimit>;
+
 export const AbsencesOverview = z.object({
-  counts: z.object({ open: z.number(), sent: z.number(), excused: z.number(), unexcused: z.number() }),
+  contingent: AbsenceContingent,
   items: z.array(Absence),
+  notices: z.array(AbsenceNotice),
+  dispensations: z.array(Dispensation),
+  subjects: z.array(SubjectLimit),
 });
 export type AbsencesOverview = z.infer<typeof AbsencesOverview>;
 
-export const ABSENCE_REASONS = ["Krankheit", "Arzt", "Termin", "Anderes"] as const;
+export const AbsenceNoticeSubmit = z
+  .object({ date, fromPeriod: z.number().int().min(1).max(12), toPeriod: z.number().int().min(1).max(12), note: z.string().max(500).optional() })
+  .refine((v) => v.fromPeriod <= v.toPeriod, { message: "Bis muss nach Von liegen.", path: ["toPeriod"] });
+export type AbsenceNoticeSubmit = z.infer<typeof AbsenceNoticeSubmit>;
 
-/** Absenz entschuldigen (bestehende offene Absenz) oder neu melden (ohne absenceId). */
-export const AbsenceSubmit = z
-  .object({
-    absenceId: z.string().optional(),
-    date: date.optional(),
-    periods: z.array(z.number().int().min(1).max(8)).min(1, "Wähle mindestens eine Lektion."),
-    reason: z.enum(ABSENCE_REASONS),
-    note: z.string().max(500).optional(),
-    attachmentKey: z.string().optional(),
-  })
-  .refine((v) => v.absenceId || v.date, { message: "Datum fehlt.", path: ["date"] });
-export type AbsenceSubmit = z.infer<typeof AbsenceSubmit>;
+export const DispensationSubmit = z.object({
+  date,
+  reason: z.enum(DISPENSATION_REASONS),
+  note: z.string().max(500).optional(),
+  periods: z.array(z.number().int().min(1).max(12)).min(1, "Wähle mindestens eine Lektion."),
+  /** neue Anhänge; beim Bearbeiten bleiben bisherige, solange `keepAttachments` gesetzt ist */
+  attachmentKeys: z.array(z.string()).max(2, "Höchstens zwei Anhänge.").optional(),
+  keepAttachments: z.boolean().optional(),
+});
+export type DispensationSubmit = z.infer<typeof DispensationSubmit>;
 
 export const SolBlock = z.object({ id: z.string(), n: z.number(), starts: date.nullable(), ends: date.nullable() });
 
@@ -239,7 +299,7 @@ export const Home = z.object({
   now: time,
   next: Lesson.nullable(),
   lessons: z.array(Lesson),
-  openAbsences: z.array(Absence),
+  absences: z.object({ contingent: AbsenceContingent, recent: z.array(Absence) }),
   recentGrades: z.array(RecentGrade),
   news: z.array(NewsItem),
 });

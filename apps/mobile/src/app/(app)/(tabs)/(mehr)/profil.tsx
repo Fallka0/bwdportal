@@ -14,7 +14,7 @@ const ROWS: { key: keyof Omit<Settings, "theme">; title: string; sub?: string }[
   { key: "nTimetable", title: "Stundenplanänderungen", sub: "Ausfälle und Raumänderungen" },
   { key: "nGrades", title: "Neue Noten" },
   { key: "nNews", title: "Mitteilungen" },
-  { key: "nAbsences", title: "Absenzen", sub: "Erinnerung vor Ablauf der Frist" },
+  { key: "nAbsences", title: "Absenzen", sub: "Entscheid zu Dispensationsgesuchen" },
   { key: "nEmail", title: "Zusätzlich per E-Mail" },
 ];
 
@@ -146,7 +146,7 @@ function CalendarCard() {
         Kalender abonnieren
       </T>
       <T v="small" style={{ marginBottom: sp[5] }}>
-        Stundenplan, Prüfungen, SOL-Plan und Fristen
+        Stundenplan, Prüfungen und SOL-Plan
       </T>
       <View style={{ gap: sp[3] }}>
         <Button label="Im Kalender öffnen" wide disabled={!urls} onPress={() => urls && Linking.openURL(urls.webcal)} />

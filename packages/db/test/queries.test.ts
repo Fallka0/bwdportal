@@ -14,12 +14,12 @@ beforeEach(async () => {
 
 describe("Konto", () => {
   it("Selin Hofer, IM24b, Zähler wie im Design", async () => {
-    const me = await q.getMe(db, U);
+    const me = await q.getMe(db, U, NOW);
     expect(me?.name).toBe("Selin Hofer");
     expect(me?.initials).toBe("SH");
     expect(me?.classCode).toBe("IM24b");
     expect(me?.classTeacher).toBe("R. Keller");
-    expect(me?.counts).toEqual({ unreadNotifications: 3, openAbsences: 2, unreadNews: 2 });
+    expect(me?.counts).toEqual({ unreadNotifications: 3, contingentAvailable: 13, contingentSize: 20, unreadNews: 2 });
   });
 
   it("Demo-Konten: Selin und Mia von der bwd", async () => {
@@ -117,34 +117,80 @@ describe("Noten", () => {
 });
 
 describe("Absenzen", () => {
-  it("2 offen, 1 unentschuldigt, 2 entschuldigt, Fächer und Fristen", async () => {
-    const a = await q.getAbsences(db, U);
-    expect(a.counts).toEqual({ open: 2, sent: 0, excused: 2, unexcused: 1 });
-    expect(a.items.map((x) => [x.date, x.lessons.length, x.subjectsLabel, x.status, x.dueDate])).toEqual([
-      ["2026-10-22", 2, "Französisch, Mathematik", "open", "2026-11-05"],
-      ["2026-10-19", 1, "Englisch", "open", "2026-11-02"],
-      ["2026-10-09", 4, "Vormittag", "excused", "2026-10-23"],
-      ["2026-09-29", 1, "Sport", "unexcused", "2026-10-13"],
-      ["2026-09-16", 2, "Deutsch", "excused", "2026-09-30"],
+  it("Zustand pro Lektion: dispensiert, aufs Kontingent, ohne Abmeldung doppelt", async () => {
+    const a = await q.getAbsences(db, U, NOW);
+    expect(a.items.map((x) => [x.date, x.lessons.length, x.subjectsLabel, x.status, x.lessons.reduce((n, l) => n + l.weight, 0)])).toEqual([
+      ["2026-10-22", 2, "Französisch, Mathematik", "contingent", 2],
+      ["2026-10-19", 1, "Englisch", "contingent", 1],
+      ["2026-10-09", 4, "Vormittag", "dispensed", 0],
+      ["2026-09-29", 1, "Sport", "contingent", 2],
+      ["2026-09-16", 2, "Deutsch", "contingent", 2],
+    ]);
+    expect(a.items[3]?.lessons[0]).toMatchObject({ notified: false, weight: 2 });
+  });
+
+  it("Kontingent: 10 gefehlt, 4 dispensiert, Sport doppelt, 7 bezogen, 13 verfügbar", async () => {
+    const a = await q.getAbsences(db, U, NOW);
+    expect(a.contingent).toEqual({ semester: 1, size: 20, missed: 10, used: 7, available: 13 });
+    const me = await q.getMe(db, U, NOW);
+    expect(me?.counts).toMatchObject({ contingentAvailable: 13, contingentSize: 20 });
+  });
+
+  it("Fachkontingent: doppelte Wochenlektionen", async () => {
+    const a = await q.getAbsences(db, U, NOW);
+    const sport = a.subjects.find((x) => x.subjectName === "Sport");
+    expect(sport?.used).toBe(1);
+    expect(sport?.max).toBeGreaterThan(0);
+    expect(a.subjects.every((x) => x.max % 2 === 0)).toBe(true);
+  });
+
+  it("Abmeldungen und Gesuche, neuste zuerst", async () => {
+    const a = await q.getAbsences(db, U, NOW);
+    expect(a.notices.map((n) => [n.date, n.note, n.editable])).toEqual([
+      ["2026-10-22", "Arzttermin", false],
+      ["2026-10-19", "Zahnarzt", false],
+      ["2026-10-09", "Krank", false],
+      ["2026-09-16", "Arzttermin", false],
+    ]);
+    expect(a.dispensations.map((d) => [d.date, d.status, d.lessons.length, d.late, d.editable])).toEqual([
+      ["2026-11-05", "submitted", 2, false, true],
+      ["2026-10-09", "approved", 4, false, false],
     ]);
   });
 
-  it("Entschuldigen setzt In Prüfung und speichert die Lektionen", async () => {
-    const r = await q.submitAbsence(db, U, { absenceId: "a-1", periods: [1, 2], reason: "Krankheit" }, NOW);
-    expect(r.status).toBe("sent");
-    const a = await q.getAbsences(db, U);
-    expect(a.counts.open).toBe(1);
-    expect(a.counts.sent).toBe(1);
+  it("Abmeldung erfassen, ändern bis zum Beginn, löschen", async () => {
+    const n = await q.submitAbsenceNotice(db, U, { date: "2026-10-27", fromPeriod: 9, toPeriod: 10, note: " Termin " }, NOW);
+    expect(n).toMatchObject({ date: "2026-10-27", from: "15:15", to: "16:55", note: "Termin", createdAt: NOW.stamp, editable: true });
+    const u = await q.updateAbsenceNotice(db, U, n.id, { date: "2026-10-27", fromPeriod: 1, toPeriod: 2 }, NOW);
+    expect(u).toMatchObject({ from: "08:00", to: "09:40", note: null });
+    await q.deleteAbsenceNotice(db, U, n.id, NOW);
+    expect((await q.getAbsences(db, U, NOW)).notices.some((x) => x.id === n.id)).toBe(false);
+    await expect(q.submitAbsenceNotice(db, U, { date: "2026-10-01", fromPeriod: 1, toPeriod: 1 }, NOW)).rejects.toThrow("14 Tage");
   });
 
-  it("lehnt Lektionen ab, die es an dem Tag nicht gibt", async () => {
-    await expect(q.submitAbsence(db, U, { absenceId: "a-1", periods: [8], reason: "Arzt" }, NOW)).rejects.toThrow("keine 8. Lektion");
+  it("Abmeldung nach Beginn gesperrt", async () => {
+    const n = await q.submitAbsenceNotice(db, U, { date: NOW.date, fromPeriod: 1, toPeriod: 2 }, NOW);
+    expect(n.editable).toBe(false);
+    await expect(q.deleteAbsenceNotice(db, U, n.id, NOW)).rejects.toThrow("schon begonnen");
   });
 
-  it("neue Absenz melden", async () => {
-    const r = await q.submitAbsence(db, U, { date: "2026-10-26", periods: [1, 2], reason: "Termin" }, NOW);
-    expect(r.subjectsLabel).toBe("Mathematik");
-    expect(r.dueDate).toBe("2026-11-09");
+  it("Gesuch: Anhang Pflicht ausser ab 2. Krankheitstag, verspätet unter 5 Arbeitstagen, zählt erst bewilligt", async () => {
+    await expect(q.submitDispensation(db, U, { date: "2026-10-26", reason: "Todesfall in der Familie", periods: [1] }, NOW)).rejects.toThrow("Bestätigung");
+    const d = await q.submitDispensation(db, U, { date: "2026-10-26", reason: "Todesfall in der Familie", periods: [1, 2], attachmentKeys: ["absenzen/x/1.pdf"] }, NOW);
+    expect(d).toMatchObject({ status: "submitted", attachments: 1, late: true, editable: true, lessons: [{ period: 1, subjectName: "Mathematik" }, { period: 2, subjectName: "Mathematik" }] });
+    const sick = await q.submitDispensation(db, U, { date: "2026-10-19", reason: "Dispensation ab 2. Krankheitstag", periods: [1] }, NOW);
+    expect(sick).toMatchObject({ attachments: 0, late: false });
+    expect((await q.getAbsences(db, U, NOW)).contingent.used).toBe(7);
+  });
+
+  it("Gesuch ändern behält Anhänge, löschen gibt sie zurück, entschiedene sind gesperrt", async () => {
+    const d = await q.submitDispensation(db, U, { date: "2026-11-20", reason: "Aufgebot durch Amts- und Dienststellen", periods: [1], attachmentKeys: ["absenzen/x/a.pdf"] }, NOW);
+    expect(d.late).toBe(false);
+    const u = await q.updateDispensation(db, U, d.id, { date: "2026-11-20", reason: "Aufgebot durch Amts- und Dienststellen", periods: [1, 2], keepAttachments: true, attachmentKeys: ["absenzen/x/b.pdf"] }, NOW);
+    expect(u.dispensation).toMatchObject({ attachments: 2, lessons: [{ period: 1 }, { period: 2 }] });
+    expect(u.removedKeys).toEqual([]);
+    expect(await q.deleteDispensation(db, U, d.id)).toEqual(["absenzen/x/a.pdf", "absenzen/x/b.pdf"]);
+    await expect(q.deleteDispensation(db, U, "di-1")).rejects.toThrow("entschieden");
   });
 });
 
@@ -304,13 +350,13 @@ describe("Kalender-Abo", () => {
     expect(await q.userByCalendarToken(db, t2)).toBe(U);
   });
 
-  it("enthält Lektionen, Ausfall, Raumänderung, Prüfungen, SOL-Plan und Fristen", async () => {
+  it("enthält Lektionen, Ausfall, Raumänderung, Prüfungen und SOL-Plan, keine Fristen", async () => {
     const ev = await q.calendarEvents(db, U, NOW);
     expect(ev.find((e) => e.summary === "Deutsch (entfällt)" && e.date === "2026-10-26")?.cancelled).toBe(true);
     expect(ev.find((e) => e.date === "2026-10-26" && e.start === "10:50")?.location).toBe("B 015 (statt A 207)");
     expect(ev.find((e) => e.summary === "Prüfung Mathematik: Funktionen")).toMatchObject({ date: "2026-10-20", description: "Note 4.5" });
     expect(ev.some((e) => e.summary === "SOL Mathe 3.02: Lineare Optimierung I" && e.start === "08:00")).toBe(true);
-    expect(ev.find((e) => e.summary === "Frist: Absenz vom 22.10. entschuldigen")?.date).toBe("2026-11-05");
+    expect(ev.some((e) => e.summary.startsWith("Frist"))).toBe(false);
     expect(new Set(ev.map((e) => e.uid)).size).toBe(ev.length);
   });
 });

@@ -185,14 +185,12 @@ export function buildSeed(): SeedData {
   // ---- Absenzen ----
   d.absences = [];
   d.absence_lessons = [];
-  const statusMap: Record<string, string> = { open: "open", excused: "excused", unexcused: "unexcused" };
   const byName = Object.fromEntries(f.subjects.map((s) => [s.name, s.code]));
   f.absences.forEach((a, i) => {
     const date = parseCh(a.date);
     const id = `a-${i + 1}`;
     const n = parseInt(a.lessons, 10);
-    const status = statusMap[a.status]!;
-    d.absences!.push({ id, user_id: DEMO_USERS.selin, date, status, reason: status === "excused" ? a.note : null, note: null, due_date: addDays(date, config.absenceDeadlineDays), attachment_key: null, created_at: `${date}T18:00` });
+    d.absences!.push({ id, user_id: DEMO_USERS.selin, date, created_at: `${date}T18:00` });
     // Unterricht an diesem Wochentag laut Muster der Fixtures-Woche (Absenzen liegen vor Woche 41)
     const pattern = f.week.find((w) => weekday(w.date) === weekday(date));
     const candidates = (pattern?.lessons ?? []).map((l) => ({ period: l.period, subject: pattern?.solDay ? null : l.subject }));
@@ -214,6 +212,28 @@ export function buildSeed(): SeedData {
     }
     for (const p of picked) d.absence_lessons!.push({ absence_id: id, period: p.period, subject_code: p.subject });
   });
+
+  // ---- Abmeldungen und Dispensationsgesuche (erfunden) ----
+  // Jede Absenz ist am Vortag abgemeldet, ausser Sport am 29.09. (zählt doppelt, Art. 5c).
+  // Die Absenz vom 9.10. ist durch ein bewilligtes Gesuch gedeckt und zählt nicht aufs Kontingent.
+  const notes: Record<string, string> = { "a-1": "Arzttermin", "a-2": "Zahnarzt", "a-3": "Krank", "a-5": "Arzttermin" };
+  d.absence_notices = [];
+  for (const abs of d.absences!) {
+    const id = abs.id as string;
+    if (id === "a-4") continue;
+    const ps = d.absence_lessons!.filter((l) => l.absence_id === id).map((l) => l.period as number);
+    if (!ps.length) continue;
+    d.absence_notices.push({ id: `an-${id.slice(2)}`, user_id: DEMO_USERS.selin, date: abs.date ?? null, from_period: Math.min(...ps), to_period: Math.max(...ps), note: notes[id] ?? null, created_at: `${addDays(abs.date as string, -1)}T19:30` });
+  }
+  d.dispensations = [
+    { id: "di-1", user_id: DEMO_USERS.selin, date: "2026-10-09", reason: "Dispensation 1. Krankheitstag mit Arztzeugnis", note: "Grippe", status: "approved", attachment_key: null, attachment_key2: null, created_at: "2026-10-12T17:45" },
+    { id: "di-2", user_id: DEMO_USERS.selin, date: "2026-11-05", reason: "Berufskundliche Veranstaltung im Hinblick auf die Berufswahl; Vorstellungsgespräche", note: "Informationstag Fachhochschule", status: "submitted", attachment_key: null, attachment_key2: null, created_at: "2026-10-25T20:05" },
+  ];
+  d.dispensation_lessons = [
+    ...d.absence_lessons!.filter((l) => l.absence_id === "a-3").map((l) => ({ dispensation_id: "di-1", period: l.period ?? null, subject_code: l.subject_code ?? null })),
+    { dispensation_id: "di-2", period: 1, subject_code: null },
+    { dispensation_id: "di-2", period: 2, subject_code: null },
+  ];
 
   // ---- Dokumente ----
   d.documents = [];
@@ -329,6 +349,9 @@ export const TABLE_ORDER = [
   "grades",
   "absences",
   "absence_lessons",
+  "absence_notices",
+  "dispensations",
+  "dispensation_lessons",
   "documents",
   "links",
   "news",

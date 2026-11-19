@@ -10,7 +10,7 @@ const ROWS: { key: keyof Omit<Settings, "theme">; title: string; sub?: string }[
   { key: "nTimetable", title: "Stundenplanänderungen", sub: "Ausfälle und Raumänderungen" },
   { key: "nGrades", title: "Neue Noten" },
   { key: "nNews", title: "Mitteilungen" },
-  { key: "nAbsences", title: "Absenzen", sub: "Erinnerung vor Ablauf der Frist" },
+  { key: "nAbsences", title: "Absenzen", sub: "Entscheid zu Dispensationsgesuchen" },
   { key: "nEmail", title: "Zusätzlich per E-Mail" },
 ];
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getHome } from "@bwd/db";
-import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtPeriods, fmtShort, fmtShortLoose, fmtUntil, fmtWeekdayShort, greeting, isInsufficient, lessonRun, periodOf, plural, toMin, type Lesson } from "@bwd/shared";
-import { Card, CardHead, Icon, LinkButton, ListRow } from "@/components/ui";
+import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtPeriods, fmtShort, fmtUntil, fmtWeekdayShort, greeting, isInsufficient, lessonRun, periodOf, plural, toMin, type Lesson } from "@bwd/shared";
+import { Card, CardHead, Icon, LinkButton, ListRow, Status } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
 
@@ -68,26 +68,19 @@ export default async function Home() {
           </section>
 
           <Card className="h-abs" aria-labelledby="ab-h">
-            <CardHead id="ab-h" title="Offene Absenzen" href="/absenzen" />
-            {h.openAbsences.length === 0 ? (
-              <p className="empty-s">
-                <Icon name="check" small />
-                Keine offenen Absenzen.
-              </p>
-            ) : (
-              h.openAbsences.map((a) => (
-                <ListRow
-                  key={a.id}
-                  title={`${fmtWeekdayShort(a.date)} · ${plural(a.lessons.length, "Lektion", "Lektionen")}`}
-                  sub={`${a.subjectsLabel}${a.dueDate ? ` · bis ${fmtShortLoose(a.dueDate)} entschuldigen` : ""}`}
-                  end={
-                    <LinkButton href={`/absenzen?entschuldigen=${a.id}`} small>
-                      Entschuldigen
-                    </LinkButton>
-                  }
-                />
-              ))
-            )}
+            <CardHead id="ab-h" title="Absenzen" href="/absenzen" />
+            <ListRow
+              title={`Kontingent: ${h.absences.contingent.available} von ${h.absences.contingent.size} verfügbar`}
+              sub={`${plural(h.absences.contingent.missed, "Lektion", "Lektionen")} gefehlt · ${h.absences.contingent.used} bezogen`}
+              end={
+                <LinkButton href="/absenzen?tab=abmeldungen&neu=abmeldung" small>
+                  Abmelden
+                </LinkButton>
+              }
+            />
+            {h.absences.recent.map((a) => (
+              <ListRow key={a.id} href="/absenzen" title={`${fmtWeekdayShort(a.date)} · ${plural(a.lessons.length, "Lektion", "Lektionen")}`} sub={a.subjectsLabel} end={<Status tone={a.status === "unexcused" ? "err" : a.status === "dispensed" ? "ok" : "info"}>{a.status === "unexcused" ? "Unentschuldigt" : a.status === "dispensed" ? "Dispensiert" : "Kontingent"}</Status>} />
+            ))}
           </Card>
 
           <Card className="h-gr" aria-labelledby="gr-h">

@@ -45,7 +45,7 @@ export async function currentUserId(env: ServerEnv, req?: Request): Promise<stri
 export async function requireUser(): Promise<{ env: ServerEnv; me: Me }> {
   const env = await serverEnv();
   const id = await currentUserId(env);
-  const me = id ? await getMe(env.db, id) : null;
+  const me = id ? await getMe(env.db, id, env.now) : null;
   if (!me) redirect("/login");
   return { env, me };
 }

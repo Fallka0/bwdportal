@@ -1,12 +1,12 @@
 # bwd Portal: Projektdokumentation
 
-Schulprojekt. Die Demo-Konten zeigen erfundene Daten (Selin Hofer, Klasse IM24b). Echt sind die Lektionenzeiten und der Stundenplan der Klasse IM24a, von Hand aus WebUntis übertragen. Stand: November 2026.
+Schulprojekt. Die Demo-Konten zeigen erfundene Daten (Selin Hofer, Klasse IM24b). Echt sind die Lektionenzeiten, der Stundenplan der Klasse IM24a (von Hand aus WebUntis übertragen) und ihre SOL-Daten: Blöcke 1 bis 8 aus der SOL-Einführung, 89 Aufträge mit Zeitvorgabe aus SharePoint, Präsenzen aus WebUntis. Stand: November 2026.
 
 ## 1. Ziel
 
 Lernende der bwd finden heute Stundenplan, Noten, Absenzen, SOL-Aufträge, Mitteilungen und Dokumente an fünf Orten: WebUntis, SOL-UP, Moodle, SharePoint und die Website. Das Portal bündelt diese Informationen an einem Ort, als Website und als App für iOS und Android.
 
-Umfang (alle Screens aus dem Design): Login, Übersicht, Stundenplan (Tag, Woche), Noten, Fach, Absenzen mit "Absenz entschuldigen", SOL (Aufträge, Kalender mit Einplanen, Portfolio mit Check-in und Check-out), Mitteilungen, Mitteilung, Dokumente mit Suche und Filter, Links, Benachrichtigungen, Profil und Einstellungen, 404. Hell und dunkel. Zustände: lädt, leer, Fehler.
+Umfang (alle Screens aus dem Design): Login, Übersicht, Stundenplan (Tag, Woche), Noten, Fach, Absenzen (Cockpit wie in der Absenzendatenbank: Kontingent, Absenzen, Abmeldungen, Dispensationsgesuche), SOL (Aufträge, Kalender mit Einplanen, Portfolio mit Check-in und Check-out), Mitteilungen, Mitteilung, Dokumente mit Suche und Filter, Links, Benachrichtigungen, Profil und Einstellungen, 404. Hell und dunkel. Zustände: lädt, leer, Fehler.
 
 Nicht im Umfang: Ansicht für Lehrpersonen, echte Push-Nachrichten, echte Noten oder Absenzen aus Schulsystemen, weitere Sprachen.
 
@@ -45,10 +45,11 @@ flowchart LR
 - **App**: Expo Router mit vier Tabs. Jeder Tab hat einen eigenen Stack, darum bleibt die Tab-Bar auf Unterseiten sichtbar wie im Design. Die App liest alles über `/api/v1` und prüft jede Antwort mit Zod.
 - **Login**: Schnittstelle `AuthProvider` (`signIn`, `signOut`, `getSession`) mit zwei Umsetzungen. `MockAuthProvider` mit Demo-Konten und `MicrosoftAuthProvider` (Entra ID, OpenID Connect mit PKCE): der Server tauscht den Code gegen ein ID-Token, prüft Signatur, Aussteller, Empfänger und Nonce und lässt nur die Schul-Domain zu. Die App meldet sich über das Portal an und bekommt einen Einmal-Code (60 Sekunden), den sie gegen ihr Token tauscht; Rücksprung nur in die App (kein offener Redirect). Sessions liegen in D1: im Web als HttpOnly-Cookie, in der App als Bearer-Token im SecureStore.
 - **Offline**: Die App speichert die letzte gute Antwort jeder Ansicht auf dem Gerät und zeigt sie ohne Verbindung mit dem Stand an. Beim Abmelden wird der Speicher gelöscht. Im Web speichert der Service Worker nur Skripte, Schriften und eine Offline-Seite, keine persönlichen Daten.
-- **Kalender-Abo**: Privater Link pro Person (`/api/v1/calendar/<token>.ics`) mit Lektionen, Prüfungen, SOL-Plan und Fristen im iCalendar-Format (Zeitzone Europe/Zurich). Ein neuer Link macht den alten ungültig.
+- **Kalender-Abo**: Privater Link pro Person (`/api/v1/calendar/<token>.ics`) mit Lektionen, Prüfungen und SOL-Plan im iCalendar-Format (Zeitzone Europe/Zurich). Ein neuer Link macht den alten ungültig.
 - **Zeit**: Im Deployment gilt die echte Zeit in Europe/Zurich, die Jetzt-Linie wandert jede Minute. Lokal setzt `DEMO_NOW` (in `.dev.vars`) die Zeit auf den Stichtag der Beispieldaten (26.10.2026, 10:20), für Tests und Screenshots.
 - **Klasse**: Neue Microsoft-Konten kommen in die Klasse aus `DEFAULT_CLASS` (IM24a), bis die Zuordnung aus dem Schulsystem kommt.
 - **Stundenplan-Import**: Quellen `webuntis`, `ical`, `file` (JSON, von Hand übertragen) und `mock`. Das Banner "WebUntis antwortet gerade nicht" erscheint, wenn der letzte Lauf fehlschlug oder ein laufender Abgleich (WebUntis, iCal) älter als ein Tag ist. Daten aus einer Datei oder die Beispieldaten veralten nicht.
+- **Absenzen**: Nach dem Absenzenreglement WMB/IMS (gültig ab 1.8.2025). Lehrpersonen erfassen die Absenzen; Lernende melden sich vorher ab (Datum, von Lektion bis Lektion, Bemerkung) und stellen Dispensationsgesuche (Grund, Lektionen, Bestätigung). Die Rechnung steht einmal in `packages/shared/src/domain.ts`: Kontingent IMS 20 Lektionen pro Semester (Art. 3a), durch ein bewilligtes Gesuch gedeckte Lektionen zählen nicht (Art. 6b), ohne Abmeldung vor Beginn der Lektion doppelt (Art. 5c), was das Kontingent übersteigt gilt als unentschuldigt (Art. 8a), die Überschreitung kürzt das Kontingent im nächsten Semester (Art. 8b). Fachkontingent: höchstens doppelte Wochenlektionen pro Fach (Art. 3d). Gesuche brauchen eine Bestätigung, ausser ab dem 2. Krankheitstag, und gelten unter 5 Arbeitstagen im Voraus als verspätet (Art. 4b, 4d). Abmeldungen lassen sich bis zum Beginn ändern, Gesuche solange sie eingereicht sind.
 - **Konfiguration**: Alle Adressen der Schule stehen in `config/portal.json`, die unbestätigten als Platzhalter markiert. Im Code steht keine Adresse fest.
 
 ## 4. Datenmodell
@@ -109,6 +110,8 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 | Caching | `cacheComponents` aus | Jede Seite hängt von der Session ab, das alte Modell ist einfacher und läuft sicher auf OpenNext |
 | Proxy (Middleware) | entfernt | Node-Middleware ist auf OpenNext experimentell. Jede Seite prüft die Session selbst auf dem Server |
 | Zeit im Deployment | echt, `DEMO_NOW` nur lokal | Der echte Stundenplan soll am richtigen Tag erscheinen. Lokal bleibt der Stichtag für Tests und den Vergleich mit dem Design |
+| Absenzen | Cockpit der Absenzendatenbank statt "Absenz entschuldigen" aus dem Design | An der Schule entschuldigen Lernende nicht nachträglich; sie melden sich ab, Lehrpersonen erfassen, das Kontingent rechnet. Ablauf und Gründe wie in der Absenzendatenbank, Regeln aus dem Reglement |
+| Echte SOL-Daten | Aufträge aus den SharePoint-Dokumenten gelesen, `pnpm sol:import` | Titel und Zeitvorgabe stehen in den Dokumenten. Die Dokumente selbst kommen nicht ins Portal: die Demo-Konten sind offen, und es sind Unterlagen der Schule |
 | Echter Stundenplan | von Hand aus WebUntis in eine JSON-Datei, Import mit `--source file` | Schneller als der API-Zugang; die Datei liegt in `tools/import/.local/` und nicht im Repo |
 | Login | Microsoft (Entra ID) und Demo-Konten | Der echte Login läuft mit einer eigenen Test-Registrierung; für die Schule genügt deren Client-ID. Demo-Konten bleiben für die Vorführung |
 | App-Login | über das Portal mit Einmal-Code | Die App braucht keine eigene Registrierung und kein Secret; der Code gilt 60 Sekunden und nur einmal |
@@ -123,12 +126,12 @@ Die Beispieldaten entstehen aus `handoff/data/fixtures.json`. Wo die Fixtures L�
 
 | Ebene | Werkzeug | Was |
 |---|---|---|
-| Rechnung | Vitest (`packages/shared`, 43 Tests) | Zeitraster (Massstab, Jetzt-Linie, vergangene Blöcke, Spuren), Datum und Formate, Notenschnitt und Rundung, Fristen, Tokens synchron |
-| Daten | Vitest (`packages/db`, 33 Tests) | Echte Migration und Seed in SQLite im Speicher. Kennzahlen wie im Design (4.9, 25 Prüfungen, 1 ungenügend), Schreiben (Absenz, Einplanen, Portfolio, Einstellungen), Suche, Stand des Imports, Standardklasse für Microsoft-Konten |
-| Import | Vitest (`tools/import`, 8 Tests) | Abbildung WebUntis und iCal, Upsert-SQL |
+| Rechnung | Vitest (`packages/shared`, 51 Tests) | Zeitraster (Massstab, Jetzt-Linie, vergangene Blöcke, Spuren), Datum und Formate, Notenschnitt und Rundung, Absenzenreglement (Kontingent, doppelt ohne Abmeldung, Kürzung, verspätete Gesuche), Tokens synchron |
+| Daten | Vitest (`packages/db`, 37 Tests) | Echte Migration und Seed in SQLite im Speicher. Kennzahlen wie im Design (4.9, 25 Prüfungen, 1 ungenügend), Schreiben (Abmeldung, Gesuch, Einplanen, Portfolio, Einstellungen), Suche, Stand des Imports, Standardklasse für Microsoft-Konten |
+| Import | Vitest (`tools/import`, 11 Tests) | Abbildung WebUntis und iCal, Upsert-SQL, SOL-Blöcke aus Kalenderwochen |
 | App | Jest mit jest-expo und React Native Testing Library (12 Tests) | Zeitraster (Beschriftung, Jetzt-Linie, Kontrast vergangener Lektionen), Offline-Verhalten, Grundkomponenten (Rollen und Zustände) |
 | Login | Vitest (`apps/web`, 5 Tests) | PKCE, Authorize-URL, Domain-Prüfung, kein offener Redirect |
-| Wege im Web | Playwright (40 Tests, Desktop und Pixel 7) | Login und Abmelden, alle Routen mit genau einer H1, Stundenplan, Note ansehen, Absenz entschuldigen mit Anhang, SOL einplanen, Portfolio, Dokumente, Benachrichtigungen, Profil |
+| Wege im Web | Playwright (40 Tests, Desktop und Pixel 7) | Login und Abmelden, alle Routen mit genau einer H1, Stundenplan, Note ansehen, Kontingent und Fachkontingent, Abmeldung eintragen, ändern und löschen, Gesuch mit Pflicht-Bestätigung, SOL einplanen, Portfolio, Dokumente, Benachrichtigungen, Profil |
 | Barrierefreiheit | axe-core (7 Tests) | WCAG 2.2 AA auf allen Seiten in hell und dunkel, Desktop und Mobile; Skip-Link und sichtbarer Fokus |
 | CI | GitHub Actions | Typecheck, Lint, Unit-Tests bei jedem Push |
 
@@ -169,4 +172,4 @@ Die Playwright-Tests laufen lokal mit `DEMO_NOW`. Vor jedem Test werden die Demo
 
 ## 9. Offene Punkte
 
-Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Weiter offen: SOL-Daten der Klasse IM24a aus SharePoint (Blöcke, Aufträge, Präsenzen), Stundenplan nach den Winterferien, Zustimmung der Schul-IT für Konten der bwd. Später: echte Push-Nachrichten, Rolle Lehrperson.
+Siehe [handoff/docs/OFFENE-PUNKTE.md](../handoff/docs/OFFENE-PUNKTE.md). Die Platzhalter-Adressen stehen in `config/portal.json`. Weiter offen: Links der SOL-Aufträge auf SharePoint, Präsenzen der SOL-Tage ausser Block 4, Stundenplan der Blockwoche (KW 48) und nach den Winterferien, Zustimmung der Schul-IT für Konten der bwd. Später: echte Push-Nachrichten, Rolle Lehrperson.

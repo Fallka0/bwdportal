@@ -10,6 +10,7 @@ export const config = raw as {
   solLunch: { from: string; to: string };
   timeGridEnd: string;
   homeGridEnd: string;
-  absenceDeadlineDays: number;
+  /** Kontingent: Lektionen, die pro Semester ohne Dispensation fehlen dürfen */
+  absenceContingent: { lessons: number; per: "semester" };
   secondSemesterStart: string;
 };

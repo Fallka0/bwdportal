@@ -13,7 +13,7 @@ export default function More() {
   const n = me.data?.counts;
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
     { href: "/sol", title: "SOL", sub: "SOL-Tag am Freitag", icon: "book" },
-    { href: "/absenzen", title: "Absenzen", sub: n?.openAbsences ? `${n.openAbsences} offen` : undefined, icon: "clock", dot: !!n?.openAbsences },
+    { href: "/absenzen", title: "Absenzen", sub: n ? `Kontingent ${n.contingentAvailable} von ${n.contingentSize}` : undefined, icon: "clock", dot: n?.contingentAvailable === 0 },
     { href: "/mitteilungen", title: "Mitteilungen", sub: n?.unreadNews ? `${n.unreadNews} neu` : undefined, icon: "megaphone" },
     { href: "/dokumente", title: "Dokumente", icon: "folder" },
     { href: "/links", title: "Links", icon: "grid4" },

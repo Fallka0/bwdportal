@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => login(page));
 test("Woche 44 mit Raumänderung, Ausfall, SOL-Tag und Jetzt-Linie", async ({ page }) => {
   await page.goto("/stundenplan");
   await expect(page.locator("#tt-title")).toHaveText("26. bis 30. Oktober");
-  await expect(page.getByRole("listitem", { name: /Wirtschaft und Recht, Raumänderung: B 015 statt A 207, 10:45/ })).toBeVisible();
+  await expect(page.getByRole("listitem", { name: /Wirtschaft und Recht, Raumänderung: B 015 statt A 207, 10:50/ })).toBeVisible();
   await expect(page.getByRole("listitem", { name: /Deutsch, entfällt/ })).toBeVisible();
   await expect(page.getByRole("listitem", { name: /SOL-Tag, Lernzone, 08:00 bis 12:00/ })).toBeVisible();
   await expect(page.getByRole("note", { name: "Jetzt 10:20" })).toBeVisible();

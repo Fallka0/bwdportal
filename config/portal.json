@@ -75,19 +75,28 @@
       "n": 11,
       "from": "17:00",
       "to": "17:45"
+    },
+    {
+      "n": 12,
+      "from": "17:50",
+      "to": "18:35"
     }
   ],
-  "periodsStatus": "aus WebUntis (IM24A, KW 49 2026)",
+  "periodsStatus": "aus WebUntis und Absenzendatenbank (IM24A, November 2026)",
   "lunch": {
     "from": "12:30",
     "to": "12:35"
   },
-  "absenceDeadlineDays": 14,
   "secondSemesterStart": "2027-02-08",
   "solLunch": {
-    "from": "12:30",
-    "to": "12:35"
+    "from": "12:00",
+    "to": "13:00"
   },
   "timeGridEnd": "18:00",
-  "homeGridEnd": "18:00"
+  "homeGridEnd": "18:00",
+  "absenceContingent": {
+    "lessons": 20,
+    "per": "semester",
+    "status": "aus der Absenzendatenbank (20 Lektionen pro Semester)"
+  }
 }

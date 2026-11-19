@@ -21,31 +21,53 @@ test("Note ansehen: von der Übersicht zur Mathematik-Note", async ({ page }) =>
   await expect(page).toHaveURL("/noten");
 });
 
-test("Absenz entschuldigen mit Bestätigung: Status In Prüfung, Toast", async ({ page }) => {
-  await page.getByRole("link", { name: "Entschuldigen" }).first().click();
-  await expect(page).toHaveURL(/entschuldigen=a-1/);
-  const dlg = page.getByRole("dialog", { name: "Absenz entschuldigen" });
-  await expect(dlg).toBeVisible();
-  await expect(dlg.getByText("Do, 22. Oktober 2026")).toBeVisible();
-  await expect(dlg.getByRole("button", { name: /1\. Lektion/ })).toHaveAttribute("aria-pressed", "true");
-  await dlg.getByRole("button", { name: "Arzt", exact: true }).click();
-  await dlg.locator('input[type="file"]').setInputFiles("e2e/files/arztzeugnis.pdf");
-  await expect(dlg.getByText("arztzeugnis.pdf")).toBeVisible();
-  await dlg.getByRole("button", { name: "2 Lektionen entschuldigen" }).click();
-
-  await expect(page.getByRole("status").filter({ hasText: "Absenz gesendet. Deine Klassenlehrperson prüft sie." })).toBeVisible();
-  await expect(dlg).toBeHidden();
-  await expect(page.getByText("In Prüfung").filter({ visible: true })).toHaveCount(1);
-  await expect(page.getByRole("link", { name: /^Absenz vom .* entschuldigen$/ })).toHaveCount(1);
+test("Absenzen: Kontingent, Zustand pro Lektion, Filter nach Fach mit Fachkontingent", async ({ page }) => {
+  await page.goto("/absenzen");
+  await expect(page.getByText("Verfügbares Kontingent von 20")).toBeVisible();
+  await expect(page.getByText("ohne Abmeldung doppelt").first()).toBeVisible();
+  await expect(page.getByText("Dispensiert").filter({ visible: true })).toHaveCount(1);
+  await page.getByRole("link", { name: "Sport" }).click();
+  await expect(page.getByText("Sport auf Kontingent")).toBeVisible();
+  await expect(page.getByText("Höchstens im Semester")).toBeVisible();
 });
 
-test("Absenz melden: Lektionen wählen ist Pflicht", async ({ page }) => {
-  await page.goto("/absenzen");
-  await page.getByRole("link", { name: "Absenz melden" }).first().click();
-  const dlg = page.getByRole("dialog", { name: "Absenz entschuldigen" });
-  await expect(dlg.getByRole("button", { name: "0 Lektionen entschuldigen" })).toBeDisabled();
-  await dlg.getByRole("button", { name: /3\. Lektion/ }).click();
-  await dlg.getByRole("button", { name: "1 Lektion entschuldigen" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Absenz gesendet" })).toBeVisible();
-  await expect(page.getByText("1 Lektion · Englisch").filter({ visible: true })).toHaveCount(2);
+test("Abmeldung eintragen, bearbeiten und löschen", async ({ page }) => {
+  await page.goto("/absenzen?tab=abmeldungen");
+  await page.getByRole("link", { name: "Neue Abmeldung" }).first().click();
+  let dlg = page.getByRole("dialog", { name: "Abmeldung eintragen" });
+  await dlg.getByLabel("Von").selectOption("9");
+  await dlg.getByLabel("Bis").selectOption("10");
+  await dlg.getByLabel("Bemerkung").fill("Zahnarzt");
+  await dlg.getByRole("button", { name: "Abmeldung speichern" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Abmeldung gespeichert." })).toBeVisible();
+  await expect(page.getByText("15:15 bis 16:55")).toBeVisible();
+
+  await page.getByRole("link", { name: /^Abmeldung vom .* bearbeiten$/ }).filter({ visible: true }).first().click();
+  dlg = page.getByRole("dialog", { name: "Abmeldung bearbeiten" });
+  await dlg.getByLabel("Bis").selectOption("11");
+  await dlg.getByRole("button", { name: "Abmeldung speichern" }).click();
+  await expect(page.getByText("15:15 bis 17:45")).toBeVisible();
+
+  await page.getByRole("link", { name: /^Abmeldung vom .* bearbeiten$/ }).filter({ visible: true }).first().click();
+  dlg = page.getByRole("dialog", { name: "Abmeldung bearbeiten" });
+  await dlg.getByRole("button", { name: "Löschen" }).click();
+  await dlg.getByRole("button", { name: "Abmeldung wirklich löschen" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Abmeldung gelöscht." })).toBeVisible();
+  await expect(page.getByText("15:15 bis 17:45")).toHaveCount(0);
+});
+
+test("Dispensationsgesuch: Bestätigung Pflicht, einreichen, Status Eingereicht", async ({ page }) => {
+  await page.goto("/absenzen?tab=dispensationen");
+  await expect(page.getByText("Bewilligt").filter({ visible: true })).toHaveCount(1);
+  await page.getByRole("link", { name: "Neues Gesuch" }).first().click();
+  const dlg = page.getByRole("dialog", { name: "Dispensationsgesuch einreichen" });
+  await dlg.getByLabel("Grund").selectOption("Todesfall in der Familie");
+  await dlg.getByRole("button", { name: /^L1(?!\d)/ }).click();
+  await dlg.getByRole("button", { name: "1 Lektion beantragen" }).click();
+  await expect(dlg.getByText("Hänge eine Bestätigung an.")).toBeVisible();
+  await dlg.getByLabel("Grund").selectOption("Dispensation ab 2. Krankheitstag");
+  await dlg.getByRole("button", { name: "1 Lektion beantragen" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Gesuch eingereicht." })).toBeVisible();
+  await expect(page.getByText("Dispensation ab 2. Krankheitstag")).toBeVisible();
+  await expect(page.getByText("Eingereicht").filter({ visible: true })).toHaveCount(2);
 });

@@ -1,6 +1,6 @@
 import type { IconName } from "@bwd/shared/icons";
 
-export type NavItem = { href: string; label: string; icon: IconName; count?: "absences" | "notifications" };
+export type NavItem = { href: string; label: string; icon: IconName; count?: "notifications" };
 
 export const NAV: { group: string; items: NavItem[] }[] = [
   {
@@ -10,7 +10,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
       { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
       { href: "/noten", label: "Noten", icon: "chart" },
       { href: "/sol", label: "SOL", icon: "book" },
-      { href: "/absenzen", label: "Absenzen", icon: "clock", count: "absences" },
+      { href: "/absenzen", label: "Absenzen", icon: "clock" },
     ],
   },
   {
