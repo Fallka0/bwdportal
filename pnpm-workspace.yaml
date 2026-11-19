@@ -11,6 +11,7 @@ allowBuilds:
   workerd: true
   sharp: false
   unrs-resolver: true
+  "@parcel/watcher": false
 
 minimumReleaseAgeExclude:
   - jose@6.2.18
