@@ -1,0 +1,78 @@
+{
+  "_hinweis": "Adressen der Schule. Alle mit PLATZHALTER markierten Werte sind nicht bestätigt, siehe handoff/docs/OFFENE-PUNKTE.md. Nur hier ändern, nie im Code.",
+  "portalUrl": "https://portal.bwdbern.ch",
+  "portalUrlStatus": "PLATZHALTER",
+  "school": {
+    "name": "bwd",
+    "website": "https://www.bwdbern.ch/",
+    "emailDomain": "bwdbern.ch",
+    "emailPattern": "vorname.nachname@bwdbern.ch",
+    "status": "PLATZHALTER (E-Mail-Muster)"
+  },
+  "services": {
+    "webuntis": "https://bwd-bern.webuntis.com/",
+    "moodle": "https://moodle.bwdbern.ch/",
+    "sharepointSol": "https://bwdbern.sharepoint.com/sites/sol/",
+    "mediothek": "https://www.bwdbern.ch/mediothek",
+    "status": "PLATZHALTER (webuntis, moodle, sharepointSol, mediothek)",
+    "teams": "https://teams.microsoft.com/",
+    "outlook": "https://outlook.office.com/mail/",
+    "onedrive": "https://www.office.com/launch/onedrive",
+    "onenote": "https://www.onenote.com/notebooks"
+  },
+  "periods": [
+    {
+      "n": 1,
+      "from": "08:00",
+      "to": "08:45"
+    },
+    {
+      "n": 2,
+      "from": "08:50",
+      "to": "09:35"
+    },
+    {
+      "n": 3,
+      "from": "09:55",
+      "to": "10:40"
+    },
+    {
+      "n": 4,
+      "from": "10:45",
+      "to": "11:30"
+    },
+    {
+      "n": 5,
+      "from": "11:35",
+      "to": "12:20"
+    },
+    {
+      "n": 6,
+      "from": "13:15",
+      "to": "14:00"
+    },
+    {
+      "n": 7,
+      "from": "14:05",
+      "to": "14:50"
+    },
+    {
+      "n": 8,
+      "from": "15:05",
+      "to": "15:50"
+    }
+  ],
+  "periodsStatus": "PLATZHALTER (angenommen)",
+  "lunch": {
+    "from": "12:20",
+    "to": "13:15"
+  },
+  "absenceDeadlineDays": 14,
+  "secondSemesterStart": "2027-02-08",
+  "solLunch": {
+    "from": "12:00",
+    "to": "13:00"
+  },
+  "timeGridEnd": "17:00",
+  "homeGridEnd": "15:00"
+}

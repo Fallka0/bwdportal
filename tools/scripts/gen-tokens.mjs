@@ -35,10 +35,11 @@ lines.push(Object.entries(src.size).map(([k, v]) => `  --size-${kebab(k)}: ${v}p
 lines.push(`  --motion-fast: ${src.motion.fast};\n  --motion-base: ${src.motion.base};\n  --ease: ${src.motion.ease};`);
 lines.push(`  --display-tracking: ${src.font.displayTracking};`);
 lines.push(`  --tg-px-per-min: ${src.timeGrid.pxPerMinute};\n  --tg-hour: ${src.timeGrid.hourRow}px;\n  --tg-axis: ${src.timeGrid.axisWidthWeb}px;`);
-lines.push("  color-scheme: light;");
+lines.push("  --field-bg: var(--raise);\n  --on-bg: var(--raise);\n  color-scheme: light;");
 lines.push("}");
-const dark = `${colorVars(c.dark)}\n  --tt-bg: ${c.timetableBlock.dark.bg};\n  --tt-fg: ${c.timetableBlock.dark.fg};\n  --tt-changed: ${c.timetableBlock.changedText.dark};\n  color-scheme: dark;`;
-lines.push(`:root[data-theme="dark"] {\n${dark}\n}`);
+const dark = `${colorVars(c.dark)}\n  --tt-bg: ${c.timetableBlock.dark.bg};\n  --tt-fg: ${c.timetableBlock.dark.fg};\n  --tt-changed: ${c.timetableBlock.changedText.dark};\n  --field-bg: var(--panel2);\n  --on-bg: var(--panel2);\n  color-scheme: dark;`;
+lines.push(`:root[data-theme="dark"],\n[data-theme="dark"] {\n${dark}\n}`);
+lines.push(`[data-theme="light"] {\n${colorVars(c.light)}\n  --tt-bg: ${c.timetableBlock.light.bg};\n  --tt-fg: ${c.timetableBlock.light.fg};\n  --tt-changed: ${c.timetableBlock.changedText.light};\n  --field-bg: var(--raise);\n  --on-bg: var(--raise);\n  color-scheme: light;\n}`);
 lines.push(`@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]) {\n${dark.replace(/^/gm, "  ")}\n  }\n}`);
 const cssPath = resolve(root, "apps/web/src/styles/tokens.gen.css");
 mkdirSync(dirname(cssPath), { recursive: true });
