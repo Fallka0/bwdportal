@@ -158,14 +158,19 @@ export async function lessonsBetween(db: Db, userId: string, from: string, to: s
   }));
 }
 
-/** Stand des Stundenplans: letzter Import. Älter als 24 Stunden oder fehlgeschlagen gilt als veraltet. */
+/**
+ * Stand des Stundenplans: Ist der letzte Import fehlgeschlagen oder der letzte erfolgreiche älter als einen Tag,
+ * gilt der Plan als veraltet (Banner). lastRunAt ist immer der letzte erfolgreiche Stand.
+ */
 export async function timetableSource(db: Db, now: Now): Promise<Timetable["source"]> {
-  const r = (await db.select().from(s.importRuns).orderBy(desc(s.importRuns.startedAt)).limit(1))[0];
-  if (!r) return { name: "mock", lastRunAt: null, ok: false, stale: true };
-  const at = r.finishedAt ?? r.startedAt;
-  const ok = bool(r.ok);
-  const age = daysBetween(at.slice(0, 10), now.date);
-  return { name: r.source, lastRunAt: at, ok, stale: !ok || age > 1 };
+  // Bei gleicher Minute entscheidet die Reihenfolge des Einfügens (rowid).
+  const latest = (await db.select().from(s.importRuns).orderBy(desc(s.importRuns.startedAt), desc(sql`rowid`)).limit(1))[0];
+  const lastOk = (await db.select().from(s.importRuns).where(eq(s.importRuns.ok, true)).orderBy(desc(s.importRuns.startedAt), desc(sql`rowid`)).limit(1))[0];
+  if (!latest) return { name: "mock", lastRunAt: null, ok: false, stale: true };
+  const ok = bool(latest.ok);
+  const at = lastOk ? (lastOk.finishedAt ?? lastOk.startedAt) : null;
+  const age = at ? daysBetween(at.slice(0, 10), now.date) : Infinity;
+  return { name: latest.source, lastRunAt: at, ok, stale: !ok || age > 1 };
 }
 
 export async function getTimetable(db: Db, userId: string, from: string, to: string, now: Now): Promise<Timetable> {

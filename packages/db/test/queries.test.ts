@@ -2,6 +2,7 @@ import { fmtGrade } from "@bwd/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Db } from "../src/client";
 import * as q from "../src/queries";
+import * as schema from "../src/schema";
 import { DEMO_USERS } from "../src/seed/build";
 import { NOW, testDb } from "./helpers";
 
@@ -242,5 +243,18 @@ describe("Suche", () => {
     expect((await q.search(db, U, NOW, "Mathe")).subjects.map((s) => s.code)).toEqual(["MA"]);
     expect((await q.search(db, U, NOW, "moodle")).links.map((l) => l.title)).toEqual(["Moodle"]);
     expect((await q.search(db, U, NOW, "x")).documents).toEqual([]);
+  });
+});
+
+describe("Stand des Imports", () => {
+  it("fehlgeschlagener Lauf: veraltet, Stand bleibt der letzte erfolgreiche", async () => {
+    await db.insert(schema.importRuns).values({ id: "r-fail", source: "webuntis", startedAt: "2026-10-26T09:00", finishedAt: "2026-10-26T09:00", ok: false, lessons: 0, error: "Zeitüberschreitung" });
+    const src = await q.timetableSource(db, NOW);
+    expect(src).toMatchObject({ ok: false, stale: true, lastRunAt: "2026-10-26T07:58" });
+  });
+
+  it("alter Stand gilt als veraltet", async () => {
+    const src = await q.timetableSource(db, { date: "2026-10-29", time: "08:00", stamp: "2026-10-29T08:00" });
+    expect(src.stale).toBe(true);
   });
 });
