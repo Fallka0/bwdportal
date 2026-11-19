@@ -3,11 +3,18 @@ import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { LogoutButton } from "./LogoutButton";
 import { ThemeSetting, NotificationSettings } from "./SettingsClient";
+import { CalendarSetting } from "./CalendarSetting";
+import { headers } from "next/headers";
+import { calendarToken } from "@bwd/db";
+import { calendarUrls } from "@/lib/calendar";
 
 export const metadata: Metadata = { title: "Profil" };
 
 export default async function Profile() {
-  const { me } = await requireUser();
+  const { me, env } = await requireUser();
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const cal = calendarUrls(origin, await calendarToken(env.db, me.id, env.now));
   return (
     <>
       <div className="ph">
@@ -56,6 +63,12 @@ export default async function Profile() {
             <div>
               <ThemeSetting />
             </div>
+          </Card>
+          <Card aria-labelledby="kal-h">
+            <h2 id="kal-h" className="box-t" style={{ marginBottom: "var(--sp-6)" }}>
+              Kalender
+            </h2>
+            <CalendarSetting initial={cal} />
           </Card>
           <LogoutButton />
         </div>

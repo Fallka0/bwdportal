@@ -1,13 +1,14 @@
 import type { Settings } from "@bwd/shared";
 import { router } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Linking, Share, View } from "react-native";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useMe } from "@/lib/me";
+import { useApi } from "@/lib/useApi";
 import { ErrorState, Screen } from "@/shell/Screen";
 import { font, radius, sp, tracking, useTheme, type ThemePref } from "@/theme";
-import { Button, Card, Segment, SkBox, SkeletonArea, Switch, T } from "@/ui";
+import { Button, Card, Segment, SkBox, SkeletonArea, Switch, T, useToast } from "@/ui";
 
 const ROWS: { key: keyof Omit<Settings, "theme">; title: string; sub?: string }[] = [
   { key: "nTimetable", title: "Stundenplanänderungen", sub: "Ausfälle und Raumänderungen" },
@@ -112,6 +113,7 @@ export default function Profile() {
               ]}
             />
           </Card>
+          <CalendarCard />
           <Button
             label="Abmelden"
             variant="line"
@@ -125,5 +127,48 @@ export default function Profile() {
         </View>
       )}
     </Screen>
+  );
+}
+
+/** Kalender-Abo: in der Kalender-App öffnen, Link teilen oder neu erstellen. */
+function CalendarCard() {
+  const toast = useToast();
+  const cal = useApi(() => api.calendar(), [], { cache: "calendar" });
+  const [busy, setBusy] = useState(false);
+  const [fresh, setFresh] = useState<{ url: string; webcal: string } | null>(null);
+  const urls = fresh ?? cal.data;
+  return (
+    <Card>
+      <T v="box" accessibilityRole="header" style={{ marginBottom: sp[6] }}>
+        Kalender
+      </T>
+      <T v="strong" style={{ fontFamily: font.body700 }}>
+        Kalender abonnieren
+      </T>
+      <T v="small" style={{ marginBottom: sp[5] }}>
+        Stundenplan, Prüfungen, SOL-Plan und Fristen
+      </T>
+      <View style={{ gap: sp[3] }}>
+        <Button label="Im Kalender öffnen" wide disabled={!urls} onPress={() => urls && Linking.openURL(urls.webcal)} />
+        <Button label="Link teilen" variant="line" wide disabled={!urls} onPress={() => urls && Share.share({ message: urls.url })} />
+        <Button
+          label="Neuen Link erstellen"
+          variant="ghost"
+          wide
+          busy={busy}
+          onPress={async () => {
+            setBusy(true);
+            try {
+              setFresh(await api.resetCalendar());
+              toast.show("Neuer Link erstellt. Der alte funktioniert nicht mehr.");
+            } catch {
+              toast.show("Das hat nicht geklappt. Versuche es nochmals.");
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      </View>
+    </Card>
   );
 }

@@ -107,6 +107,8 @@ export function createApiClient(opts: ApiClientOptions) {
     documents: (search = "", group?: string) => call(DocumentGroups, "GET", `/documents${q({ q: search, group })}`),
     links: () => call(z.object({ items: z.array(LinkItem) }), "GET", "/links"),
     notifications: () => call(z.object({ items: z.array(NotificationItem) }), "GET", "/notifications"),
+    calendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "GET", "/me/calendar"),
+    resetCalendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "POST", "/me/calendar"),
     markAllRead: () => call(Ok, "POST", "/notifications/read"),
     markRead: (ids: string[]) => call(Ok, "POST", "/notifications/read", { ids }),
     /** Absolute URL für Dateien (Download mit Token als Query, weil Links keinen Header senden können). */

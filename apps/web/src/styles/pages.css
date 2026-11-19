@@ -1350,3 +1350,10 @@
     font-size: var(--fs-h2);
   }
 }
+
+.cal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}

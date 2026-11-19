@@ -320,3 +320,12 @@ export const loginCodes = sqliteTable("login_codes", {
     .references(() => sessions.id, { onDelete: "cascade" }),
   expiresAt: text("expires_at").notNull(),
 });
+
+/** Geheimer Link fürs Kalender-Abo. Ein Token pro Person; neu erstellen macht den alten ungültig. */
+export const calendarTokens = sqliteTable("calendar_tokens", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  createdAt: text("created_at").notNull(),
+});

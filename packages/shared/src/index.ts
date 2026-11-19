@@ -7,3 +7,4 @@ export * from "./grades";
 export * from "./schemas";
 export * from "./domain";
 export * from "./timegrid";
+export * from "./ical";

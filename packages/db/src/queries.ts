@@ -14,6 +14,8 @@ import {
   round1,
   weightedAverage,
   type Absence,
+  type IcsEvent,
+  fmtShortLoose,
   type AbsencesOverview,
   type AbsenceSubmit,
   type DemoAccount,
@@ -621,4 +623,73 @@ export async function consumeLoginCode(db: Db, code: string, now: Now): Promise<
   if (!r) return null;
   await db.delete(s.loginCodes).where(eq(s.loginCodes.code, code));
   return r.expiresAt >= `${now.stamp}:00` ? r.sessionId : null;
+}
+
+// ---------- Kalender-Abo ----------
+
+/** Token fürs Kalender-Abo, wird beim ersten Mal angelegt. */
+export async function calendarToken(db: Db, userId: string, now: Now): Promise<string> {
+  const r = (await db.select().from(s.calendarTokens).where(eq(s.calendarTokens.userId, userId)).limit(1))[0];
+  if (r) return r.token;
+  const token = randomId(24);
+  await db.insert(s.calendarTokens).values({ userId, token, createdAt: now.stamp });
+  return token;
+}
+
+/** Neuer Link: der alte funktioniert danach nicht mehr. */
+export async function resetCalendarToken(db: Db, userId: string, now: Now): Promise<string> {
+  const token = randomId(24);
+  await db
+    .insert(s.calendarTokens)
+    .values({ userId, token, createdAt: now.stamp })
+    .onConflictDoUpdate({ target: s.calendarTokens.userId, set: { token, createdAt: now.stamp } });
+  return token;
+}
+
+export async function userByCalendarToken(db: Db, token: string): Promise<string | null> {
+  return (await db.select({ u: s.calendarTokens.userId }).from(s.calendarTokens).where(eq(s.calendarTokens.token, token)).limit(1))[0]?.u ?? null;
+}
+
+/**
+ * Termine fürs Abo: Lektionen (eine Woche zurück bis acht Wochen voraus), Prüfungen, eigener SOL-Plan
+ * und Fristen offener Absenzen. UIDs sind stabil, damit Kalender Änderungen statt Duplikate zeigen.
+ */
+export async function calendarEvents(db: Db, userId: string, now: Now): Promise<IcsEvent[]> {
+  const from = addDays(now.date, -7);
+  const to = addDays(now.date, 56);
+  const events: IcsEvent[] = [];
+  for (const l of await lessonsBetween(db, userId, from, to)) {
+    if (l.state === "sol") {
+      events.push({ uid: `${l.id}@bwd-portal`, summary: "SOL-Tag", date: l.date, start: l.start, end: l.end, location: l.room });
+      continue;
+    }
+    const name = l.subject?.name ?? "Lektion";
+    const room = l.state === "room_changed" ? `${l.room} (statt ${l.originalRoom})` : l.room;
+    events.push({
+      uid: `${l.id}@bwd-portal`,
+      summary: l.state === "cancelled" ? `${name} (entfällt)` : name,
+      date: l.date,
+      start: l.start,
+      end: l.end,
+      location: room,
+      description: l.teacher?.name ?? null,
+      cancelled: l.state === "cancelled",
+    });
+  }
+  for (const r of await examsFor(db, userId)) {
+    const sub = (await db.select().from(s.subjects).where(eq(s.subjects.code, r.exam.subjectCode)).limit(1))[0];
+    events.push({ uid: `${r.exam.id}@bwd-portal`, summary: `Prüfung ${sub?.name ?? r.exam.subjectCode}: ${r.exam.title}`, date: r.exam.date, description: r.value !== null ? `Note ${fmtGrade(r.value)}` : null });
+  }
+  const plan = await db
+    .select({ p: s.solPlan, d: s.solDays, t: s.solTasks, sub: s.subjects })
+    .from(s.solPlan)
+    .innerJoin(s.solDays, eq(s.solPlan.solDayId, s.solDays.id))
+    .innerJoin(s.solTasks, eq(s.solPlan.taskId, s.solTasks.id))
+    .innerJoin(s.subjects, eq(s.solTasks.subjectCode, s.subjects.code))
+    .where(eq(s.solPlan.userId, userId));
+  for (const { p, d, t, sub } of plan) events.push({ uid: `${p.id}@bwd-portal`, summary: `SOL ${sub.short} ${t.code}: ${t.title}`, date: d.date, start: p.startTime, end: p.endTime, description: p.note });
+  for (const a of (await getAbsences(db, userId)).items.filter((x) => x.status === "open" && x.dueDate)) {
+    events.push({ uid: `${a.id}-frist@bwd-portal`, summary: `Frist: Absenz vom ${fmtShortLoose(a.date)} entschuldigen`, date: a.dueDate! });
+  }
+  return events;
 }

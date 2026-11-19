@@ -277,3 +277,25 @@ describe("Microsoft-Login", () => {
     expect(await q.consumeLoginCode(db, late, { date: "2026-10-26", time: "10:22", stamp: "2026-10-26T10:22" })).toBeNull();
   });
 });
+
+describe("Kalender-Abo", () => {
+  it("Token ist stabil, neu erstellen macht den alten ungültig", async () => {
+    const t1 = await q.calendarToken(db, U, NOW);
+    expect(await q.calendarToken(db, U, NOW)).toBe(t1);
+    expect(await q.userByCalendarToken(db, t1)).toBe(U);
+    const t2 = await q.resetCalendarToken(db, U, NOW);
+    expect(t2).not.toBe(t1);
+    expect(await q.userByCalendarToken(db, t1)).toBeNull();
+    expect(await q.userByCalendarToken(db, t2)).toBe(U);
+  });
+
+  it("enthält Lektionen, Ausfall, Raumänderung, Prüfungen, SOL-Plan und Fristen", async () => {
+    const ev = await q.calendarEvents(db, U, NOW);
+    expect(ev.find((e) => e.summary === "Deutsch (entfällt)" && e.date === "2026-10-26")?.cancelled).toBe(true);
+    expect(ev.find((e) => e.date === "2026-10-26" && e.start === "10:45")?.location).toBe("B 015 (statt A 207)");
+    expect(ev.find((e) => e.summary === "Prüfung Mathematik: Funktionen")).toMatchObject({ date: "2026-10-20", description: "Note 4.5" });
+    expect(ev.some((e) => e.summary === "SOL Mathe 3.02: Lineare Optimierung I" && e.start === "08:00")).toBe(true);
+    expect(ev.find((e) => e.summary === "Frist: Absenz vom 22.10. entschuldigen")?.date).toBe("2026-11-05");
+    expect(new Set(ev.map((e) => e.uid)).size).toBe(ev.length);
+  });
+});
