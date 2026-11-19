@@ -30,6 +30,8 @@ export type Palette = ColorTokens & {
   ttBg: string;
   ttFg: string;
   ttChanged: string;
+  /** Vergangener Block: blasser, Text bleibt lesbar (4.5:1) */
+  ttPast: string;
 };
 
 /** Alle Farben eines Designs, inklusive der abgeleiteten Flächen (gleiche Formeln wie im Web-CSS). */
@@ -47,5 +49,6 @@ export function palette(theme: ThemeName): Palette {
     ttBg: tt[theme].bg,
     ttFg: tt[theme].fg,
     ttChanged: tt.changedText[theme],
+    ttPast: mix(tt[theme].bg, c.panel, 0.7),
   };
 }

@@ -41,7 +41,7 @@ test("Login als Selin Hofer, alle Bereiche erreichbar, Abmelden", async ({ page,
     await page.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link", { name: /Mehr/ }).click();
     await expect(page).toHaveURL("/mehr");
     await page.getByRole("link", { name: /Absenzen/ }).click();
-    await expect(page.getByRole("link", { name: "Mehr" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mehr", exact: true })).toBeVisible();
   } else {
     const nav = page.getByRole("navigation", { name: "Schule" });
     await nav.getByRole("link", { name: "Noten" }).click();

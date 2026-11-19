@@ -111,7 +111,7 @@ export function TimeGrid({ grid, now: initialNow, live, title, sub, prev, next, 
           {g.now && (
             <View accessible accessibilityLabel={`Jetzt ${g.now.label}`} pointerEvents="none" style={{ position: "absolute", left: AX + axGap, right: 0, top: g.now.top - 1, height: 2, backgroundColor: c.now, zIndex: 3 }}>
               <View style={{ position: "absolute", right: "100%", marginRight: 4, top: -8, height: 18, paddingHorizontal: 3, borderRadius: radius.xs, backgroundColor: c.now, justifyContent: "center" }}>
-                <T style={{ fontFamily: font.body700, fontSize: fs.micro, color: c.btnFg === "#0b0b0f" ? c.frame : "#ffffff" }}>{g.now.label}</T>
+                <T style={{ fontFamily: font.body700, fontSize: fs.micro, color: c.frame }}>{g.now.label}</T>
               </View>
             </View>
           )}
@@ -132,7 +132,7 @@ function NavBtn({ icon, onPress, label }: Nav & { icon: "chev-l" | "chev-r" }) {
 function Block({ b, lanes, width, variant }: { b: PlacedBlock; lanes?: number; width: number; variant: Props["variant"] }) {
   const { c } = useTheme();
   const grey = b.kind === "cancelled" || b.kind === "sol" || b.kind === "presence";
-  const bg = grey ? c.panel2 : c.ttBg;
+  const bg = grey ? c.panel2 : b.past ? c.ttPast : c.ttBg;
   const fg = grey ? c.ink : c.ttFg;
   const week = variant === "week";
   const laneW = lanes ? width / lanes : width;
@@ -148,7 +148,7 @@ function Block({ b, lanes, width, variant }: { b: PlacedBlock; lanes?: number; w
     <View
       accessible
       accessibilityLabel={b.label}
-      style={{ position: "absolute", top: b.top, height: b.height, left, width: w, borderRadius: week ? radius.s : radius.m, backgroundColor: bg, paddingVertical: small ? 4 : 6, paddingHorizontal: small ? 5 : 10, overflow: "hidden", opacity: b.past ? 0.5 : 1 }}
+      style={{ position: "absolute", top: b.top, height: b.height, left, width: w, borderRadius: week ? radius.s : radius.m, backgroundColor: bg, paddingVertical: small ? 4 : 6, paddingHorizontal: small ? 5 : 10, overflow: "hidden" }}
     >
       <View style={{ flexDirection: inline || (b.kind === "plan" && b.compact) ? "row" : "column", alignItems: inline ? "baseline" : "flex-start", gap: inline ? sp[3] : 1 }}>
         <T numberOfLines={1} ellipsizeMode={week ? "clip" : "tail"} style={{ fontFamily: font.body700, fontSize: small ? fs.xs : fs.m, color: b.kind === "cancelled" ? c.text2 : fg, textDecorationLine: b.kind === "cancelled" ? "line-through" : "none" }}>
@@ -166,7 +166,7 @@ function Block({ b, lanes, width, variant }: { b: PlacedBlock; lanes?: number; w
         </T>
       )}
       {!week && b.kind !== "presence" && !(b.kind === "plan" && b.medium) && (
-        <T style={{ fontSize: fs.xs, color: grey ? c.text2 : fg, opacity: grey ? 1 : 0.6 }}>{b.timeLabel}</T>
+        <T style={{ fontSize: fs.xs, color: grey ? c.text2 : fg, opacity: grey ? 1 : b.past ? 0.85 : 0.6 }}>{b.timeLabel}</T>
       )}
     </View>
   );
