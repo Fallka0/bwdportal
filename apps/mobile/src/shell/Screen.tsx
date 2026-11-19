@@ -76,8 +76,8 @@ function OfflineBanner({ since, onRetry }: { since: string; onRetry: () => void 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   const { c } = useTheme();
   return (
-    <View accessibilityRole="alert" style={{ alignItems: "flex-start", gap: sp[5], padding: sp[7], borderRadius: 18, backgroundColor: c.errBg }}>
-      <T v="strong" tone="err">
+    <View style={{ alignItems: "flex-start", gap: sp[5], padding: sp[7], borderRadius: 18, backgroundColor: c.errBg }}>
+      <T v="strong" tone="err" accessibilityRole="alert">
         {message}
       </T>
       <Button label="Erneut laden" small variant="line" onPress={onRetry} />

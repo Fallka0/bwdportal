@@ -23,11 +23,14 @@ export function Banner({ tone = "warn", children, action }: { tone?: "warn" | "e
   const { c } = useTheme();
   const fg = tone === "err" ? c.err : c.warn;
   return (
-    <View accessibilityRole="alert" style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: sp[4], padding: sp[6], borderRadius: radius.l, backgroundColor: tone === "err" ? c.errBg : c.warnBg, marginBottom: sp[7] }}>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", gap: sp[4], padding: sp[6], borderRadius: radius.l, backgroundColor: tone === "err" ? c.errBg : c.warnBg, marginBottom: sp[7] }}>
       <View style={{ paddingTop: 2 }}>
         <Icon name="alert" small color={fg} />
       </View>
-      <T style={{ flex: 1, minWidth: 200, color: fg, lineHeight: 20 }}>{children}</T>
+      {/* Rolle "alert" auf dem Text: wird vorgelesen, der Knopf daneben bleibt einzeln erreichbar. */}
+      <T accessibilityRole="alert" accessibilityLiveRegion="polite" style={{ flex: 1, minWidth: 200, color: fg, lineHeight: 20 }}>
+        {children}
+      </T>
       {action}
     </View>
   );
