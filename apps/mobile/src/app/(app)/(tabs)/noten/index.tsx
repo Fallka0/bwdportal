@@ -11,7 +11,7 @@ import { Button, Card, Empty, Grade, Icon, Kpis, Segment, SkBox, SkeletonArea, T
 export default function Grades() {
   const { c } = useTheme();
   const [sem, setSem] = useState<"1" | "2">("1");
-  const g = useApi(() => api.grades(Number(sem)), [sem]);
+  const g = useApi(() => api.grades(Number(sem)), [sem], { cache: "grades" });
   return (
     <Screen title="Noten" onRefresh={g.refresh} refreshing={g.refreshing}>
       <View style={{ marginBottom: sp[6] }}>

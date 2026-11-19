@@ -22,7 +22,7 @@ export default function Documents() {
     const id = setTimeout(() => setQ(input), 250);
     return () => clearTimeout(id);
   }, [input]);
-  const d = useApi(() => api.documents(q, group === "alle" ? undefined : group), [q, group]);
+  const d = useApi(() => api.documents(q, group === "alle" ? undefined : group), [q, group], { cache: "documents" });
   const shown = d.data?.groups.filter((g) => g.items.length) ?? [];
   return (
     <Screen title="Dokumente" back={{ label: "Mehr", href: "/mehr" }} onRefresh={d.refresh} refreshing={d.refreshing}>

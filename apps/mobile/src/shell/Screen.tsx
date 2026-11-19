@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { size, sp, useTheme } from "@/theme";
-import { Button, T } from "@/ui";
+import { fmtShort, getNow } from "@bwd/shared";
+import { useOffline } from "@/lib/offline";
+import { Banner, Button, T } from "@/ui";
 import { AppHeader } from "./AppHeader";
 
 type Props = {
@@ -21,6 +23,7 @@ export function Screen({ title, back, children, onRefresh, refreshing = false, n
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const bottom = (noTabs ? insets.bottom : size.tabBar + insets.bottom) + sp[10];
+  const offline = useOffline();
   const head = (
     <>
       {title ? (
@@ -40,7 +43,10 @@ export function Screen({ title, back, children, onRefresh, refreshing = false, n
           keyboardShouldPersistTaps="handled"
         >
           {head}
-          <View style={{ paddingHorizontal: sp[7] }}>{children}</View>
+          <View style={{ paddingHorizontal: sp[7] }}>
+            {offline.since && <OfflineBanner since={offline.since} onRetry={offline.retry} />}
+            {children}
+          </View>
         </ScrollView>
       ) : (
         <View style={{ flex: 1 }}>
@@ -49,6 +55,20 @@ export function Screen({ title, back, children, onRefresh, refreshing = false, n
         </View>
       )}
     </View>
+  );
+}
+
+/** Ohne Verbindung: gespeicherter Stand mit Zeitpunkt. */
+function OfflineBanner({ since, onRetry }: { since: string; onRetry: () => void }) {
+  const today = getNow().date;
+  const stand = since.slice(0, 10) === today ? `von heute ${since.slice(11, 16)}` : `vom ${fmtShort(since.slice(0, 10))} ${since.slice(11, 16)}`;
+  return (
+    <Banner action={<Button label="Erneut laden" small variant="line" onPress={onRetry} />}>
+      <T v="strong" tone="warn">
+        Keine Verbindung.
+      </T>{" "}
+      Du siehst den Stand {stand}.
+    </Banner>
   );
 }
 

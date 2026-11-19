@@ -15,8 +15,8 @@ const ORDER = ["Heute", "Gestern", "Diese Woche", "Früher"] as const;
 export default function Notifications() {
   const { c } = useTheme();
   const me = useMe();
-  const n = useApi(() => api.notifications(), []);
-  const clock = useApi(() => api.home(), []);
+  const n = useApi(() => api.notifications(), [], { cache: "notifications" });
+  const clock = useApi(() => api.home(), [], { cache: "home" });
   const [busy, setBusy] = useState(false);
   const today = clock.data?.today;
   const unread = n.data?.items.some((x) => x.unread);

@@ -12,7 +12,7 @@ import { Button, Card, CardHead, Grade, Icon, ListRow, SkBox, SkeletonArea, SkLi
 
 export default function HomeScreen() {
   const me = useMe();
-  const h = useApi(() => api.home(), []);
+  const h = useApi(() => api.home(), [], { cache: "home" });
   const refresh = async () => {
     await Promise.all([h.refresh(), me.refresh()]);
   };

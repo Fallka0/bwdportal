@@ -7,7 +7,7 @@ import { Icon, SkBox, SkeletonArea, T } from "@/ui";
 
 export default function Links() {
   const { c } = useTheme();
-  const l = useApi(() => api.links(), []);
+  const l = useApi(() => api.links(), [], { cache: "links" });
   const groups = [...new Set((l.data?.items ?? []).map((x) => x.group))];
   return (
     <Screen title="Links" back={{ label: "Mehr", href: "/mehr" }} onRefresh={l.refresh} refreshing={l.refreshing}>

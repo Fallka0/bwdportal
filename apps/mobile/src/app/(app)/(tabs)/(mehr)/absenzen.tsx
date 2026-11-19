@@ -26,7 +26,7 @@ type Target = { kind: "excuse"; absence: Absence } | { kind: "report" } | null;
 export default function Absences() {
   const { c } = useTheme();
   const params = useLocalSearchParams<{ entschuldigen?: string; melden?: string }>();
-  const abs = useApi(() => api.absences(), []);
+  const abs = useApi(() => api.absences(), [], { cache: "absences" });
   const me = useMe();
   const [picked, setPicked] = useState<Target>(null);
   // Links aus der Übersicht (?entschuldigen=… oder ?melden=1) öffnen den Dialog; einmal geschlossen bleibt er zu.
@@ -128,7 +128,7 @@ const lessonLabel = (l: DayLesson) => (l.subjectName && l.subjectName.length <= 
 function AbsenceSheet({ target, onClose, onSent }: { target: Exclude<Target, null>; onClose: () => void; onSent: () => Promise<void> }) {
   const { c } = useTheme();
   const toast = useToast();
-  const clock = useApi(() => api.home(), []);
+  const clock = useApi(() => api.home(), [], { cache: "home" });
   const days = target.kind === "report" && clock.data ? lastSchoolDays(clock.data.today) : [];
   const [date, setDate] = useState<string>(target.kind === "excuse" ? target.absence.date : "");
   const effectiveDate = date || days[0] || "";

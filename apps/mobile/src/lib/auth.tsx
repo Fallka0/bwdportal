@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, API_URL, setApiToken, setUnauthorizedHandler } from "./api";
+import { clearCache } from "./cache";
 import { storage } from "./storage";
 
 const KEY = "session";
@@ -34,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clear = useCallback(async () => {
     setApiToken(null);
     await storage.remove(KEY).catch(() => {});
+    // Gespeicherte Daten sind persönlich: beim Abmelden weg.
+    await clearCache();
     setStatus("out");
   }, []);
 
