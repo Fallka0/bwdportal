@@ -10,20 +10,41 @@ import { Banner, Icon, Sheet, T } from "@/ui";
 
 export default function Login() {
   const { c } = useTheme();
-  const { status, signIn } = useAuth();
+  const { status, signIn, signInMicrosoft } = useAuth();
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [accounts, setAccounts] = useState<DemoAccount[] | null>(null);
   const [foreign, setForeign] = useState(false);
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [microsoft, setMicrosoft] = useState(false);
 
   if (status === "in") return <Redirect href="/" />;
 
+  async function microsoftLogin() {
+    setOpen(false);
+    setFailure("");
+    setForeign(false);
+    const r = await signInMicrosoft();
+    if (r.ok) router.replace("/");
+    else if (!("cancelled" in r)) {
+      if (r.foreign) setForeign(true);
+      else setFailure(r.message);
+    }
+  }
+
   async function openChooser() {
     setFailure("");
-    setOpen(true);
     try {
+      const cfg = await api.authConfig();
+      setMicrosoft(cfg.microsoft);
+      // Nur Microsoft: direkt dorthin. Sonst Auswahl mit Demo-Konten (und Microsoft, falls eingerichtet).
+      if (!cfg.mock) {
+        if (cfg.microsoft) await microsoftLogin();
+        else setFailure("Die Anmeldung mit Microsoft ist noch nicht eingerichtet.");
+        return;
+      }
+      setOpen(true);
       setAccounts((await api.accounts()).accounts);
     } catch {
       setOpen(false);
@@ -84,6 +105,7 @@ export default function Login() {
       </View>
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Demo-Konto wählen">
+        {microsoft && <AccountRow title="Echtes Microsoft-Konto" sub={config.school.emailPattern} busy={false} onPress={microsoftLogin} />}
         {(accounts ?? []).map((a) => (
           <AccountRow key={a.id} title={a.name} sub={`${a.classCode ?? ""} · ${a.email}`} initials={a.name.split(" ").map((p) => p[0]).join("")} busy={busy === a.id} onPress={() => choose(a.id)} />
         ))}

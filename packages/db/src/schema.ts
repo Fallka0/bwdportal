@@ -311,3 +311,12 @@ export const solPortfolio = sqliteTable(
   },
   (t) => [unique("sol_portfolio_user_day").on(t.userId, t.solDayId)],
 );
+
+/** Einmal-Code für die App nach dem Microsoft-Login (60 Sekunden gültig, nur einmal einlösbar). */
+export const loginCodes = sqliteTable("login_codes", {
+  code: text("code").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id, { onDelete: "cascade" }),
+  expiresAt: text("expires_at").notNull(),
+});

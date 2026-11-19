@@ -587,3 +587,38 @@ export async function search(db: Db, userId: string, now: Now, q: string): Promi
   const news = (await getNews(db, userId)).filter((n) => has(n.title, n.teaser));
   return { subjects, documents: docs, links, news };
 }
+
+// ---------- Microsoft-Login ----------
+
+export async function userByEmail(db: Db, email: string) {
+  return (await db.select().from(s.users).where(eq(s.users.email, email.toLowerCase())).limit(1))[0] ?? null;
+}
+
+/**
+ * Konto zur E-Mail aus dem Microsoft-Token. Gibt es noch keins, wird es angelegt (ohne Klasse:
+ * die Zuordnung käme später aus dem Schulsystem). Name aus den Claims.
+ */
+export async function findOrCreateUser(db: Db, claims: { email: string; firstName: string; lastName: string; oid: string }, now: Now) {
+  const existing = await userByEmail(db, claims.email);
+  if (existing) return existing;
+  const id = `u-ms-${claims.oid}`;
+  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId: null, role: "student", createdAt: now.stamp });
+  await db.insert(s.settings).values({ userId: id }).onConflictDoNothing();
+  return (await userById(db, id))!;
+}
+
+/** Einmal-Code für die App: zeigt auf eine Session, gilt 60 Sekunden. */
+export async function createLoginCode(db: Db, sessionId: string, now: Now): Promise<string> {
+  const code = randomId(24);
+  const exp = new Date(Date.parse(`${now.stamp}:00Z`) + 60_000).toISOString().slice(0, 19);
+  await db.insert(s.loginCodes).values({ code, sessionId, expiresAt: exp });
+  return code;
+}
+
+/** Code einlösen: liefert die Session-ID und löscht den Code (nur einmal gültig). */
+export async function consumeLoginCode(db: Db, code: string, now: Now): Promise<string | null> {
+  const r = (await db.select().from(s.loginCodes).where(eq(s.loginCodes.code, code)).limit(1))[0];
+  if (!r) return null;
+  await db.delete(s.loginCodes).where(eq(s.loginCodes.code, code));
+  return r.expiresAt >= `${now.stamp}:00` ? r.sessionId : null;
+}

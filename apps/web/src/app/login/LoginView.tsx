@@ -9,12 +9,12 @@ import { Banner, Dialog, Icon } from "@/components/ui";
 
 const FOREIGN = "foreign";
 
-export function LoginView({ mock, accounts, emailPattern, initialError }: { mock: boolean; accounts: DemoAccount[]; emailPattern: string; initialError: boolean }) {
+export function LoginView({ mock, microsoft, accounts, emailPattern, initialError }: { mock: boolean; microsoft: boolean; accounts: DemoAccount[]; emailPattern: string; initialError: "konto" | "microsoft" | null }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState(initialError);
+  const [error, setError] = useState(initialError === "konto");
   const [busy, setBusy] = useState<string | null>(null);
-  const [failure, setFailure] = useState("");
+  const [failure, setFailure] = useState(initialError === "microsoft" ? "Die Anmeldung mit Microsoft hat nicht geklappt. Versuche es nochmals." : "");
 
   async function choose(accountId: string) {
     setBusy(accountId);
@@ -50,10 +50,19 @@ export function LoginView({ mock, accounts, emailPattern, initialError }: { mock
               </Banner>
             )}
             {failure && <Banner tone="err">{failure}</Banner>}
-            <button className="btn btn-ink ms" type="button" onClick={() => (mock ? setOpen(true) : setFailure("Die Anmeldung mit Microsoft ist noch nicht eingerichtet."))}>
-              <MicrosoftLogo />
-              Mit Microsoft anmelden
-            </button>
+            {mock || !microsoft ? (
+              <button className="btn btn-ink ms" type="button" onClick={() => (mock ? setOpen(true) : setFailure("Die Anmeldung mit Microsoft ist noch nicht eingerichtet."))}>
+                <MicrosoftLogo />
+                Mit Microsoft anmelden
+              </button>
+            ) : (
+              // Volle Navigation: die API leitet zu Microsoft weiter (kein Next-Seitenwechsel).
+              // eslint-disable-next-line @next/next/no-html-link-for-pages
+              <a className="btn btn-ink ms" href="/api/v1/auth/microsoft">
+                <MicrosoftLogo />
+                Mit Microsoft anmelden
+              </a>
+            )}
             <p className="lg-f">{emailPattern}</p>
           </div>
           <div className="lg-f">
@@ -93,6 +102,22 @@ export function LoginView({ mock, accounts, emailPattern, initialError }: { mock
       {mock && (
         <Dialog open={open} onClose={() => setOpen(false)} title="Demo-Konto wählen">
           <ul className="acc">
+            {microsoft && (
+              <li>
+                {/* Volle Navigation: die API leitet zu Microsoft weiter. */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a className="acc-b" href="/api/v1/auth/microsoft">
+                  <span className="av av-ink">
+                    <MicrosoftLogo />
+                  </span>
+                  <span>
+                    <b>Echtes Microsoft-Konto</b>
+                    <span className="s">{emailPattern}</span>
+                  </span>
+                  <Icon name="chev-r" small />
+                </a>
+              </li>
+            )}
             {accounts.map((a) => (
               <li key={a.id}>
                 <button type="button" className="acc-b" onClick={() => choose(a.id)} disabled={!!busy} aria-busy={busy === a.id}>

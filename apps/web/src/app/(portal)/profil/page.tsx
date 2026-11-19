@@ -7,7 +7,7 @@ import { ThemeSetting, NotificationSettings } from "./SettingsClient";
 export const metadata: Metadata = { title: "Profil" };
 
 export default async function Profile() {
-  const { me, env } = await requireUser();
+  const { me } = await requireUser();
   return (
     <>
       <div className="ph">
@@ -46,7 +46,7 @@ export default async function Profile() {
               <dt>Klassenlehrperson</dt>
               <dd>{me.classTeacher ?? "–"}</dd>
               <dt>Anmeldung</dt>
-              <dd>{env.authMode === "mock" ? "Demo-Konto" : "Microsoft-Schulkonto"}</dd>
+              <dd>{me.id.startsWith("u-ms-") ? "Microsoft-Schulkonto" : "Demo-Konto"}</dd>
             </dl>
           </Card>
           <Card aria-labelledby="ds-h">

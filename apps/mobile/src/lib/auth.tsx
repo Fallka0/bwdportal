@@ -1,6 +1,8 @@
 import { ApiFailure } from "@bwd/shared/api";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api, setApiToken, setUnauthorizedHandler } from "./api";
+import { api, API_URL, setApiToken, setUnauthorizedHandler } from "./api";
 import { storage } from "./storage";
 
 const KEY = "session";
@@ -8,7 +10,12 @@ const KEY = "session";
 type Status = "loading" | "in" | "out";
 type SignInResult = { ok: true } | { ok: false; foreign: boolean; message: string };
 
-type Ctx = { status: Status; signIn: (accountId: string) => Promise<SignInResult>; signOut: () => Promise<void> };
+type Ctx = {
+  status: Status;
+  signIn: (accountId: string) => Promise<SignInResult>;
+  signInMicrosoft: () => Promise<SignInResult | { ok: false; cancelled: true }>;
+  signOut: () => Promise<void>;
+};
 const AuthCtx = createContext<Ctx | null>(null);
 
 export function useAuth() {
@@ -54,11 +61,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  /**
+   * Microsoft-Login über das Portal: der Server spricht mit Entra ID und schickt einen Einmal-Code
+   * zurück an die App (bwdportal://auth oder in Expo Go exp://…/--/auth). Der Code wird gegen das Token getauscht.
+   */
+  const signInMicrosoft = useCallback(async () => {
+    const returnUrl = Linking.createURL("auth");
+    const r = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/v1/auth/microsoft?app=${encodeURIComponent(returnUrl)}`, returnUrl);
+    if (r.type !== "success") return { ok: false as const, cancelled: true as const };
+    const params = new URL(r.url).searchParams;
+    const fehler = params.get("fehler");
+    if (fehler) return { ok: false as const, foreign: fehler === "konto", message: fehler === "konto" ? "Dieses Konto gehört nicht zur bwd." : "Die Anmeldung mit Microsoft hat nicht geklappt." };
+    try {
+      const { token } = await api.exchange(params.get("code") ?? "");
+      setApiToken(token);
+      await storage.set(KEY, token);
+      setStatus("in");
+      return { ok: true as const };
+    } catch (e) {
+      return { ok: false as const, foreign: false, message: e instanceof ApiFailure ? e.message : "Die Anmeldung mit Microsoft hat nicht geklappt." };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await api.logout().catch(() => {});
     await clear();
   }, [clear]);
 
-  const value = useMemo(() => ({ status, signIn, signOut }), [status, signIn, signOut]);
+  const value = useMemo(() => ({ status, signIn, signInMicrosoft, signOut }), [status, signIn, signInMicrosoft, signOut]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }

@@ -258,3 +258,22 @@ describe("Stand des Imports", () => {
     expect(src.stale).toBe(true);
   });
 });
+
+describe("Microsoft-Login", () => {
+  it("legt ein Konto an oder findet das bestehende über die E-Mail", async () => {
+    const selin = await q.findOrCreateUser(db, { email: "Selin.Hofer@bwdbern.ch", firstName: "X", lastName: "Y", oid: "1" }, NOW);
+    expect(selin.id).toBe(U);
+    const neu = await q.findOrCreateUser(db, { email: "lena.muster@bwdbern.ch", firstName: "Lena", lastName: "Muster", oid: "abc" }, NOW);
+    expect(neu).toMatchObject({ id: "u-ms-abc", firstName: "Lena", classId: null });
+    expect((await q.getMe(db, neu.id))?.classCode).toBe("");
+  });
+
+  it("Einmal-Code: einlösbar genau einmal und nur 60 Sekunden", async () => {
+    const s = await q.createSession(db, U, NOW);
+    const code = await q.createLoginCode(db, s.id, NOW);
+    expect(await q.consumeLoginCode(db, code, NOW)).toBe(s.id);
+    expect(await q.consumeLoginCode(db, code, NOW)).toBeNull();
+    const late = await q.createLoginCode(db, s.id, NOW);
+    expect(await q.consumeLoginCode(db, late, { date: "2026-10-26", time: "10:22", stamp: "2026-10-26T10:22" })).toBeNull();
+  });
+});

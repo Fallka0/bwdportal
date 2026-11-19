@@ -1,1 +1,6 @@
 NEXTJS_ENV=development
+# Microsoft-Login lokal (Werte aus der Entra-ID-App-Registrierung)
+# MS_CLIENT_ID=
+# MS_CLIENT_SECRET=
+# Zusätzliche erlaubte Domains zum Testen, kommagetrennt
+# AUTH_EXTRA_DOMAINS=

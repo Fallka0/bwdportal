@@ -80,7 +80,10 @@ export function createApiClient(opts: ApiClientOptions) {
   };
 
   return {
+    authConfig: () => call(z.object({ mock: z.boolean(), microsoft: z.boolean() }), "GET", "/auth/config"),
     accounts: () => call(z.object({ accounts: z.array(DemoAccount) }), "GET", "/auth/accounts"),
+    /** Einmal-Code aus dem Microsoft-Login gegen das Session-Token tauschen. */
+    exchange: (code: string) => call(z.object({ token: z.string() }), "POST", "/auth/exchange", { code }),
     signInMock: (accountId: string) => call(Token, "POST", "/auth/mock", { accountId }),
     logout: () => call(Ok, "POST", "/auth/logout"),
     me: () => call(Me, "GET", "/me"),
