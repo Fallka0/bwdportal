@@ -9,7 +9,7 @@
  * der betroffenen Aufträge in D1. Dateien mit "task": null werden übersprungen.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -70,8 +70,31 @@ const where = values.remote ? "--remote" : "--local";
 const map = (JSON.parse(readFileSync(resolve(values.map), "utf8")) as MapEntry[]).filter((m): m is MapEntry & { task: string } => !!m.task);
 const soffice = ["/Applications/LibreOffice.app/Contents/MacOS/soffice", "soffice"].find((p) => p === "soffice" || existsSync(p))!;
 const tmp = mkdtempSync(join(tmpdir(), "bwd-solfiles-"));
-const put = (key: string, file: string, type: string) =>
-  execFileSync("npx", ["wrangler", "r2", "object", "put", `bwd-portal-files/${key}`, `--file=${file}`, `--content-type=${type}`, where], { cwd: web, stdio: "pipe" });
+/** Hochladen mit bis zu vier Versuchen (R2 meldet ab und zu einen vorübergehenden Fehler). */
+function put(key: string, file: string, type: string) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      execFileSync("npx", ["wrangler", "r2", "object", "put", `bwd-portal-files/${key}`, `--file=${file}`, `--content-type=${type}`, where], { cwd: web, stdio: "pipe" });
+      return;
+    } catch (e) {
+      if (attempt >= 4) throw e;
+      console.warn(`Versuch ${attempt} fehlgeschlagen: ${key}, nochmals`);
+      execFileSync("sleep", [String(5 * attempt)]);
+    }
+  }
+}
+
+// Fortschritt: fertige Dateien werden notiert, ein neuer Lauf lädt sie nicht nochmals hoch
+const progressFile = resolve(`${values.map}.${values.remote ? "remote" : "local"}.done.jsonl`);
+const finished = new Map<string, Imported>(
+  existsSync(progressFile)
+    ? readFileSync(progressFile, "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => JSON.parse(l) as Imported)
+        .map((d) => [`${d.task}|${d.file}`, d] as const)
+    : [],
+);
 
 const TYPES: Record<string, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -93,6 +116,11 @@ for (const m of map) {
   }
   const n = (counter.get(m.task) ?? 0) + 1;
   counter.set(m.task, n);
+  const prev = finished.get(`${m.task}|${m.file}`);
+  if (prev && prev.n === n) {
+    done.push(prev);
+    continue;
+  }
   const ext = extOf(m.file);
   let pdf = false;
   if (convertible(ext)) {
@@ -110,7 +138,9 @@ for (const m of map) {
     }
   }
   put(solFileKey(classId, m.task, n, ext), src, TYPES[ext] ?? "application/octet-stream");
-  done.push({ ...m, n, ext, bytes: statSync(src).size, pdf });
+  const entry: Imported = { ...m, n, ext, bytes: statSync(src).size, pdf };
+  done.push(entry);
+  appendFileSync(progressFile, JSON.stringify(entry) + "\n");
   console.log(`${m.task} ${m.kind}: ${m.name}.${ext}${convertible(ext) && !pdf ? " (ohne PDF)" : ""}`);
 }
 
