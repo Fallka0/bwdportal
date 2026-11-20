@@ -12,11 +12,16 @@ import { MSG_FOREIGN, type AuthProvider, type SignInRequest, type SignInResult }
 
 export type PlanaryUser = { id: string; email: string; name: string };
 
-/** Ziel für den Start: Anmelden oder Konto erstellen, zurück auf die Seite /login/planary. */
-export function planaryStartUrl(base: string, origin: string, signup: boolean) {
-  const u = new URL(signup ? `${base}/signup` : `${base}/`);
+export type PlanaryStart = "login" | "signup" | "switch";
+
+/**
+ * Ziel für den Start, zurück auf die Seite /login/planary. Ohne Single Sign-on: wer bei Planary schon angemeldet
+ * ist, sieht "Weiter als …" oder "Anderes Konto" und meldet sich nicht unbemerkt mit einer fremden Adresse an.
+ * "switch" meldet bei Planary ab und zeigt das Anmeldeformular.
+ */
+export function planaryStartUrl(base: string, origin: string, mode: PlanaryStart) {
+  const u = new URL(mode === "signup" ? `${base}/signup` : mode === "switch" ? `${base}/logout` : `${base}/`);
   u.searchParams.set("returnTo", `${origin}/login/planary`);
-  if (!signup) u.searchParams.set("auto", "1");
   return u.toString();
 }
 
@@ -54,7 +59,7 @@ export class PlanaryAuthProvider implements AuthProvider {
     if (!this.env.planaryUrl) return { ok: false, code: "not_configured", message: "Die Anmeldung mit Planary ist nicht eingerichtet." };
     const u = await planaryMe(this.env.planaryUrl, req.accessToken);
     if (!u) return { ok: false, code: "unknown_account", message: "Die Anmeldung mit Planary hat nicht geklappt. Versuche es nochmals." };
-    if (!schoolEmail(u.email, this.env.extraDomains)) return { ok: false, code: "foreign_account", message: MSG_FOREIGN };
+    if (!schoolEmail(u.email, this.env.extraDomains)) return { ok: false, code: "foreign_account", message: MSG_FOREIGN, email: u.email };
     const user = await findOrCreateUser(this.env.db, { email: u.email, ...splitName(u.name, u.email), oid: `pl-${u.id}` }, this.env.now, this.env.defaultClass);
     const s = await createSession(this.env.db, user.id, this.env.now);
     return { ok: true, sessionId: s.id, expiresAt: s.expiresAt };

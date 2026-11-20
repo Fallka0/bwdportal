@@ -18,6 +18,7 @@ export function LoginView({
   accounts,
   emailPattern,
   initialError,
+  rejected,
 }: {
   mock: boolean;
   microsoft: boolean;
@@ -25,6 +26,8 @@ export function LoginView({
   accounts: DemoAccount[];
   emailPattern: string;
   initialError: "konto" | "microsoft" | "planary" | null;
+  /** Abgelehntes Konto (Planary): Adresse und Wechsel anbieten */
+  rejected?: { provider: "planary"; email: string | null } | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -61,8 +64,18 @@ export function LoginView({
           <div className="lg-c">
             <h1>Alles für die Schule an einem Ort.</h1>
             {error && (
-              <Banner tone="err">
-                <b>Dieses Konto gehört nicht zur bwd.</b> Melde dich mit deiner Adresse {emailPattern} an.
+              <Banner
+                tone="err"
+                action={
+                  rejected?.provider === "planary" ? (
+                    // eslint-disable-next-line @next/next/no-html-link-for-pages
+                    <a className="btn btn-line btn-s" href="/api/v1/auth/planary?wechseln=1">
+                      Anderes Planary-Konto verwenden
+                    </a>
+                  ) : undefined
+                }
+              >
+                <b>{rejected?.email ? `${rejected.email} gehört nicht zur bwd.` : "Dieses Konto gehört nicht zur bwd."}</b> Melde dich mit deiner Adresse {emailPattern} an.
               </Banner>
             )}
             {failure && <Banner tone="err">{failure}</Banner>}

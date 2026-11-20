@@ -8,13 +8,13 @@ import { decodeFlow, encodeFlow, FLOW_COOKIE, safeAppReturn } from "@/lib/auth/f
 import { planaryRevoke, planaryStartUrl } from "@/lib/auth/planary";
 import { serverEnv } from "@/lib/env";
 
-/** Start: weiter zu auth.planary.ch. ?signup=1 öffnet "Konto erstellen", ?app=<Rücksprung> für die App. */
+/** Start: weiter zu auth.planary.ch. ?signup=1 öffnet "Konto erstellen", ?wechseln=1 meldet dort ab, ?app=<Rücksprung> für die App. */
 export async function GET(req: Request) {
   const env = await serverEnv();
   const url = new URL(req.url);
   if (!planaryAllowed(env)) return NextResponse.redirect(new URL("/login?fehler=planary", req.url));
   const flow = { state: randomId(16), nonce: "", verifier: "", returnTo: safeAppReturn(url.searchParams.get("app")) };
-  const res = NextResponse.redirect(planaryStartUrl(env.planaryUrl!, url.origin, url.searchParams.has("signup")));
+  const res = NextResponse.redirect(planaryStartUrl(env.planaryUrl!, url.origin, url.searchParams.has("signup") ? "signup" : url.searchParams.has("wechseln") ? "switch" : "login"));
   // Der Rücksprung zählt nur in dem Browser, der den Login begonnen hat.
   res.cookies.set({ name: FLOW_COOKIE, value: encodeFlow(flow), httpOnly: true, secure: env.isProd, sameSite: "lax", path: "/api/v1/auth", maxAge: 900 });
   return res;
@@ -37,7 +37,12 @@ export async function POST(req: Request) {
     res.cookies.set({ name: FLOW_COOKIE, value: "", path: "/api/v1/auth", maxAge: 0 });
     return res;
   };
-  if (!r.ok) return done(flow.returnTo ? withParam(flow.returnTo, "fehler", r.code === "foreign_account" ? "konto" : "planary") : `/login?fehler=${r.code === "foreign_account" ? "konto" : "planary"}`);
+  if (!r.ok) {
+    const code = r.code === "foreign_account" ? "konto" : "planary";
+    if (flow.returnTo) return done(withParam(flow.returnTo, "fehler", code));
+    // Abgelehnte Adresse zeigen, damit klar ist, mit welchem Konto Planary angemeldet war
+    return done(`/login?fehler=${code}&anbieter=planary${r.email ? `&adresse=${encodeURIComponent(r.email)}` : ""}`);
+  }
   if (flow.returnTo) return done(withParam(flow.returnTo, "code", await createLoginCode(env.db, r.sessionId, env.now)));
   const res = done("/");
   res.cookies.set(sessionCookie(r.sessionId, env.isProd));

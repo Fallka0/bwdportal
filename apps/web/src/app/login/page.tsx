@@ -9,12 +9,12 @@ import { LoginView } from "./LoginView";
 
 export const metadata: Metadata = { title: "Anmelden" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ fehler?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ fehler?: string; anbieter?: string; adresse?: string }> }) {
   const env = await serverEnv();
   if (await currentUserId(env)) redirect("/");
   const mock = mockAllowed(env);
   const accounts = mock ? await demoAccounts(env.db) : [];
-  const { fehler } = await searchParams;
+  const { fehler, anbieter, adresse } = await searchParams;
   return (
     <LoginView
       mock={mock}
@@ -23,6 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       accounts={accounts}
       emailPattern={config.school.emailPattern}
       initialError={fehler === "konto" || fehler === "microsoft" || fehler === "planary" ? fehler : null}
+      rejected={fehler === "konto" && anbieter === "planary" ? { provider: "planary", email: adresse?.slice(0, 120) ?? null } : null}
     />
   );
 }
