@@ -32,7 +32,7 @@ test("Benachrichtigungen: eine öffnen, dann alle als gelesen", async ({ page })
   await page.goto("/benachrichtigungen");
   await expect(page.locator(".nt.unread")).toHaveCount(3);
   await page.getByRole("button", { name: /Neue Note in Englisch/ }).click();
-  await expect(page).toHaveURL("/noten/EN");
+  await expect(page).toHaveURL(/\/noten\/EN/);
   await page.goto("/benachrichtigungen");
   await expect(page.locator(".nt.unread")).toHaveCount(2);
   await page.getByRole("button", { name: "Alle als gelesen markieren" }).click();
@@ -60,7 +60,7 @@ test("Suche findet Fach und Dokument", async ({ page }) => {
   await expect(page.getByText("Prüfungsplan BM-Abschluss 2027")).toBeVisible();
   await page.goto("/suche?q=mathe");
   await page.getByRole("link", { name: /Mathematik/ }).click();
-  await expect(page).toHaveURL("/noten/MA");
+  await expect(page).toHaveURL(/\/noten\/MA/);
 });
 
 test("Hilfe und Datenschutz ohne Anmeldung", async ({ browser }) => {

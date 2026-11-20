@@ -1354,3 +1354,62 @@
   gap: var(--sp-3);
   margin-top: var(--sp-2);
 }
+
+/* ---------- Noten (Notenportfolio) ---------- */
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-5);
+}
+
+.stack-s {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.box-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-bottom: var(--sp-3);
+}
+
+/* Ampeln wie im Notenportfolio: farbige Wörter, keine Pills */
+.st-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-7);
+  margin: 0 0 var(--sp-6);
+  font-size: var(--fs-m);
+}
+
+.efz-r {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 80px;
+  gap: var(--sp-5);
+  align-items: center;
+  min-height: 52px;
+  border-top: 1px solid var(--rule);
+}
+
+.efz-r:first-of-type {
+  border-top: 0;
+}
+
+.efz-p {
+  font-size: var(--fs-s);
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.efz-n {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.efz-v {
+  width: 80px;
+  min-height: 44px;
+  text-align: center;
+}

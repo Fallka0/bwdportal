@@ -1,7 +1,8 @@
-import { getGrades } from "@bwd/db";
+import { getPortfolioSemester } from "@bwd/db";
 import { withUser } from "@/lib/api";
 
+/** Ein BM-Semester des Notenportfolios (?semester=1 bis 6, sonst das laufende). */
 export const GET = withUser(({ env, userId, req }) => {
-  const sem = Number(new URL(req.url).searchParams.get("semester") ?? 1);
-  return getGrades(env.db, userId, sem === 2 ? 2 : 1);
+  const n = Number(new URL(req.url).searchParams.get("semester") ?? 0);
+  return getPortfolioSemester(env.db, userId, env.now, n || undefined);
 });

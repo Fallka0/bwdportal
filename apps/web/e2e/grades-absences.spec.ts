@@ -5,20 +5,50 @@ test.beforeEach(async ({ page }) => login(page));
 
 test("Note ansehen: von der Übersicht zur Mathematik-Note", async ({ page }) => {
   await page.getByRole("link", { name: /Mathematik.*Funktionen/ }).click();
-  await expect(page).toHaveURL("/noten/MA");
+  await expect(page).toHaveURL(/\/noten\/MA\?semester=5/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mathematik");
   await expect(page.getByText("Funktionen")).toBeVisible();
   await expect(page.getByText("Klasse 4.4").first()).toBeVisible();
 
   await page.goto("/noten");
-  await expect(page.getByText("4.9")).toBeVisible();
+  await expect(page.getByText("BM-Schnitt")).toBeVisible();
+  await expect(page.getByText("BM auf Kurs")).toBeVisible();
   await page.getByRole("link", { name: /Naturwissenschaften/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Naturwissenschaften");
 
-  await page.goto("/noten?semester=2");
-  await expect(page.getByText("Noch keine Noten im 2. Semester.")).toBeVisible();
-  await page.getByRole("link", { name: "1. Semester ansehen" }).click();
-  await expect(page).toHaveURL("/noten");
+  await page.goto("/noten?semester=6");
+  await expect(page.getByText("Noch keine Noten im 6. Semester.")).toBeVisible();
+});
+
+test("Note erfassen, bearbeiten und löschen", async ({ page }) => {
+  await page.goto("/noten/MA?semester=5");
+  await page.getByRole("link", { name: "Neue Note" }).first().click();
+  let dlg = page.getByRole("dialog", { name: "Neue Note" });
+  await dlg.getByLabel("Titel").fill("Kurzcheck Vektoren");
+  await dlg.getByLabel("Note").fill("5,5");
+  await dlg.getByLabel("Gewicht").fill("0.5");
+  await dlg.getByRole("button", { name: "Note speichern" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Note gespeichert." })).toBeVisible();
+  await expect(page.getByText("Kurzcheck Vektoren")).toBeVisible();
+
+  await page.getByRole("link", { name: "Kurzcheck Vektoren bearbeiten" }).click();
+  dlg = page.getByRole("dialog", { name: "Note bearbeiten" });
+  await dlg.getByLabel("Note").fill("6");
+  await dlg.getByRole("button", { name: "Note speichern" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Note geändert." })).toBeVisible();
+
+  await page.getByRole("link", { name: "Kurzcheck Vektoren bearbeiten" }).click();
+  dlg = page.getByRole("dialog", { name: "Note bearbeiten" });
+  await dlg.getByRole("button", { name: "Löschen" }).click();
+  await dlg.getByRole("button", { name: "Note wirklich löschen" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Note gelöscht." })).toBeVisible();
+  await expect(page.getByText("Kurzcheck Vektoren")).toHaveCount(0);
+});
+
+test("EFZ-Ansicht ohne Module zeigt den leeren Zustand", async ({ page }) => {
+  await page.goto("/noten?ansicht=efz");
+  await expect(page.getByText("Noch keine EFZ-Module.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Notenportfolio importieren" }).first()).toBeVisible();
 });
 
 test("Absenzen: Kontingent, Zustand pro Lektion, Filter nach Fach mit Fachkontingent", async ({ page }) => {

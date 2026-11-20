@@ -1,4 +1,3 @@
-import { fmtGrade } from "@bwd/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import type { Db } from "../src/client";
@@ -67,53 +66,85 @@ describe("Stundenplan", () => {
   });
 });
 
-describe("Noten", () => {
-  it("Kennzahlen 4.9, 25 Prüfungen, 1 ungenügend", async () => {
-    const g = await q.getGrades(db, U, 1);
-    expect(fmtGrade(g.average!)).toBe("4.9");
-    expect(g.examCount).toBe(25);
-    expect(g.insufficient).toBe(1);
-  });
-
-  it("Fächer mit Schnitt in der Reihenfolge des Designs", async () => {
-    const g = await q.getGrades(db, U, 1);
-    expect(g.subjects.map((s) => [s.code, fmtGrade(s.average!), s.examCount, s.teacher])).toEqual([
-      ["IN", "5.6", 4, "B. Schneider"],
-      ["EN", "5.4", 3, "J. Moret"],
-      ["DE", "5.2", 3, "C. Mäder"],
-      ["GP", "5.1", 2, "L. Weber"],
-      ["FRW", "5.0", 3, "T. Brunner"],
-      ["WR", "4.8", 3, "T. Brunner"],
-      ["MA", "4.6", 3, "R. Keller"],
-      ["FR", "4.3", 2, "A. Dupont"],
-      ["NW", "3.8", 2, "S. Graf"],
+describe("Noten (Notenportfolio)", () => {
+  it("laufendes Semester 5: Fächer mit Zeugnisnote auf 0.5, Informatik aus Modulen, BM-Schnitt", async () => {
+    const g = await q.getPortfolioSemester(db, U, NOW);
+    expect(g).toMatchObject({ n: 5, current: 5, label: "2026/27 Herbst", count: 25 });
+    // Reihenfolge der Vorlage (D, F, E, FRW, WR, MA, GP), dann weitere Fächer
+    expect(g.subjects.map((x) => [x.code, x.grade, x.count])).toEqual([
+      ["DE", 5, 3],
+      ["FR", 4.5, 2],
+      ["EN", 5.5, 3],
+      ["FRW", 5, 3],
+      ["WR", 5, 3],
+      ["MA", 4.5, 3],
+      ["GP", 5, 2],
+      ["NW", 4, 2],
     ]);
+    expect(g.modules).toMatchObject([{ module: "320", moduleName: "Objektorientiert programmieren", count: 4 }]);
+    expect(g.informatics).toEqual({ raw: 5.6, grade: 5.5 });
+    expect(g.summary).toMatchObject({ bm: 5, efz: 5.6, insufficient: 0, bmStatus: "ok", efzStatus: "ok", internship: "ok" });
+    expect(g.semesters.map((x) => x.n)).toEqual([5]);
   });
 
-  it("2. Semester ist leer", async () => {
-    const g = await q.getGrades(db, U, 2);
-    expect(g.subjects).toEqual([]);
-    expect(g.average).toBeNull();
+  it("anderes Semester ist leer", async () => {
+    const g = await q.getPortfolioSemester(db, U, NOW, 6);
+    expect(g).toMatchObject({ n: 6, count: 0, subjects: [], informatics: null });
+    expect(g.summary.bm).toBeNull();
   });
 
-  it("Mathematik: 3 Prüfungen, Schnitt 4.6, Klasse 4.4", async () => {
-    const m = await q.getSubjectGrades(db, U, "MA");
-    expect(m?.exams.map((e) => [e.title, e.date, e.value, e.weight, e.classAverage])).toEqual([
+  it("Mathematik: 3 Proben, Zeugnisnote 4.5, Klasse 4.4", async () => {
+    const m = await q.getPortfolioSubject(db, U, NOW, "MA");
+    expect(m?.entries.map((e) => [e.title, e.date, e.value, e.weight, e.classAverage])).toEqual([
       ["Funktionen", "2026-10-20", 4.5, 1, 4.4],
       ["Gleichungssysteme", "2026-09-22", 5, 1, 4.7],
       ["Prozentrechnen", "2026-09-01", 4, 0.5, 4.1],
     ]);
-    expect(fmtGrade(m!.average!)).toBe("4.6");
-    expect(fmtGrade(m!.classAverage!)).toBe("4.4");
+    expect(m?.raw).toBeCloseTo(4.6, 1);
+    expect(m?.grade).toBe(4.5);
+    expect(m?.classAverage).toBe(4.4);
   });
 
-  it("Neue Noten: Englisch 5.5, Mathematik 4.5, Naturwissenschaften 3.5", async () => {
-    const r = await q.recentGrades(db, U);
-    expect(r.map((x) => [x.subjectName, x.title, x.value])).toEqual([
-      ["Englisch", "Unit 4 Test", 5.5],
-      ["Mathematik", "Funktionen", 4.5],
-      ["Naturwissenschaften", "Zellbiologie", 3.5],
-    ]);
+  it("Probe erfassen, ändern, löschen; Informatik braucht ein Modul", async () => {
+    const e = await q.addPortfolioEntry(db, U, { semester: 5, subject: "MA", title: "Kurzcheck", value: 6, weight: 0.5 }, NOW);
+    expect(e).toMatchObject({ title: "Kurzcheck", date: null, enteredAt: NOW.date });
+    expect((await q.recentGrades(db, U, 1))[0]).toMatchObject({ title: "Kurzcheck", value: 6, semester: 5 });
+    const u = await q.updatePortfolioEntry(db, U, e.id, { semester: 5, subject: "MA", title: "Kurzcheck 1", value: 5.5, weight: 0.5, date: "2026-10-23" });
+    expect(u).toMatchObject({ title: "Kurzcheck 1", value: 5.5, date: "2026-10-23" });
+    await q.deletePortfolioEntry(db, U, e.id);
+    expect((await q.getPortfolioSubject(db, U, NOW, "MA"))?.entries).toHaveLength(3);
+    await expect(q.deletePortfolioEntry(db, DEMO_USERS.mia, "mg-e-ma-1")).rejects.toThrow("gibt es nicht");
+  });
+
+  it("Import ersetzt alles, EFZ-Übersicht", async () => {
+    const r = await q.importPortfolio(
+      db,
+      U,
+      {
+        firstName: "Selin",
+        lastName: "Hofer",
+        classCode: "IM24B",
+        startYear: 2024,
+        semesters: [
+          { n: 1, subjects: [{ subject: "D", module: null, entries: [{ title: "Aufsatz", value: 5, weight: 100 }] }] },
+          { n: 5, subjects: [{ subject: "IN", module: "306", entries: [{ title: "LB1", value: 5.5, weight: 1 }] }] },
+        ],
+        efz: [
+          { year: 1, place: "gibb", module: "431", name: "Aufträge durchführen", value: 5.5 },
+          { year: 3, place: "gibb", module: "306", name: "Kleinprojekte", value: null },
+          { year: 1, place: "uek", module: "187", name: "ICT-Arbeitsplatz", value: 6 },
+        ],
+      },
+      NOW,
+    );
+    expect(r).toEqual({ entries: 2, semesters: 2, efz: 3, nameMatches: true });
+    const g = await q.getPortfolioSemester(db, U, NOW);
+    expect(g.modules).toMatchObject([{ module: "306", moduleName: "Kleinprojekte", grade: 5.5 }]);
+    expect(g.semesters.map((x) => x.n)).toEqual([5, 1]);
+    const efz = await q.getEfz(db, U);
+    expect(efz).toMatchObject({ gibb: 5.5, uek: 6, total: 5.6, status: "ok" });
+    await q.setEfzValue(db, U, efz.modules.find((m) => m.module === "306")!.id, 6);
+    expect((await q.getEfz(db, U)).gibb).toBe(6);
   });
 });
 
@@ -282,7 +313,7 @@ describe("Leeres Konto (Mia Steiner)", () => {
   it("hat Stundenplan, aber keine Noten und Absenzen", async () => {
     const m = DEMO_USERS.mia;
     expect((await q.getTimetable(db, m, "2026-10-26", "2026-10-26", NOW)).lessons).toHaveLength(7);
-    expect((await q.getGrades(db, m, 1)).subjects).toEqual([]);
+    expect((await q.getPortfolioSemester(db, m, NOW)).subjects).toEqual([]);
     expect((await q.getAbsences(db, m)).items).toEqual([]);
     expect((await q.getSolPortfolio(db, m, NOW)).entries).toEqual([]);
   });

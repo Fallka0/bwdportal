@@ -168,10 +168,15 @@ export function buildSeed(): SeedData {
   // ---- Noten ----
   d.exams = [];
   d.grades = [];
+  // Eigene Noten (Notenportfolio): Herbst 2026/27 ist für IM24b das 5. BM-Semester
+  d.my_grades = [];
   const addExam = (subject: string, e: Ex, i: number) => {
     const id = `e-${subject.toLowerCase()}-${i + 1}`;
     d.exams!.push({ id, class_id: CLASS_ID, subject_code: subject, title: e[0], date: e[1], weight: e[3], semester: 1, class_average: e[4] });
     d.grades!.push({ id: `g-${id}`, exam_id: id, user_id: DEMO_USERS.selin, value: e[2] });
+    // Informatik zählt in der Vorlage über Module: die Beispielproben gehören zu Modul 320
+    const inf = subject === "IN";
+    d.my_grades!.push({ id: `mg-${id}`, user_id: DEMO_USERS.selin, semester: 5, subject, module: inf ? "320" : null, module_name: inf ? "Objektorientiert programmieren" : null, title: e[0], value: e[2], weight: e[3], date: e[1], entered_at: e[1], class_average: e[4], sort: i });
   };
   const ma: Ex[] = f.examsMath.map((e) => [e.title, parseCh(e.date), e.grade, e.weight, e.classAverage]);
   ma.forEach((e, i) => addExam("MA", e, i));
@@ -349,6 +354,8 @@ export const TABLE_ORDER = [
   "import_runs",
   "exams",
   "grades",
+  "my_grades",
+  "my_efz",
   "absences",
   "absence_lessons",
   "absence_notices",
