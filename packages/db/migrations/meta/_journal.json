@@ -57,6 +57,13 @@
       "when": 1795170715176,
       "tag": "0007_my_grades",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1795179332362,
+      "tag": "0008_roles_assignments",
+      "breakpoints": true
     }
   ]
 }

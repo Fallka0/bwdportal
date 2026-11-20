@@ -127,6 +127,7 @@ export async function getMe(db: Db, userId: string, now: Now = getNow()): Promis
     classCode: c?.code ?? "",
     program: c?.program ?? null,
     classTeacher: c?.classTeacher ?? null,
+    role: u.role === "teacher" ? "teacher" : "student",
     settings: await getSettings(db, userId),
     counts: { unreadNotifications: Number(unread?.n ?? 0), contingentAvailable: contingent.available, contingentSize: contingent.size, unreadNews },
   };
@@ -138,6 +139,7 @@ export async function createSession(db: Db, userId: string, now: Now, days = 30)
   const id = randomId();
   const expiresAt = `${addDays(now.date, days)}T${now.time}`;
   await db.insert(s.sessions).values({ id, userId, expiresAt });
+  await db.update(s.users).set({ lastLoginAt: now.stamp }).where(eq(s.users.id, userId));
   return { id, expiresAt };
 }
 
