@@ -14,7 +14,7 @@ describe("Verwaltung (admin.planary.ch)", () => {
     const all = await a.adminPeople(db);
     expect(all.map((p) => p.name)).toContain("Selin Hofer");
     expect((await a.adminPeople(db, { q: "hofer" })).map((p) => p.id)).toEqual([DEMO_USERS.selin]);
-    expect((await a.adminPeople(db, { role: "teacher" })).length).toBe(0);
+    expect((await a.adminPeople(db, { role: "teacher" })).map((p) => p.id)).toEqual([DEMO_USERS.teacher]);
     expect((await a.adminPeople(db, { classCode: "IM24b" })).length).toBe(2);
   });
 

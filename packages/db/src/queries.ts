@@ -52,6 +52,7 @@ import {
   type DocumentGroups,
   type DocumentItem,
   type Home,
+  type TeacherHome,
   type Lesson,
   type LinkItem,
   type Me,
@@ -81,7 +82,7 @@ const bool = (v: unknown) => v === true || v === 1;
 
 export async function demoAccounts(db: Db): Promise<DemoAccount[]> {
   const rows = await db.select({ u: s.users, c: s.classes }).from(s.users).leftJoin(s.classes, eq(s.users.classId, s.classes.id)).orderBy(asc(s.users.lastName));
-  return rows.map(({ u, c }) => ({ id: u.id, name: `${u.firstName} ${u.lastName}`, email: u.email, classCode: c?.code ?? null, school: u.email.endsWith(`@${config.school.emailDomain}`) }));
+  return rows.map(({ u, c }) => ({ id: u.id, name: `${u.firstName} ${u.lastName}`, email: u.email, classCode: c?.code ?? null, school: u.email.endsWith(`@${config.school.emailDomain}`), role: u.role === "teacher" ? ("teacher" as const) : ("student" as const) }));
 }
 
 export async function userById(db: Db, id: string) {
@@ -114,8 +115,12 @@ export async function getMe(db: Db, userId: string, now: Now = getNow()): Promis
   const row = (await db.select({ u: s.users, c: s.classes }).from(s.users).leftJoin(s.classes, eq(s.users.classId, s.classes.id)).where(eq(s.users.id, userId)).limit(1))[0];
   if (!row) return null;
   const { u, c } = row;
+  const teacher = u.role === "teacher";
   const [unread] = await db.select({ n: sql<number>`count(*)` }).from(s.notifications).where(and(eq(s.notifications.userId, userId), isNull(s.notifications.readAt)));
-  const { contingent } = await getAbsences(db, userId, now);
+  // Lehrpersonen haben kein Kontingent
+  const contingent = teacher ? { available: 0, size: 0 } : (await getAbsences(db, userId, now)).contingent;
+  const teaches = teacher ? (await teacherScope(db, userId)).map((a) => ({ classCode: a.classCode, subject: a.subject, subjectName: a.subjectName ?? a.subject })) : [];
+  const classTeacherOf = teacher ? (await db.select({ code: s.classes.code }).from(s.classes).where(eq(s.classes.classTeacherId, userId)).orderBy(asc(s.classes.code))).map((r) => r.code) : [];
   const unreadNews = (await getNews(db, userId)).filter((n) => n.unread).length;
   return {
     id: u.id,
@@ -127,7 +132,9 @@ export async function getMe(db: Db, userId: string, now: Now = getNow()): Promis
     classCode: c?.code ?? "",
     program: c?.program ?? null,
     classTeacher: c?.classTeacher ?? null,
-    role: u.role === "teacher" ? "teacher" : "student",
+    role: teacher ? "teacher" : "student",
+    teaches,
+    classTeacherOf,
     settings: await getSettings(db, userId),
     counts: { unreadNotifications: Number(unread?.n ?? 0), contingentAvailable: contingent.available, contingentSize: contingent.size, unreadNews },
   };
@@ -178,17 +185,44 @@ async function classOf(db: Db, userId: string): Promise<string | null> {
   return (await db.select({ c: s.users.classId }).from(s.users).where(eq(s.users.id, userId)).limit(1))[0]?.c ?? null;
 }
 
+/** Was eine Lehrperson unterrichtet (Klasse und Fach), sortiert nach Klasse und Fach. */
+export async function teacherScope(db: Db, userId: string) {
+  return db
+    .select({ classId: s.teacherAssignments.classId, classCode: s.classes.code, subject: s.teacherAssignments.subjectCode, subjectName: s.subjects.name, subjectShort: s.subjects.short })
+    .from(s.teacherAssignments)
+    .innerJoin(s.classes, eq(s.classes.id, s.teacherAssignments.classId))
+    .leftJoin(s.subjects, eq(s.subjects.code, s.teacherAssignments.subjectCode))
+    .where(eq(s.teacherAssignments.userId, userId))
+    .orderBy(asc(s.classes.code), asc(s.teacherAssignments.subjectCode));
+}
+
+/**
+ * Lektionen im Zeitraum. Lernende: die eigene Klasse. Lehrpersonen: die zugewiesenen Fächer ihrer Klassen,
+ * mit der Klasse an jeder Lektion.
+ */
 export async function lessonsBetween(db: Db, userId: string, from: string, to: string): Promise<Lesson[]> {
-  const classId = await classOf(db, userId);
-  if (!classId) return [];
+  const u = (await db.select({ classId: s.users.classId, role: s.users.role }).from(s.users).where(eq(s.users.id, userId)).limit(1))[0];
+  if (!u) return [];
+  let scope;
+  if (u.role === "teacher") {
+    const mine = await teacherScope(db, userId);
+    if (!mine.length) return [];
+    scope = or(...mine.map((a) => and(eq(s.lessons.classId, a.classId), eq(s.lessons.subjectCode, a.subject))));
+  } else {
+    if (!u.classId) return [];
+    scope = eq(s.lessons.classId, u.classId);
+  }
+  const teacher = u.role === "teacher";
   const rows = await db
-    .select({ l: s.lessons, sub: s.subjects, t: s.teachers })
+    .select({ l: s.lessons, sub: s.subjects, t: s.teachers, c: s.classes.code })
     .from(s.lessons)
+    .innerJoin(s.classes, eq(s.classes.id, s.lessons.classId))
     .leftJoin(s.subjects, eq(s.lessons.subjectCode, s.subjects.code))
     .leftJoin(s.teachers, eq(s.lessons.teacherCode, s.teachers.code))
-    .where(and(eq(s.lessons.classId, classId), gte(s.lessons.date, from), lte(s.lessons.date, to)))
-    .orderBy(asc(s.lessons.date), asc(s.lessons.startTime));
-  return rows.map(({ l, sub, t }) => ({
+    .where(and(scope, gte(s.lessons.date, from), lte(s.lessons.date, to)))
+    .orderBy(asc(s.lessons.date), asc(s.lessons.startTime), asc(s.classes.code));
+  return rows.map(({ l, sub, t, c }) => ({
+    ...(teacher ? { classCode: c } : {}),
     id: l.id,
     date: l.date,
     start: l.startTime,
@@ -697,14 +731,61 @@ export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
   };
 }
 
+/** Übersicht einer Lehrperson: heutige Lektionen, ihre Klassen mit Fächern und Mitteilungen. */
+export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<TeacherHome> {
+  const lessons = await lessonsBetween(db, userId, now.date, now.date);
+  const scope = await teacherScope(db, userId);
+  const own = await db.select({ id: s.classes.id, code: s.classes.code, program: s.classes.program }).from(s.classes).where(eq(s.classes.classTeacherId, userId));
+  const byClass = new Map<string, TeacherHome["classes"][number] & { id: string }>();
+  for (const a of scope) {
+    const c = byClass.get(a.classId) ?? { id: a.classId, code: a.classCode, program: null, subjects: [], students: 0, classTeacher: false };
+    c.subjects.push({ code: a.subject, name: a.subjectName ?? a.subject, short: a.subjectShort ?? a.subject });
+    byClass.set(a.classId, c);
+  }
+  for (const o of own) {
+    const c = byClass.get(o.id) ?? { id: o.id, code: o.code, program: null, subjects: [], students: 0, classTeacher: false };
+    c.classTeacher = true;
+    byClass.set(o.id, c);
+  }
+  const ids = [...byClass.keys()];
+  if (ids.length) {
+    const meta = await db.select({ id: s.classes.id, program: s.classes.program }).from(s.classes).where(inArray(s.classes.id, ids));
+    for (const m of meta) byClass.get(m.id)!.program = m.program;
+    const counts = await db
+      .select({ id: s.users.classId, n: sql<number>`count(*)` })
+      .from(s.users)
+      .where(and(inArray(s.users.classId, ids), eq(s.users.role, "student")))
+      .groupBy(s.users.classId);
+    for (const r of counts) if (r.id) byClass.get(r.id)!.students = Number(r.n);
+  }
+  return {
+    today: now.date,
+    now: now.time,
+    next: nextLesson(lessons, now.date, now.time),
+    lessons,
+    classes: [...byClass.values()].sort((a, b) => a.code.localeCompare(b.code)).map(({ id: _id, ...c }) => c),
+    news: (await getNews(db, userId)).slice(0, 3),
+  };
+}
+
 // ---------- Mitteilungen ----------
 
-/** Für alle oder für die eigene Klasse (Beispieldaten gehören zur Demo-Klasse). */
+/** Klassen einer Person: Lernende ihre Klasse, Lehrpersonen die zugewiesenen und die als Klassenlehrperson. */
+async function classesOf(db: Db, userId: string): Promise<string[]> {
+  const u = (await db.select({ classId: s.users.classId, role: s.users.role }).from(s.users).where(eq(s.users.id, userId)).limit(1))[0];
+  if (!u) return [];
+  if (u.role !== "teacher") return u.classId ? [u.classId] : [];
+  const assigned = (await teacherScope(db, userId)).map((a) => a.classId);
+  const own = (await db.select({ id: s.classes.id }).from(s.classes).where(eq(s.classes.classTeacherId, userId))).map((r) => r.id);
+  return [...new Set([...assigned, ...own])];
+}
+
+/** Für alle oder für die eigenen Klassen (Beispieldaten gehören zur Demo-Klasse). */
 async function visibleFor(db: Db, userId: string) {
-  const classId = await classOf(db, userId);
+  const ids = await classesOf(db, userId);
   return {
-    news: classId ? or(isNull(s.news.classId), eq(s.news.classId, classId)) : isNull(s.news.classId),
-    documents: classId ? or(isNull(s.documents.classId), eq(s.documents.classId, classId)) : isNull(s.documents.classId),
+    news: ids.length ? or(isNull(s.news.classId), inArray(s.news.classId, ids)) : isNull(s.news.classId),
+    documents: ids.length ? or(isNull(s.documents.classId), inArray(s.documents.classId, ids)) : isNull(s.documents.classId),
   };
 }
 

@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getHome } from "@bwd/db";
-import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtPeriods, fmtShort, fmtUntil, fmtWeekdayShort, greeting, isInsufficient, lessonRun, periodOf, plural, toMin, type Lesson } from "@bwd/shared";
+import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtShort, fmtWeekdayShort, greeting, isInsufficient, plural } from "@bwd/shared";
 import { Card, CardHead, Icon, LinkButton, ListRow, Status } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
+import { NextCard } from "./NextCard";
+import { TeacherHome } from "./TeacherHome";
 
 export const metadata: Metadata = { title: "Übersicht" };
 
 export default async function Home() {
   const { env, me } = await requireUser();
+  if (me.role === "teacher") return <TeacherHome env={env} me={me} />;
   const h = await getHome(env.db, me.id, env.now);
   return (
     <>
@@ -105,60 +108,5 @@ export default async function Home() {
         </div>
       </div>
     </>
-  );
-}
-
-function NextCard({ next, lessons, nowTime }: { next: Lesson | null; lessons: Lesson[]; nowTime: string }) {
-  if (!next) {
-    return (
-      <section className="next h-next" aria-labelledby="nx-h">
-        <span className="k" id="nx-h">
-          Als Nächstes
-        </span>
-        <p className="next-none">Heute keine weiteren Lektionen.</p>
-      </section>
-    );
-  }
-  const run = lessonRun(lessons, next);
-  const periods = run.map((l) => periodOf(l.start)).filter((p): p is number => p !== null);
-  const periodLabel = fmtPeriods(periods);
-  return (
-    <section className="next h-next" aria-labelledby="nx-h">
-      <span className="k" id="nx-h">
-        Als Nächstes · {fmtUntil(toMin(next.start) - toMin(nowTime))}
-      </span>
-      <div className="next-t">
-        <b>{next.subject?.name}</b>
-        <span>{next.start}</span>
-      </div>
-      <div className="next-m">
-        {next.room && (
-          <span>
-            <Icon name="door" small />
-            <span className="sr">Raum</span>
-            {next.room}
-          </span>
-        )}
-        {next.teacher && (
-          <span>
-            <Icon name="user" small />
-            <span className="sr">Lehrperson</span>
-            {next.teacher.name}
-          </span>
-        )}
-        {periods.length > 0 && (
-          <span>
-            <Icon name="clock" small />
-            {periodLabel}
-          </span>
-        )}
-      </div>
-      {next.state === "room_changed" && (
-        <div className="next-chg">
-          <Icon name="swap" small />
-          Raumänderung: {next.room} statt {next.originalRoom}
-        </div>
-      )}
-    </section>
   );
 }

@@ -53,6 +53,13 @@ export async function requireUser(): Promise<{ env: ServerEnv; me: Me }> {
   return { env, me };
 }
 
+/** Für Seiten nur für Lernende (Noten, SOL, Absenzen): Lehrpersonen gehen zur Übersicht. */
+export async function requireStudent(): Promise<{ env: ServerEnv; me: Me }> {
+  const r = await requireUser();
+  if (r.me.role === "teacher") redirect("/");
+  return r;
+}
+
 export function sessionCookie(value: string, isProd: boolean, maxAge = 60 * 60 * 24 * 30) {
   return { name: SESSION_COOKIE, value, httpOnly: true, secure: isProd, sameSite: "lax" as const, path: "/", maxAge };
 }

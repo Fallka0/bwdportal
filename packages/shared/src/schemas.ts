@@ -35,6 +35,10 @@ export const Me = z.object({
   counts: z.object({ unreadNotifications: z.number(), contingentAvailable: z.number(), contingentSize: z.number(), unreadNews: z.number() }),
   /** student oder teacher (admin.planary.ch) */
   role: z.enum(["student", "teacher"]).default("student"),
+  /** Lehrperson: Klassen und Fächer aus admin.planary.ch */
+  teaches: z.array(z.object({ classCode: z.string(), subject: z.string(), subjectName: z.string() })).default([]),
+  /** Lehrperson: Klassen, in denen sie Klassenlehrperson ist */
+  classTeacherOf: z.array(z.string()).default([]),
 });
 export type Me = z.infer<typeof Me>;
 
@@ -54,6 +58,8 @@ export const Lesson = z.object({
   room: z.string().nullable(),
   state: LessonState,
   originalRoom: z.string().nullable(),
+  /** Nur im Stundenplan einer Lehrperson: die Klasse der Lektion */
+  classCode: z.string().nullable().optional(),
 });
 export type Lesson = z.infer<typeof Lesson>;
 
@@ -319,7 +325,26 @@ export const Home = z.object({
 });
 export type Home = z.infer<typeof Home>;
 
-export const DemoAccount = z.object({ id: z.string(), name: z.string(), email: z.string(), classCode: z.string().nullable(), school: z.boolean() });
+export const TeacherClass = z.object({
+  code: z.string(),
+  program: z.string().nullable(),
+  subjects: z.array(Subject),
+  students: z.number(),
+  classTeacher: z.boolean(),
+});
+export type TeacherClass = z.infer<typeof TeacherClass>;
+
+export const TeacherHome = z.object({
+  today: date,
+  now: time,
+  next: Lesson.nullable(),
+  lessons: z.array(Lesson),
+  classes: z.array(TeacherClass),
+  news: z.array(NewsItem),
+});
+export type TeacherHome = z.infer<typeof TeacherHome>;
+
+export const DemoAccount = z.object({ id: z.string(), name: z.string(), email: z.string(), classCode: z.string().nullable(), school: z.boolean(), role: z.enum(["student", "teacher"]).default("student") });
 export type DemoAccount = z.infer<typeof DemoAccount>;
 
 export const ApiError = z.object({ error: z.object({ code: z.string(), message: z.string(), field: z.string().optional() }) });

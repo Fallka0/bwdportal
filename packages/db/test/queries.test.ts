@@ -24,7 +24,7 @@ describe("Konto", () => {
 
   it("Demo-Konten: Selin und Mia von der bwd", async () => {
     const acc = await q.demoAccounts(db);
-    expect(acc.map((a) => a.name)).toEqual(["Selin Hofer", "Mia Steiner"]);
+    expect(acc.map((a) => a.name)).toEqual(["Selin Hofer", "Regula Keller", "Mia Steiner"]);
     expect(acc.every((a) => a.school)).toBe(true);
   });
 

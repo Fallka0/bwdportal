@@ -456,7 +456,8 @@
   .h-next { order: 1; }
   .h-qa { order: 2; }
   .h-today { order: 3; }
-  .h-abs { order: 4; }
+  .h-abs,
+  .h-cls { order: 4; }
   .h-gr { order: 6; }
   .h-nw { order: 7; }
 

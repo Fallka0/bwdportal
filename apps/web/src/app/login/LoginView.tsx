@@ -153,7 +153,7 @@ export function LoginView({
                   <span>
                     <b>{a.name}</b>
                     <span className="s">
-                      {a.classCode} · {a.email}
+                      {a.role === "teacher" ? "Lehrperson" : a.classCode} · {a.email}
                     </span>
                   </span>
                   {busy === a.id ? <span className="spin" aria-hidden="true" /> : <Icon name="chev-r" small />}

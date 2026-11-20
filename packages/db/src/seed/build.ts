@@ -7,6 +7,7 @@
  * - Stundenplan der Wochen 41 bis 51 nach dem Muster der Woche 44. Raumänderung und Ausfall nur am 26.10.
  * - SOL-Blöcke 1 bis 3 mit allen Freitagen als SOL-Tage.
  * - Ein zweites Demo-Konto (Mia Steiner) ohne Noten und Absenzen, um Leerzustände zu zeigen.
+ * - Eine Demo-Lehrperson (Regula Keller): Mathematik in der Demo-Klasse, Klassenlehrperson.
  */
 import { addDays, config, toMin, weekday } from "@bwd/shared";
 import fixtures from "../../../../handoff/data/fixtures.json";
@@ -18,6 +19,7 @@ export const CLASS_ID = "c-im24b";
 export const DEMO_USERS = {
   selin: "u-selin",
   mia: "u-mia",
+  teacher: "u-keller",
 } as const;
 
 const TEACHERS: Record<string, string> = {
@@ -112,14 +114,17 @@ export function buildSeed(): SeedData {
   const d: SeedData = {};
 
   // ---- Stammdaten ----
-  d.classes = [{ id: CLASS_ID, code: f.user.classCode, program: f.user.program, class_teacher: f.user.classTeacher }];
+  d.classes = [{ id: CLASS_ID, code: f.user.classCode, program: f.user.program, class_teacher: f.user.classTeacher, class_teacher_id: DEMO_USERS.teacher }];
   d.users = [
     { id: DEMO_USERS.selin, email: f.user.email, first_name: f.user.firstName, last_name: f.user.name.split(" ").slice(1).join(" "), class_id: CLASS_ID, role: "student", created_at: "2026-08-10T08:00" },
     { id: DEMO_USERS.mia, email: `mia.steiner@${config.school.emailDomain}`, first_name: "Mia", last_name: "Steiner", class_id: CLASS_ID, role: "student", created_at: "2026-08-10T08:00" },
+    { id: DEMO_USERS.teacher, email: `regula.keller@${config.school.emailDomain}`, first_name: "Regula", last_name: "Keller", class_id: null, role: "teacher", created_at: "2026-08-01T08:00" },
   ];
+  d.teacher_assignments = [{ user_id: DEMO_USERS.teacher, class_id: CLASS_ID, subject_code: "MA" }];
   d.settings = [
     { user_id: DEMO_USERS.selin, theme: "system", n_timetable: 1, n_grades: 1, n_news: 1, n_absences: 1, n_email: 0 },
     { user_id: DEMO_USERS.mia, theme: "system", n_timetable: 1, n_grades: 1, n_news: 1, n_absences: 1, n_email: 0 },
+    { user_id: DEMO_USERS.teacher, theme: "system", n_timetable: 1, n_grades: 1, n_news: 1, n_absences: 1, n_email: 0 },
   ];
   d.subjects = f.subjects.map((s) => ({ code: s.code, name: s.name, short: s.short }));
   d.teachers = Object.entries(TEACHERS).map(([code, name]) => ({ code, name }));
@@ -345,6 +350,7 @@ export function buildSeed(): SeedData {
 export const TABLE_ORDER = [
   "classes",
   "users",
+  "teacher_assignments",
   "settings",
   "subjects",
   "teachers",

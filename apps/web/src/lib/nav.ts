@@ -24,6 +24,30 @@ export const NAV: { group: string; items: NavItem[] }[] = [
   },
 ];
 
+/** Lehrpersonen: ohne Noten, SOL und Absenzen der Lernenden. */
+export const TEACHER_NAV: { group: string; items: NavItem[] }[] = [
+  {
+    group: "Schule",
+    items: [
+      { href: "/", label: "Übersicht", icon: "home" },
+      { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+    ],
+  },
+  NAV[1]!,
+];
+
+export const TEACHER_TABS: NavItem[] = [
+  { href: "/", label: "Übersicht", icon: "home" },
+  { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+  { href: "/mehr", label: "Mehr", icon: "grid4" },
+];
+
+/** Nur für Lernende; Lehrpersonen werden zur Übersicht geleitet. */
+export const STUDENT_ONLY = ["/noten", "/sol", "/absenzen"];
+
+/** Zeile unter dem Namen: Klasse oder "Lehrperson". */
+export const roleLine = (me: { role: "student" | "teacher"; classCode: string }) => (me.role === "teacher" ? "Lehrperson" : me.classCode);
+
 export const TABS: NavItem[] = [
   { href: "/", label: "Übersicht", icon: "home" },
   { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
