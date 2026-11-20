@@ -123,15 +123,17 @@ export function lessonBlocks(lessons: Lesson[]): GridBlock[] {
     const room = l.room ?? "";
     const tcode = l.teacher?.code ?? "";
     const time = `${l.start} bis ${l.end}`;
+    // Stundenplan einer Lehrperson: Klasse statt Lehrperson
+    const cls = l.classCode ?? "";
     if (l.state === "sol") {
       return { id: l.id, start: l.start, end: l.end, kind: "sol", title: "SOL-Tag", sub: room || "Lernzone", label: `SOL-Tag, ${room || "Lernzone"}, ${time}` };
     }
     if (l.state === "cancelled") {
-      return { id: l.id, start: l.start, end: l.end, kind: "cancelled", title: name, titleShort: short, sub: "Entfällt", subShort: "Entfällt", label: `${name}, entfällt, ${time}` };
+      return { id: l.id, start: l.start, end: l.end, kind: "cancelled", title: name, titleShort: short, sub: cls ? `${cls} · Entfällt` : "Entfällt", subShort: "Entfällt", label: `${name}${cls ? `, ${cls}` : ""}, entfällt, ${time}` };
     }
     if (l.state === "room_changed") {
       const chg = `${room} statt ${l.originalRoom ?? ""}`.trim();
-      return { id: l.id, start: l.start, end: l.end, kind: "changed", title: name, titleShort: short, sub: chg, subShort: chg, label: `${name}, Raumänderung: ${chg}, ${time}` };
+      return { id: l.id, start: l.start, end: l.end, kind: "changed", title: name, titleShort: short, sub: cls ? `${cls} · ${chg}` : chg, subShort: chg, label: `${name}${cls ? `, ${cls}` : ""}, Raumänderung: ${chg}, ${time}` };
     }
     return {
       id: l.id,
@@ -140,9 +142,9 @@ export function lessonBlocks(lessons: Lesson[]): GridBlock[] {
       kind: "lesson",
       title: name,
       titleShort: short,
-      sub: [room, tcode].filter(Boolean).join(" · "),
-      subShort: room,
-      label: `${name}, ${room}${l.teacher ? `, ${l.teacher.name}` : ""}, ${time}`,
+      sub: (cls ? [cls, room] : [room, tcode]).filter(Boolean).join(" · "),
+      subShort: cls || room,
+      label: cls ? `${name}, ${cls}, ${room}, ${time}` : `${name}, ${room}${l.teacher ? `, ${l.teacher.name}` : ""}, ${time}`,
     };
   });
 }

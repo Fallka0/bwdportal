@@ -28,7 +28,7 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
   const dates = view === "woche" ? [0, 1, 2, 3, 4].map((i) => addDays(from, i)) : [date];
   if (view === "woche") {
     title = fmtRange(from, to);
-    sub = `Woche ${isoWeek(from)} · ${me.classCode}`;
+    sub = me.role === "teacher" ? `Woche ${isoWeek(from)}` : `Woche ${isoWeek(from)} · ${me.classCode}`;
     prev = href("woche", addDays(from, -7));
     next = href("woche", addDays(from, 7));
     isCurrent = mondayOf(today) === from;

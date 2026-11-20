@@ -4,18 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/brand/Brand";
 import { Icon } from "@/components/ui";
-import { isActive, NAV } from "@/lib/nav";
+import { isActive, NAV, TEACHER_NAV } from "@/lib/nav";
 
 type Counts = { notifications: number };
 
-export function Sidebar({ name, classCode, initials, counts }: { name: string; classCode: string; initials: string; counts: Counts }) {
+export function Sidebar({ name, classCode, initials, counts, teacher = false }: { name: string; classCode: string; initials: string; counts: Counts; teacher?: boolean }) {
   const path = usePathname();
+  const nav = teacher ? TEACHER_NAV : NAV;
   return (
     <aside className="sb" aria-label="Navigation">
       <div className="sb-brand">
         <Wordmark href="/" light />
       </div>
-      {NAV.map((g) => (
+      {nav.map((g) => (
         <nav key={g.group} aria-label={g.group}>
           <span className="sb-g">{g.group}</span>
           {g.items.map((n) => {

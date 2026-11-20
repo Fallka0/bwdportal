@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { roleLine } from "@/lib/nav";
 import { LogoutButton } from "./LogoutButton";
 import { ThemeSetting, NotificationSettings } from "./SettingsClient";
 import { CalendarSetting } from "./CalendarSetting";
@@ -29,7 +30,7 @@ export default async function Profile() {
             <div>
               <h2 id="pf-name">{me.name}</h2>
               <p>
-                {me.classCode} · {me.email}
+                {roleLine(me)} · {me.email}
               </p>
             </div>
           </section>
@@ -46,12 +47,23 @@ export default async function Profile() {
               Konto
             </h2>
             <dl className="kv">
-              <dt>Klasse</dt>
-              <dd>{me.classCode}</dd>
-              <dt>Lehrgang</dt>
-              <dd>{me.program ?? "–"}</dd>
-              <dt>Klassenlehrperson</dt>
-              <dd>{me.classTeacher ?? "–"}</dd>
+              {me.role === "teacher" ? (
+                <>
+                  <dt>Unterrichtet</dt>
+                  <dd>{me.teaches.length ? me.teaches.map((t) => `${t.subjectName} ${t.classCode}`).join(", ") : "–"}</dd>
+                  <dt>Klassenlehrperson</dt>
+                  <dd>{me.classTeacherOf.join(", ") || "–"}</dd>
+                </>
+              ) : (
+                <>
+                  <dt>Klasse</dt>
+                  <dd>{me.classCode}</dd>
+                  <dt>Lehrgang</dt>
+                  <dd>{me.program ?? "–"}</dd>
+                  <dt>Klassenlehrperson</dt>
+                  <dd>{me.classTeacher ?? "–"}</dd>
+                </>
+              )}
               <dt>Anmeldung</dt>
               <dd>{me.id.startsWith("u-ms-") ? "Microsoft-Schulkonto" : "Demo-Konto"}</dd>
             </dl>

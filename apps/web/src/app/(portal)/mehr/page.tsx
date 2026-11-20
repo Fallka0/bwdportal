@@ -12,11 +12,16 @@ export const metadata: Metadata = { title: "Mehr" };
 /** Übrige Bereiche mit Zähler (in der App über den Tab "Mehr"). */
 export default async function More() {
   const { me, env } = await requireUser();
-  const sol = await getSolCalendar(env.db, me.id, env.now);
-  const solSub = sol.day ? (sol.day.date === env.now.date ? "SOL-Tag heute" : daysBetween(env.now.date, sol.day.date) < 7 ? `SOL-Tag am ${WEEKDAYS[weekday(sol.day.date)]}` : "") : "";
+  const teacher = me.role === "teacher";
+  const sol = teacher ? null : await getSolCalendar(env.db, me.id, env.now);
+  const solSub = sol?.day ? (sol.day.date === env.now.date ? "SOL-Tag heute" : daysBetween(env.now.date, sol.day.date) < 7 ? `SOL-Tag am ${WEEKDAYS[weekday(sol.day.date)]}` : "") : "";
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
-    { href: "/sol", title: "SOL", sub: solSub, icon: "book" },
-    { href: "/absenzen", title: "Absenzen", sub: `Kontingent ${me.counts.contingentAvailable} von ${me.counts.contingentSize}`, icon: "clock", dot: me.counts.contingentAvailable === 0 },
+    ...(teacher
+      ? []
+      : [
+          { href: "/sol", title: "SOL", sub: solSub, icon: "book" as const },
+          { href: "/absenzen", title: "Absenzen", sub: `Kontingent ${me.counts.contingentAvailable} von ${me.counts.contingentSize}`, icon: "clock" as const, dot: me.counts.contingentAvailable === 0 },
+        ]),
     { href: "/mitteilungen", title: "Mitteilungen", sub: me.counts.unreadNews ? `${me.counts.unreadNews} neu` : "", icon: "megaphone" },
     { href: "/dokumente", title: "Dokumente", icon: "folder" },
     { href: "/links", title: "Links", icon: "grid4" },
