@@ -22,7 +22,7 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       { name: "Stundenplan", url: "/stundenplan" },
       { name: "Noten", url: "/noten" },
-      { name: "Absenz melden", url: "/absenzen?melden=1" },
+      { name: "Abmelden", url: "/absenzen?tab=abmeldungen&neu=abmeldung" },
     ],
   };
 }

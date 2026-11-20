@@ -103,5 +103,11 @@
   "absenceSystem": {
     "connected": false,
     "status": "Abmeldungen und Gesuche im Portal erreichen die Schule nicht; gemeldet wird in der Absenzendatenbank (services.absenzendatenbank). Auf true setzen, wenn die Schule das Portal dafür nutzt."
+  },
+  "app": {
+    "android": {
+      "version": "",
+      "status": "Version der APK in R2 (app/bwd-portal.apk); leer = noch keine, dann keine Download-Knöpfe"
+    }
   }
 }

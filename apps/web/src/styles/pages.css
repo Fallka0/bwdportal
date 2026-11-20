@@ -444,6 +444,8 @@
   .home-grid {
     display: flex;
     flex-direction: column;
+    /* sonst übernimmt die Spalte "start" vom Raster und Karten mit wenig Inhalt werden schmal */
+    align-items: stretch;
     gap: var(--sp-5);
   }
 
@@ -724,6 +726,7 @@
 
 .sg-h .done-n {
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .cal,
@@ -1412,4 +1415,28 @@
   width: 80px;
   min-height: 44px;
   text-align: center;
+}
+
+@media (max-width: 599px) {
+  /* Filter nach Fach: eine Zeile, seitlich scrollen statt umbrechen */
+  .ftabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-right: calc(-1 * var(--sp-7));
+    padding-right: var(--sp-7);
+  }
+
+  .ftabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ftabs a {
+    flex: none;
+  }
+
+  /* SOL-Fachkopf: Lehrperson weglassen, Name und Stand haben so Platz */
+  .sg-h > .s:not(.done-n) {
+    display: none;
+  }
 }

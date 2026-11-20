@@ -146,7 +146,7 @@ function NextCard({ h }: { h: Home }) {
 function QuickAccess() {
   const { c } = useTheme();
   const items: { icon: IconName; label: string; onPress: () => void }[] = [
-    { icon: "plus", label: "Absenz melden", onPress: () => router.navigate("/absenzen?melden=1") },
+    { icon: "plus", label: "Abmelden", onPress: () => router.navigate("/absenzen?neu=abmeldung") },
     { icon: "grid4", label: "Moodle", onPress: () => Linking.openURL(config.services.moodle) },
     { icon: "msg", label: "Teams", onPress: () => Linking.openURL(config.services.teams) },
     { icon: "book", label: "SOL", onPress: () => router.navigate("/sol") },

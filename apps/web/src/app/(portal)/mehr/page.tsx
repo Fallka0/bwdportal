@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { IconName } from "@bwd/shared/icons";
 import { getSolCalendar } from "@bwd/db";
 import { WEEKDAYS, daysBetween, weekday } from "@bwd/shared";
+import { AndroidAppLink } from "@/components/app/AndroidApp";
 import { Icon } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 
@@ -41,6 +42,7 @@ export default async function More() {
             <Icon name="chev-r" small className="chev" />
           </Link>
         ))}
+        <AndroidAppLink variant="row" />
       </nav>
     </>
   );

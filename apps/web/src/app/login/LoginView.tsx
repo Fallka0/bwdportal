@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { DemoAccount } from "@bwd/shared";
 import { MicrosoftLogo, Wordmark } from "@/components/brand/Brand";
+import { AndroidAppLink } from "@/components/app/AndroidApp";
 import { Banner, Dialog, Icon } from "@/components/ui";
 
 const FOREIGN = "foreign";
@@ -114,6 +115,7 @@ export function LoginView({
             <Link className="ul" href="/datenschutz">
               Datenschutz
             </Link>
+            <AndroidAppLink />
           </div>
         </div>
         <div className="lg-r" aria-hidden="true">
