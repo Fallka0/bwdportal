@@ -106,7 +106,7 @@
   },
   "app": {
     "android": {
-      "version": "",
+      "version": "0.1.0",
       "status": "Version der APK in R2 (app/bwd-portal.apk); leer = noch keine, dann keine Download-Knöpfe"
     }
   }
