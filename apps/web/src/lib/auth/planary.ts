@@ -65,7 +65,7 @@ export class PlanaryAuthProvider implements AuthProvider {
     const u = await planaryMe(this.env.planaryUrl, req.accessToken);
     if (!u) return { ok: false, code: "unknown_account", message: "Die Anmeldung mit Planary hat nicht geklappt. Versuche es nochmals." };
     if (!schoolEmail(u.email, this.env.extraDomains)) return { ok: false, code: "foreign_account", message: MSG_FOREIGN, email: u.email };
-    const user = await findOrCreateUser(this.env.db, { email: u.email, ...splitName(u.name, u.email), oid: `pl-${u.id}` }, this.env.now, this.env.defaultClass);
+    const user = await findOrCreateUser(this.env.db, { email: u.email, ...splitName(u.name, u.email), oid: `pl-${u.id}`, trustedName: false }, this.env.now, this.env.defaultClass);
     const s = await createSession(this.env.db, user.id, this.env.now);
     return { ok: true, sessionId: s.id, expiresAt: s.expiresAt };
   }

@@ -325,6 +325,15 @@ describe("Microsoft-Login", () => {
     expect((await q.getMe(db, neu.id))?.classCode).toBe("");
   });
 
+  it("Microsoft: Name aus dem Verzeichnis gewinnt (Umlaute), Planary: Name aus der Adresse", async () => {
+    const ms = await q.findOrCreateUser(db, { email: "lea.mueller@bwdbern.ch", firstName: "Lea", lastName: "Müller", oid: "m1", trustedName: true }, NOW);
+    expect(ms).toMatchObject({ firstName: "Lea", lastName: "Müller" });
+    // Später über Planary: "Müller" passt zur Adresse mueller und bleibt
+    expect(await q.findOrCreateUser(db, { email: "lea.mueller@bwdbern.ch", firstName: "x", lastName: "", oid: "p0" }, NOW)).toMatchObject({ lastName: "Müller" });
+    const nr = await q.findOrCreateUser(db, { email: "max.muster2@bwdbern.ch", firstName: "Gamer", lastName: "", oid: "p1" }, NOW);
+    expect(nr).toMatchObject({ firstName: "Max", lastName: "Muster" });
+  });
+
   it("Schuladresse: Name kommt aus der Adresse, auch wenn der Anbieter einen anderen schickt", async () => {
     const neu = await q.findOrCreateUser(db, { email: "anna-lena.de.la.cruz@bwdbern.ch", firstName: "xX", lastName: "gamer", oid: "n1" }, NOW);
     expect(neu).toMatchObject({ firstName: "Anna-Lena", lastName: "De La Cruz" });
