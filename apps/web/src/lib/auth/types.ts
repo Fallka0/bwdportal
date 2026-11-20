@@ -10,7 +10,7 @@ export type SignInRequest =
   /** Planary: Access-Token von auth.planary.ch (siehe planary.ts) */
   | { kind: "planary"; accessToken: string };
 
-export type SignInResult = { ok: true; sessionId: string; expiresAt: string } | { ok: false; code: "foreign_account" | "unknown_account" | "not_configured"; message: string };
+export type SignInResult = { ok: true; sessionId: string; expiresAt: string } | { ok: false; code: "foreign_account" | "unknown_account" | "not_configured"; message: string; email?: string };
 
 export interface AuthProvider {
   readonly name: "mock" | "microsoft" | "planary";

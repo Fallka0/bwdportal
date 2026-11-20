@@ -5,14 +5,13 @@ import { planaryMe, planaryStartUrl, schoolEmail, splitName } from "./planary";
 const BASE = "https://auth.planary.ch";
 
 describe("Planary-Login", () => {
-  it("Start: Anmelden mit Single Sign-on, Konto erstellen ohne, zurück auf /login/planary", () => {
-    const u = new URL(planaryStartUrl(BASE, "https://bwdportal.planary.ch", false));
+  it("Start ohne Single Sign-on (Planary fragt nach dem Konto), Konto erstellen, Konto wechseln", () => {
+    const u = new URL(planaryStartUrl(BASE, "https://bwdportal.planary.ch", "login"));
     expect(u.origin + u.pathname).toBe("https://auth.planary.ch/");
     expect(u.searchParams.get("returnTo")).toBe("https://bwdportal.planary.ch/login/planary");
-    expect(u.searchParams.get("auto")).toBe("1");
-    const s = new URL(planaryStartUrl(BASE, "http://localhost:3000", true));
-    expect(s.pathname).toBe("/signup");
-    expect(s.searchParams.has("auto")).toBe(false);
+    expect(u.searchParams.has("auto")).toBe(false);
+    expect(new URL(planaryStartUrl(BASE, "http://localhost:3000", "signup")).pathname).toBe("/signup");
+    expect(new URL(planaryStartUrl(BASE, "http://localhost:3000", "switch")).pathname).toBe("/logout");
   });
 
   it("prüft das Token bei /api/auth/me", async () => {

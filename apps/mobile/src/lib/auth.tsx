@@ -14,7 +14,7 @@ type SignInResult = { ok: true } | { ok: false; foreign: boolean; message: strin
 type Ctx = {
   status: Status;
   signIn: (accountId: string) => Promise<SignInResult>;
-  signInWith: (provider: "microsoft" | "planary", signup?: boolean) => Promise<SignInResult | { ok: false; cancelled: true }>;
+  signInWith: (provider: "microsoft" | "planary", mode?: "signup" | "switch") => Promise<SignInResult | { ok: false; cancelled: true }>;
   signOut: () => Promise<void>;
 };
 const AuthCtx = createContext<Ctx | null>(null);
@@ -68,10 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Login über das Portal (Microsoft oder Planary): der Server spricht mit dem Anbieter und schickt einen
    * Einmal-Code zurück an die App (bwdportal://auth oder in Expo Go exp://…/--/auth). Der Code wird gegen das Token getauscht.
    */
-  const signInWith = useCallback(async (provider: "microsoft" | "planary", signup = false) => {
+  const signInWith = useCallback(async (provider: "microsoft" | "planary", mode?: "signup" | "switch") => {
     const name = provider === "planary" ? "Planary" : "Microsoft";
     const returnUrl = Linking.createURL("auth");
-    const r = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/v1/auth/${provider}?app=${encodeURIComponent(returnUrl)}${signup ? "&signup=1" : ""}`, returnUrl);
+    const r = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/v1/auth/${provider}?app=${encodeURIComponent(returnUrl)}${mode === "signup" ? "&signup=1" : mode === "switch" ? "&wechseln=1" : ""}`, returnUrl);
     if (r.type !== "success") return { ok: false as const, cancelled: true as const };
     const params = new URL(r.url).searchParams;
     const fehler = params.get("fehler");

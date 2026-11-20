@@ -20,6 +20,8 @@ export default function Login() {
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [methods, setMethods] = useState<Methods | null>(null);
+  // Mit welchem Anbieter der letzte Versuch lief (für "Anderes Planary-Konto verwenden")
+  const [lastProvider, setLastProvider] = useState<"microsoft" | "planary" | null>(null);
 
   useEffect(() => {
     api
@@ -30,11 +32,12 @@ export default function Login() {
 
   if (status === "in") return <Redirect href="/" />;
 
-  async function login(provider: "microsoft" | "planary", signup = false) {
+  async function login(provider: "microsoft" | "planary", mode?: "signup" | "switch") {
     setOpen(false);
     setFailure("");
     setForeign(false);
-    const r = await signInWith(provider, signup);
+    setLastProvider(provider);
+    const r = await signInWith(provider, mode);
     if (r.ok) router.replace("/");
     else if (!("cancelled" in r)) {
       if (r.foreign) setForeign(true);
@@ -84,13 +87,14 @@ export default function Login() {
             Melde dich mit deiner Adresse {config.school.emailPattern} an.
           </Banner>
         )}
+        {foreign && lastProvider === "planary" && <LoginButton label="Anderes Planary-Konto verwenden" onPress={() => login("planary", "switch")} />}
         {!!failure && <Banner tone="err">{failure}</Banner>}
         {m?.planary && <LoginButton label="Mit Planary-Konto anmelden" primary onPress={() => login("planary")} />}
         {m?.microsoft && <LoginButton label="Mit Microsoft anmelden" microsoft primary={!m.planary} onPress={() => login("microsoft")} />}
         {m?.mock && <LoginButton label="Demo-Konto wählen" primary={!m.planary && !m.microsoft} onPress={openDemo} />}
         {m && !m.planary && !m.microsoft && !m.mock && <Banner tone="err">Die Anmeldung ist noch nicht eingerichtet.</Banner>}
         {m?.planary && (
-          <Pressable accessibilityRole="link" onPress={() => login("planary", true)} hitSlop={8} style={{ minHeight: size.touchMin, justifyContent: "center", alignSelf: "flex-start" }}>
+          <Pressable accessibilityRole="link" onPress={() => login("planary", "signup")} hitSlop={8} style={{ minHeight: size.touchMin, justifyContent: "center", alignSelf: "flex-start" }}>
             <T style={{ fontFamily: font.body600, fontSize: fs.m, textDecorationLine: "underline" }}>Planary-Konto erstellen</T>
           </Pressable>
         )}
