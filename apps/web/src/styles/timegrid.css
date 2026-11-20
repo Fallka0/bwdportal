@@ -364,8 +364,8 @@
   box-shadow: inset 0 0 0 1px var(--rule-strong);
 }
 
-/* ---------- Stundenplan-Seite ---------- */
-.tt-head .seg a {
+/* ---------- Stundenplan-Seite (Umschalter als Links, auch Prüfungen) ---------- */
+.seg a {
   display: inline-grid;
   place-items: center;
   height: 30px;
@@ -376,7 +376,7 @@
   text-decoration: none;
 }
 
-.tt-head .seg a[aria-current="page"] {
+.seg a[aria-current="page"] {
   background: var(--on-bg);
   color: var(--ink);
 }

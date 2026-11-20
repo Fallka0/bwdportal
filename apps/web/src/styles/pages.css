@@ -458,6 +458,7 @@
   .h-today { order: 3; }
   .h-abs,
   .h-cls { order: 4; }
+  .h-ts { order: 5; }
   .h-gr { order: 6; }
   .h-nw { order: 7; }
 
@@ -1454,4 +1455,82 @@
 
 .wish-r b {
   font: 400 var(--fs-h3) / 1 var(--font-display);
+}
+
+/* ---------- Prüfungen ---------- */
+.tst {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  gap: var(--sp-6);
+  align-items: start;
+  padding: var(--sp-6) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.tst:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.tst:last-child {
+  padding-bottom: 0;
+}
+
+.tst-d {
+  display: grid;
+  gap: var(--sp-1);
+  font-size: var(--fs-s);
+  color: var(--text2);
+}
+
+.tst-d b {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tst-r {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tst-b {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.tst-b b {
+  font-weight: 700;
+}
+
+.tst-b .s {
+  font-size: var(--fs-s);
+  color: var(--text2);
+}
+
+.tst-b p {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-m);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599px) {
+  .tst-head .ph-a {
+    display: none;
+  }
+
+  .tst {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+
+  .tst > :last-child:not(:empty) {
+    grid-column: 2;
+  }
+
+  .tst > :last-child:empty {
+    display: none;
+  }
 }

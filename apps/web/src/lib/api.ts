@@ -25,7 +25,7 @@ export function withUser(fn: Handler) {
       const out = await fn({ env, userId, req });
       return out instanceof Response ? out : json(out);
     } catch (e) {
-      if (e instanceof DomainError) return apiError(e.code === "not_found" ? 404 : 422, e.code, e.message, e.field);
+      if (e instanceof DomainError) return apiError(e.code === "not_found" ? 404 : e.code === "forbidden" ? 403 : 422, e.code, e.message, e.field);
       console.error(e);
       return apiError(500, "server", "Etwas ist schiefgelaufen. Versuche es nochmals.");
     }

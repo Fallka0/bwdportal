@@ -9,6 +9,7 @@ export const NAV: { group: string; items: NavItem[] }[] = [
       { href: "/", label: "Übersicht", icon: "home" },
       { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
       { href: "/noten", label: "Noten", icon: "chart" },
+      { href: "/pruefungen", label: "Prüfungen", icon: "note" },
       { href: "/sol", label: "SOL", icon: "book" },
       { href: "/absenzen", label: "Absenzen", icon: "clock" },
     ],
@@ -31,6 +32,7 @@ export const TEACHER_NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: "/", label: "Übersicht", icon: "home" },
       { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+      { href: "/pruefungen", label: "Prüfungen", icon: "note" },
     ],
   },
   NAV[1]!,
@@ -56,7 +58,7 @@ export const TABS: NavItem[] = [
 ];
 
 /** Bereiche, die in der App unter "Mehr" liegen. */
-export const IN_MORE = ["/mehr", "/sol", "/absenzen", "/mitteilungen", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/suche"];
+export const IN_MORE = ["/mehr", "/pruefungen", "/sol", "/absenzen", "/mitteilungen", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/suche"];
 
 export function isActive(href: string, path: string): boolean {
   if (href === "/") return path === "/";

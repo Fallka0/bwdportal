@@ -135,6 +135,8 @@ export function lessonBlocks(lessons: Lesson[]): GridBlock[] {
       const chg = `${room} statt ${l.originalRoom ?? ""}`.trim();
       return { id: l.id, start: l.start, end: l.end, kind: "changed", title: name, titleShort: short, sub: cls ? `${cls} · ${chg}` : chg, subShort: chg, label: `${name}${cls ? `, ${cls}` : ""}, Raumänderung: ${chg}, ${time}` };
     }
+    // Prüfung: vorne im Hinweis, damit sie auch in schmalen Blöcken sichtbar bleibt
+    const test = l.test ? "Prüfung" : "";
     return {
       id: l.id,
       start: l.start,
@@ -142,9 +144,9 @@ export function lessonBlocks(lessons: Lesson[]): GridBlock[] {
       kind: "lesson",
       title: name,
       titleShort: short,
-      sub: (cls ? [cls, room] : [room, tcode]).filter(Boolean).join(" · "),
-      subShort: cls || room,
-      label: cls ? `${name}, ${cls}, ${room}, ${time}` : `${name}, ${room}${l.teacher ? `, ${l.teacher.name}` : ""}, ${time}`,
+      sub: [test, ...(cls ? [cls, room] : [room, tcode])].filter(Boolean).join(" · "),
+      subShort: test || cls || room,
+      label: (cls ? `${name}, ${cls}, ${room}, ${time}` : `${name}, ${room}${l.teacher ? `, ${l.teacher.name}` : ""}, ${time}`) + (l.test ? `, Prüfung: ${l.test}` : ""),
     };
   });
 }

@@ -121,6 +121,11 @@ export function buildSeed(): SeedData {
     { id: DEMO_USERS.teacher, email: `regula.keller@${config.school.emailDomain}`, first_name: "Regula", last_name: "Keller", class_id: null, role: "teacher", created_at: "2026-08-01T08:00" },
   ];
   d.teacher_assignments = [{ user_id: DEMO_USERS.teacher, class_id: CLASS_ID, subject_code: "MA" }];
+  // Prüfungskalender: eine Prüfung der Lehrperson, eine eigene von Selin
+  d.tests = [
+    { id: "ts-ma-1", owner_id: DEMO_USERS.teacher, class_id: CLASS_ID, subject_code: "MA", date: "2026-10-29", title: "Lineare Funktionen", description: "Kapitel 4 und 5, Taschenrechner erlaubt", created_at: "2026-10-19T16:00", updated_at: "2026-10-19T16:00" },
+    { id: "ts-en-1", owner_id: DEMO_USERS.selin, class_id: null, subject_code: "EN", date: "2026-11-04", title: "Vocabulary Unit 6", description: null, created_at: "2026-10-22T19:00", updated_at: "2026-10-22T19:00" },
+  ];
   d.settings = [
     { user_id: DEMO_USERS.selin, theme: "system", n_timetable: 1, n_grades: 1, n_news: 1, n_absences: 1, n_email: 0 },
     { user_id: DEMO_USERS.mia, theme: "system", n_timetable: 1, n_grades: 1, n_news: 1, n_absences: 1, n_email: 0 },
@@ -352,6 +357,7 @@ export const TABLE_ORDER = [
   "users",
   "teacher_assignments",
   "settings",
+  "tests",
   "subjects",
   "teachers",
   "class_subjects",

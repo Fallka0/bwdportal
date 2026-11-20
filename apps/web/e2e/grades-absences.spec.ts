@@ -4,7 +4,7 @@ import { login } from "./helpers";
 test.beforeEach(async ({ page }) => login(page));
 
 test("Note ansehen: von der Übersicht zur Mathematik-Note", async ({ page }) => {
-  await page.getByRole("link", { name: /Mathematik.*Funktionen/ }).click();
+  await page.getByRole("region", { name: "Neue Noten" }).getByRole("link", { name: /Mathematik.*Funktionen/ }).click();
   await expect(page).toHaveURL(/\/noten\/MA\?semester=5/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mathematik");
   await expect(page.getByText("Funktionen")).toBeVisible();
