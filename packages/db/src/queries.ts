@@ -25,6 +25,8 @@ import {
   fmtGrade,
   initials,
   isNewDocument,
+  nameFromSchoolEmail,
+  nameMatchesAddress,
   round1,
   weightedAverage,
   type Absence,
@@ -777,16 +779,36 @@ export async function userByEmail(db: Db, email: string) {
  * Klasse: classCode (Standardklasse aus der Konfiguration), bis die Zuordnung aus dem Schulsystem kommt.
  * Ein bestehendes Konto ohne Klasse bekommt sie beim nächsten Login.
  */
-export async function findOrCreateUser(db: Db, claims: { email: string; firstName: string; lastName: string; oid: string }, now: Now, classCode?: string | null) {
+/**
+ * Konto zur E-Mail finden oder anlegen. Name: aus dem Verzeichnis der Schule (Microsoft, `trustedName`),
+ * sonst bei Schuladressen aus der Adresse vorname.nachname, sonst vom Anbieter. Jede Anmeldung gleicht den Namen
+ * an, damit niemand einen anderen Namen behält.
+ */
+export async function findOrCreateUser(
+  db: Db,
+  claims: { email: string; firstName: string; lastName: string; oid: string; trustedName?: boolean },
+  now: Now,
+  classCode?: string | null,
+) {
   const classId = classCode ? await ensureClass(db, classCode) : null;
+  const names = claims.trustedName
+    ? { firstName: claims.firstName, lastName: claims.lastName }
+    : (nameFromSchoolEmail(claims.email) ?? { firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName });
   const existing = await userByEmail(db, claims.email);
   if (existing) {
-    if (existing.classId || !classId) return existing;
-    await db.update(s.users).set({ classId }).where(eq(s.users.id, existing.id));
+    const fix: Partial<typeof s.users.$inferInsert> = {};
+    // Verzeichnisname gilt immer. Ein Name aus der Adresse ersetzt nur Namen, die nicht zur Adresse passen
+    // (so bleibt "Müller" aus dem Verzeichnis, wenn dieselbe Person später über Planary kommt).
+    const fromAddress = nameFromSchoolEmail(claims.email);
+    const changed = existing.firstName !== names.firstName || existing.lastName !== names.lastName;
+    if (changed && (claims.trustedName || (fromAddress && !nameMatchesAddress(existing, fromAddress)))) Object.assign(fix, names);
+    if (!existing.classId && classId) fix.classId = classId;
+    if (!Object.keys(fix).length) return existing;
+    await db.update(s.users).set(fix).where(eq(s.users.id, existing.id));
     return (await userById(db, existing.id))!;
   }
   const id = `u-ms-${claims.oid}`;
-  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId, role: "student", createdAt: now.stamp });
+  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), ...names, classId, role: "student", createdAt: now.stamp });
   await db.insert(s.settings).values({ userId: id }).onConflictDoNothing();
   return (await userById(db, id))!;
 }

@@ -6,7 +6,7 @@ export type SignInRequest =
   /** Mock: gewähltes Demo-Konto. "foreign" simuliert ein Konto, das nicht zur Schule gehört. */
   | { kind: "mock"; accountId: string }
   /** Microsoft: geprüfte Angaben aus dem ID-Token (siehe microsoft.ts) */
-  | { kind: "oidc"; claims: { email: string; firstName: string; lastName: string; oid: string } }
+  | { kind: "oidc"; claims: { email: string; firstName: string; lastName: string; oid: string; trustedName: boolean } }
   /** Planary: Access-Token von auth.planary.ch (siehe planary.ts) */
   | { kind: "planary"; accessToken: string };
 

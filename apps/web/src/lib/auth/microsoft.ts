@@ -1,7 +1,7 @@
 import "server-only";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { createSession, deleteSession, findOrCreateUser, randomId, sessionUser } from "@bwd/db";
-import { config } from "@bwd/shared";
+import { config, nameFromSchoolEmail } from "@bwd/shared";
 import type { ServerEnv } from "../env";
 import { MSG_FOREIGN, type AuthProvider, type SignInRequest, type SignInResult } from "./types";
 
@@ -51,7 +51,7 @@ export function authorizeUrl(ms: MsSettings, o: { redirectUri: string; state: st
   return u.toString();
 }
 
-export type MsClaims = { email: string; firstName: string; lastName: string; oid: string };
+export type MsClaims = { email: string; firstName: string; lastName: string; oid: string; trustedName: boolean };
 
 /** Code gegen ID-Token tauschen und das Token prüfen. */
 export async function redeemCode(ms: MsSettings, o: { code: string; verifier: string; redirectUri: string; nonce: string }): Promise<MsClaims> {
@@ -68,10 +68,15 @@ export async function redeemCode(ms: MsSettings, o: { code: string; verifier: st
   if (payload.nonce !== o.nonce) throw new Error("Nonce stimmt nicht");
   const email = String(payload.email ?? payload.preferred_username ?? "").toLowerCase();
   const name = String(payload.name ?? "");
+  // Name aus dem Verzeichnis der Schule (mit Umlauten und Doppelnamen); fehlt er, aus der Adresse
+  const school = nameFromSchoolEmail(email);
+  const given = String(payload.given_name ?? "").trim();
+  const family = String(payload.family_name ?? "").trim();
   return {
     email,
-    firstName: String(payload.given_name ?? name.split(" ")[0] ?? ""),
-    lastName: String(payload.family_name ?? name.split(" ").slice(1).join(" ")),
+    firstName: given || school?.firstName || (name.split(" ")[0] ?? ""),
+    lastName: family || school?.lastName || name.split(" ").slice(1).join(" "),
+    trustedName: !!(given && family),
     oid: String(payload.oid ?? payload.sub ?? randomId(8)),
   };
 }

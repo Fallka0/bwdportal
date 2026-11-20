@@ -28,9 +28,10 @@ describe("Planary-Login", () => {
     expect(schoolEmail("a.b@gmail.com", ["gmail.com"])).toBe(true);
   });
 
-  it("Name aus Planary oder aus der Adresse", () => {
-    expect(splitName("Mykyta Pantelei", "x@bwdbern.ch")).toEqual({ firstName: "Mykyta", lastName: "Pantelei" });
-    expect(splitName("", "selin.hofer@bwdbern.ch")).toEqual({ firstName: "Selin", lastName: "Hofer" });
+  it("Schuladresse: Name immer aus der Adresse, sonst von Planary", () => {
+    expect(splitName("xX_gamer_Xx", "mykyta.pantelei@bwdbern.ch")).toEqual({ firstName: "Mykyta", lastName: "Pantelei" });
+    expect(splitName("", "anna-lena.de.la.cruz@bwdbern.ch")).toEqual({ firstName: "Anna-Lena", lastName: "De La Cruz" });
+    expect(splitName("Max Muster", "max@gmail.com")).toEqual({ firstName: "Max", lastName: "Muster" });
   });
 
   it("AUTH_METHODS, früheres AUTH_MODE gilt weiter", () => {

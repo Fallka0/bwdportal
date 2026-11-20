@@ -211,3 +211,36 @@ export function fmtBytes(n: number): string {
   if (n >= 1_000_000) return `${Math.round(n / 1_000_000)} MB`;
   return `${Math.max(1, Math.round(n / 1000))} KB`;
 }
+
+/**
+ * Name aus der Schuladresse vorname.nachname@bwdbern.ch: "anna-lena.de.la.cruz" → Anna-Lena, De La Cruz,
+ * "max.muster2" → Max, Muster.
+ * Null, wenn die Adresse nicht diesem Muster folgt.
+ */
+export function nameFromSchoolEmail(email: string): { firstName: string; lastName: string } | null {
+  const [local = "", domain = ""] = email.toLowerCase().split("@");
+  if (domain !== config.school.emailDomain.toLowerCase()) return null;
+  // Doppelte Namen nummeriert die Schule (max.muster2@): Ziffern gehören nicht zum Namen
+  const parts = local.replace(/\d+$/, "").split(".").filter(Boolean);
+  if (parts.length < 2 || parts.some((p) => !/^[\p{L}-]+$/u.test(p))) return null;
+  const word = (w: string) =>
+    w
+      .split("-")
+      .map((p) => (p ? p[0]!.toUpperCase() + p.slice(1) : p))
+      .join("-");
+  return { firstName: word(parts[0]!), lastName: parts.slice(1).map(word).join(" ") };
+}
+
+/** Passt ein Name zur Adresse? Umlaute und Akzente zählen gleich (Müller = mueller, Zoé = zoe). */
+export function nameMatchesAddress(name: { firstName: string; lastName: string }, fromAddress: { firstName: string; lastName: string }): boolean {
+  const norm = (v: string) =>
+    v
+      .toLowerCase()
+      .replace(/ä/g, "ae")
+      .replace(/ö/g, "oe")
+      .replace(/ü/g, "ue")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z]/g, "");
+  return norm(`${name.firstName}${name.lastName}`) === norm(`${fromAddress.firstName}${fromAddress.lastName}`);
+}
