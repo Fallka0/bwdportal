@@ -48,9 +48,9 @@ export default async function Home() {
               Schnellzugriff
             </h2>
             <div className="qa">
-              <Link href="/absenzen?melden=1">
+              <Link href="/absenzen?tab=abmeldungen&neu=abmeldung">
                 <Icon name="plus" />
-                Absenz melden
+                Abmelden
               </Link>
               <a href={config.services.moodle} target="_blank" rel="noopener noreferrer">
                 <Icon name="grid4" />

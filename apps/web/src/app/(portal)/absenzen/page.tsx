@@ -60,7 +60,7 @@ export default async function Absences({ searchParams }: { searchParams: Promise
   const kind = tab === "dispensationen" ? "gesuch" : "abmeldung";
 
   return (
-    <>
+    <div className="tt-head">
       <div className="ph">
         <h1>Absenzen</h1>
         <div className="ph-a">
@@ -69,9 +69,9 @@ export default async function Absences({ searchParams }: { searchParams: Promise
       </div>
       <Kpis
         items={[
-          { label: "Gefehlte Lektionen", value: c.missed },
-          { label: `Verfügbares Kontingent von ${c.size}`, value: c.available, tone: c.available === 0 ? "err" : c.available <= 3 ? "warn" : undefined },
-          { label: "Bezogenes Kontingent", value: c.used, tone: c.used > c.size ? "err" : undefined },
+          { label: "Gefehlt", value: c.missed },
+          { label: `Übrig von ${c.size}`, value: c.available, tone: c.available === 0 ? "err" : c.available <= 3 ? "warn" : undefined },
+          { label: "Bezogen", value: c.used, tone: c.used > c.size ? "err" : undefined },
         ]}
       />
       <nav className="stabs" aria-label="Absenzen">
@@ -149,7 +149,7 @@ export default async function Absences({ searchParams }: { searchParams: Promise
           </section>
         ))}
       <NoticeForms today={env.now.date} tab={tab} notices={a.notices} dispensations={a.dispensations} />
-    </>
+    </div>
   );
 }
 

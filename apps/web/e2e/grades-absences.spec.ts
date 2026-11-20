@@ -53,7 +53,7 @@ test("EFZ-Ansicht ohne Module zeigt den leeren Zustand", async ({ page }) => {
 
 test("Absenzen: Kontingent, Zustand pro Lektion, Filter nach Fach mit Fachkontingent", async ({ page }) => {
   await page.goto("/absenzen");
-  await expect(page.getByText("Verfügbares Kontingent von 20")).toBeVisible();
+  await expect(page.getByText("Übrig von 20")).toBeVisible();
   await expect(page.getByText("ohne Abmeldung doppelt").first()).toBeVisible();
   await expect(page.getByText("Dispensiert").filter({ visible: true })).toHaveCount(1);
   await page.getByRole("link", { name: "Sport" }).click();

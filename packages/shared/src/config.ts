@@ -14,5 +14,7 @@ export const config = raw as {
   absenceContingent: { lessons: number; per: "semester" };
   /** true, sobald die Schule Abmeldungen und Gesuche im Portal entgegennimmt; bis dahin Hinweis auf die Absenzendatenbank */
   absenceSystem: { connected: boolean };
+  /** Android-App zum Herunterladen (APK in R2); leere Version = noch keine */
+  app: { android: { version: string } };
   secondSemesterStart: string;
 };
