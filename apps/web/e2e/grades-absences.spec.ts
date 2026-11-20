@@ -63,6 +63,9 @@ test("Absenzen: Kontingent, Zustand pro Lektion, Filter nach Fach mit Fachkontin
 
 test("Abmeldung eintragen, bearbeiten und löschen", async ({ page }) => {
   await page.goto("/absenzen?tab=abmeldungen");
+  // Solange die Schule das Portal nicht anbindet: Hinweis auf die Absenzendatenbank
+  await expect(page.getByText("Nur im Portal gespeichert.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Absenzendatenbank öffnen" })).toHaveAttribute("href", "https://absenzen.bwdbern.ch/lernende_anzeigen");
   await page.getByRole("link", { name: "Neue Abmeldung" }).first().click();
   let dlg = page.getByRole("dialog", { name: "Abmeldung eintragen" });
   await dlg.getByLabel("Von").selectOption("9");

@@ -4,7 +4,7 @@ import raw from "../../../config/portal.json";
 export const config = raw as {
   portalUrl: string;
   school: { name: string; website: string; emailDomain: string; emailPattern: string };
-  services: { webuntis: string; moodle: string; sharepointSol: string; mediothek: string; teams: string; outlook: string; onedrive: string; onenote: string };
+  services: { webuntis: string; moodle: string; sharepointSol: string; mediothek: string; teams: string; outlook: string; onedrive: string; onenote: string; absenzendatenbank?: string };
   periods: { n: number; from: string; to: string }[];
   lunch: { from: string; to: string };
   solLunch: { from: string; to: string };
@@ -12,5 +12,7 @@ export const config = raw as {
   homeGridEnd: string;
   /** Kontingent: Lektionen, die pro Semester ohne Dispensation fehlen dürfen */
   absenceContingent: { lessons: number; per: "semester" };
+  /** true, sobald die Schule Abmeldungen und Gesuche im Portal entgegennimmt; bis dahin Hinweis auf die Absenzendatenbank */
+  absenceSystem: { connected: boolean };
   secondSemesterStart: string;
 };

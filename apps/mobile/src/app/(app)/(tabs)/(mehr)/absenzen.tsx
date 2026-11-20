@@ -3,14 +3,14 @@ import { ApiFailure } from "@bwd/shared/api";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams } from "expo-router";
 import { useState, type ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { Linking, Pressable, View } from "react-native";
 import { api, API_URL } from "@/lib/api";
 import { useMe } from "@/lib/me";
 import { useApi } from "@/lib/useApi";
 import { storage } from "@/lib/storage";
 import { ErrorState, Screen } from "@/shell/Screen";
 import { font, fs, radius, size, sp, useTheme } from "@/theme";
-import { Button, Card, Empty, Icon, Kpis, SelectField, Sheet, SkBox, SkeletonArea, Status, T, TextField, TextTabs, useToast, type StatusTone } from "@/ui";
+import { Banner, Button, Card, Empty, Icon, Kpis, SelectField, Sheet, SkBox, SkeletonArea, Status, T, TextField, TextTabs, useToast, type StatusTone } from "@/ui";
 
 type Tab = "absenzen" | "abmeldungen" | "dispensationen";
 type Reason = (typeof DISPENSATION_REASONS)[number];
@@ -47,6 +47,7 @@ function countLine(lessons: Absence["lessons"]) {
 }
 
 export default function Absences() {
+  const { c: colors } = useTheme();
   const params = useLocalSearchParams<{ neu?: string }>();
   const abs = useApi(() => api.absences(), [], { cache: "absences" });
   const clock = useApi(() => api.home(), [], { cache: "home" });
@@ -99,6 +100,14 @@ export default function Absences() {
             onPress={() => setEditing(tab === "dispensationen" ? { kind: "dispensation" } : { kind: "notice" })}
             style={{ marginVertical: sp[5] }}
           />
+          {tab !== "absenzen" && !config.absenceSystem.connected && (
+            <Banner action={config.services.absenzendatenbank ? <Button label="Absenzendatenbank öffnen" variant="line" small onPress={() => Linking.openURL(config.services.absenzendatenbank!)} /> : undefined}>
+              <T v="strong" style={{ color: colors.warn }}>
+                Nur im Portal gespeichert.
+              </T>{" "}
+              Die Schule sieht {tab === "abmeldungen" ? "Abmeldungen" : "Gesuche"} nur in der Absenzendatenbank, trage sie dort ein.
+            </Banner>
+          )}
           {tab === "absenzen" && <AbsenceList items={d.items} subjects={d.subjects} fach={fach} setFach={setFach} />}
           {tab === "abmeldungen" &&
             (d.notices.length === 0 ? (
