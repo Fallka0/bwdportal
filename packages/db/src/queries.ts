@@ -25,6 +25,7 @@ import {
   fmtGrade,
   initials,
   isNewDocument,
+  nameFromSchoolEmail,
   round1,
   weightedAverage,
   type Absence,
@@ -781,12 +782,18 @@ export async function findOrCreateUser(db: Db, claims: { email: string; firstNam
   const classId = classCode ? await ensureClass(db, classCode) : null;
   const existing = await userByEmail(db, claims.email);
   if (existing) {
-    if (existing.classId || !classId) return existing;
-    await db.update(s.users).set({ classId }).where(eq(s.users.id, existing.id));
+    // Schuladressen: Name folgt der Adresse (korrigiert Konten, die vorher einen anderen Namen bekamen)
+    const school = nameFromSchoolEmail(existing.email);
+    const fix: Partial<typeof s.users.$inferInsert> = {};
+    if (school && (existing.firstName !== school.firstName || existing.lastName !== school.lastName)) Object.assign(fix, school);
+    if (!existing.classId && classId) fix.classId = classId;
+    if (!Object.keys(fix).length) return existing;
+    await db.update(s.users).set(fix).where(eq(s.users.id, existing.id));
     return (await userById(db, existing.id))!;
   }
   const id = `u-ms-${claims.oid}`;
-  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName, classId, role: "student", createdAt: now.stamp });
+  const names = nameFromSchoolEmail(claims.email) ?? { firstName: claims.firstName || claims.email.split("@")[0]!, lastName: claims.lastName };
+  await db.insert(s.users).values({ id, email: claims.email.toLowerCase(), ...names, classId, role: "student", createdAt: now.stamp });
   await db.insert(s.settings).values({ userId: id }).onConflictDoNothing();
   return (await userById(db, id))!;
 }

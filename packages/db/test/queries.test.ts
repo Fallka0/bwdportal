@@ -1,5 +1,6 @@
 import { fmtGrade } from "@bwd/shared";
 import { beforeEach, describe, expect, it } from "vitest";
+import { eq } from "drizzle-orm";
 import type { Db } from "../src/client";
 import * as q from "../src/queries";
 import * as schema from "../src/schema";
@@ -322,6 +323,14 @@ describe("Microsoft-Login", () => {
     const neu = await q.findOrCreateUser(db, { email: "lena.muster@bwdbern.ch", firstName: "Lena", lastName: "Muster", oid: "abc" }, NOW);
     expect(neu).toMatchObject({ id: "u-ms-abc", firstName: "Lena", classId: null });
     expect((await q.getMe(db, neu.id))?.classCode).toBe("");
+  });
+
+  it("Schuladresse: Name kommt aus der Adresse, auch wenn der Anbieter einen anderen schickt", async () => {
+    const neu = await q.findOrCreateUser(db, { email: "anna-lena.de.la.cruz@bwdbern.ch", firstName: "xX", lastName: "gamer", oid: "n1" }, NOW);
+    expect(neu).toMatchObject({ firstName: "Anna-Lena", lastName: "De La Cruz" });
+    // Bestehendes Konto mit falschem Namen wird beim nächsten Login korrigiert
+    await db.update(schema.users).set({ firstName: "Cool", lastName: "Name" }).where(eq(schema.users.id, neu.id));
+    expect(await q.findOrCreateUser(db, { email: "anna-lena.de.la.cruz@bwdbern.ch", firstName: "Cool", lastName: "Name", oid: "n1" }, NOW)).toMatchObject({ firstName: "Anna-Lena", lastName: "De La Cruz" });
   });
 
   it("legt neue Konten in die Standardklasse und ergänzt sie bei Konten ohne Klasse", async () => {

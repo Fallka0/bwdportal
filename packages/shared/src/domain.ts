@@ -211,3 +211,20 @@ export function fmtBytes(n: number): string {
   if (n >= 1_000_000) return `${Math.round(n / 1_000_000)} MB`;
   return `${Math.max(1, Math.round(n / 1000))} KB`;
 }
+
+/**
+ * Name aus der Schuladresse vorname.nachname@bwdbern.ch: "anna-lena.de.la.cruz" → Anna-Lena, De La Cruz.
+ * Null, wenn die Adresse nicht diesem Muster folgt.
+ */
+export function nameFromSchoolEmail(email: string): { firstName: string; lastName: string } | null {
+  const [local = "", domain = ""] = email.toLowerCase().split("@");
+  if (domain !== config.school.emailDomain.toLowerCase()) return null;
+  const parts = local.split(".").filter(Boolean);
+  if (parts.length < 2 || parts.some((p) => !/^[\p{L}-]+$/u.test(p))) return null;
+  const word = (w: string) =>
+    w
+      .split("-")
+      .map((p) => (p ? p[0]!.toUpperCase() + p.slice(1) : p))
+      .join("-");
+  return { firstName: word(parts[0]!), lastName: parts.slice(1).map(word).join(" ") };
+}

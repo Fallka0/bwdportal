@@ -1,7 +1,7 @@
 import "server-only";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { createSession, deleteSession, findOrCreateUser, randomId, sessionUser } from "@bwd/db";
-import { config } from "@bwd/shared";
+import { config, nameFromSchoolEmail } from "@bwd/shared";
 import type { ServerEnv } from "../env";
 import { MSG_FOREIGN, type AuthProvider, type SignInRequest, type SignInResult } from "./types";
 
@@ -68,10 +68,12 @@ export async function redeemCode(ms: MsSettings, o: { code: string; verifier: st
   if (payload.nonce !== o.nonce) throw new Error("Nonce stimmt nicht");
   const email = String(payload.email ?? payload.preferred_username ?? "").toLowerCase();
   const name = String(payload.name ?? "");
+  // Schuladressen: Name aus der Adresse wie bei Planary, damit beide Anmeldungen denselben Namen ergeben
+  const school = nameFromSchoolEmail(email);
   return {
     email,
-    firstName: String(payload.given_name ?? name.split(" ")[0] ?? ""),
-    lastName: String(payload.family_name ?? name.split(" ").slice(1).join(" ")),
+    firstName: school?.firstName ?? String(payload.given_name ?? name.split(" ")[0] ?? ""),
+    lastName: school?.lastName ?? String(payload.family_name ?? name.split(" ").slice(1).join(" ")),
     oid: String(payload.oid ?? payload.sub ?? randomId(8)),
   };
 }

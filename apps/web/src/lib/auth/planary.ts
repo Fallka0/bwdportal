@@ -1,6 +1,6 @@
 import "server-only";
 import { createSession, deleteSession, findOrCreateUser, sessionUser } from "@bwd/db";
-import { config } from "@bwd/shared";
+import { config, nameFromSchoolEmail } from "@bwd/shared";
 import type { ServerEnv } from "../env";
 import { MSG_FOREIGN, type AuthProvider, type SignInRequest, type SignInResult } from "./types";
 
@@ -44,8 +44,13 @@ export function schoolEmail(email: string, extraDomains: string[]) {
   return [config.school.emailDomain, ...extraDomains].some((d) => d.toLowerCase() === domain);
 }
 
-/** "Vorname Nachname" oder, ohne Namen, aus der Adresse vorname.nachname@… */
+/**
+ * Name des Kontos: bei Schuladressen immer aus der Adresse (vorname.nachname@bwdbern.ch), damit niemand
+ * einen anderen Namen wählt; sonst "Vorname Nachname" von Planary oder, ohne Namen, aus der Adresse.
+ */
 export function splitName(name: string, email: string) {
+  const school = nameFromSchoolEmail(email);
+  if (school) return school;
   const parts = name.trim() ? name.trim().split(/\s+/) : (email.split("@")[0] ?? "").split(".").map((p) => (p ? p[0]!.toUpperCase() + p.slice(1) : p));
   return { firstName: parts[0] ?? "", lastName: parts.slice(1).join(" ") };
 }
