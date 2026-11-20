@@ -20,6 +20,16 @@ test("Note ansehen: von der Übersicht zur Mathematik-Note", async ({ page }) =>
   await expect(page.getByText("Noch keine Noten im 6. Semester.")).toBeVisible();
 });
 
+test("Wunschnote: was die nächste Probe braucht", async ({ page }) => {
+  await page.goto("/noten/MA?semester=5");
+  const box = page.getByRole("region", { name: "Was brauche ich?" });
+  // 4.5, 5, 4 (Gewicht ½): für eine 5 braucht die nächste Probe (Gewicht 1) eine 5.2
+  await box.getByLabel("Zeugnisnote").selectOption("5");
+  await expect(box).toContainText("Du brauchst mindestens eine 5.2.");
+  await box.getByLabel("Zeugnisnote").selectOption("6");
+  await expect(box).toContainText("Mit einer Probe nicht erreichbar, höchstens 5.0.");
+});
+
 test("Note erfassen, bearbeiten und löschen", async ({ page }) => {
   await page.goto("/noten/MA?semester=5");
   await page.getByRole("link", { name: "Neue Note" }).first().click();

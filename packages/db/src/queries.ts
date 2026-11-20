@@ -18,6 +18,7 @@ import {
   efzSummary,
   informatics,
   moduleGrade,
+  neededGrade,
   semesterLabel,
   semesterSummary,
   subjectGrade,
@@ -233,6 +234,14 @@ async function examsFor(db: Db, userId: string, semester?: number, subject?: str
 // ---------- Notenportfolio (eigene Noten wie in der Excel-Vorlage der Schule) ----------
 
 /** Reihenfolge der Vorlage; DE, FR, EN (Stundenplan-Kürzel) zählen wie D, F, E. */
+/** Häufigstes Gewicht der Proben (für die Wunschnote der nächsten Probe). */
+const commonWeight = (list: { weight: number }[]) => {
+  const ws = list.map((x) => x.weight).filter((w) => w > 0);
+  if (!ws.length) return 1;
+  const count = (w: number) => ws.filter((x) => x === w).length;
+  return [...ws].sort((a, b) => count(b) - count(a))[0]!;
+};
+
 const orderOf = (code: string) => {
   const alias: Record<string, string> = { DE: "D", FR: "F", EN: "E", M: "MA" };
   const i = BM_SUBJECTS.findIndex((x) => x.code === (alias[code] ?? code));
@@ -283,7 +292,8 @@ export async function getPortfolioSemester(db: Db, userId: string, now: Now, n?:
       modules.push({ code: "IN", name: `Modul ${first.module}`, module: first.module, moduleName: first.moduleName ?? modNames.get(first.module ?? "") ?? null, raw: grade, grade, count: list.length });
     } else {
       const g = subjectGrade(list);
-      subjects.push({ code: k, name: names.get(k) ?? k, module: null, moduleName: null, raw: g?.raw ?? null, grade: g?.grade ?? null, count: list.length });
+      const need = g && g.grade < 4 ? neededGrade(list, 4, commonWeight(list)) : null;
+      subjects.push({ code: k, name: names.get(k) ?? k, module: null, moduleName: null, raw: g?.raw ?? null, grade: g?.grade ?? null, count: list.length, needFor4: need?.kind === "need" ? need.value : null });
     }
   }
   subjects.sort((a, b) => orderOf(a.code) - orderOf(b.code) || a.name.localeCompare(b.name, "de"));

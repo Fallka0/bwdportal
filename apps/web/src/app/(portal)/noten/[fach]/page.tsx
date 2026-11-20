@@ -6,7 +6,7 @@ import { fmtGrade, fmtShortLoose, fmtWeekdayDate, gradeBar, isInsufficient, mont
 import { Card, Empty, Icon } from "@/components/ui";
 import { currentUserId, requireUser } from "@/lib/auth";
 import { serverEnv } from "@/lib/env";
-import { EditLink, GradeActions, GradeDialogs } from "../GradeForms";
+import { EditLink, GradeActions, GradeDialogs, WishGrade } from "../GradeForms";
 
 type Props = { params: Promise<{ fach: string }>; searchParams: Promise<{ semester?: string; modul?: string }> };
 
@@ -92,6 +92,7 @@ export default async function Subject({ params, searchParams }: Props) {
                 {s.classAverage !== null && <span>Klasse {fmtGrade(s.classAverage)}</span>}
               </div>
             </section>
+            <WishGrade entries={s.entries} current={s.grade} module={s.code === "IN"} />
             {chrono.length > 1 && (
               <Card aria-labelledby="vl-h">
                 <h2 id="vl-h" className="box-t">

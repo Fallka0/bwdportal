@@ -429,3 +429,14 @@ describe("Kalender-Abo", () => {
     expect(new Set(ev.map((e) => e.uid)).size).toBe(ev.length);
   });
 });
+
+describe("Wunschnote im Semester", () => {
+  it("Fach unter 4 zeigt die nötige Note für eine 4", async () => {
+    await q.addPortfolioEntry(db, U, { semester: 5, subject: "TU", title: "Test 1", value: 3, weight: 1 }, NOW);
+    const g = await q.getPortfolioSemester(db, U, NOW);
+    const tu = g.subjects.find((x) => x.code === "TU");
+    expect(tu?.grade).toBe(3);
+    expect(tu?.needFor4).toBe(4.5);
+    expect(g.subjects.find((x) => x.code === "MA")?.needFor4).toBeNull();
+  });
+});

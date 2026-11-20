@@ -1440,3 +1440,17 @@
     display: none;
   }
 }
+
+/* Wunschnote */
+.wish .row2 {
+  margin-top: var(--sp-4);
+}
+
+.wish-r {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-l);
+}
+
+.wish-r b {
+  font: 400 var(--fs-h3) / 1 var(--font-display);
+}

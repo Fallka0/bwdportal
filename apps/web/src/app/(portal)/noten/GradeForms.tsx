@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { BM_SUBJECTS, plural, type PortfolioEntry } from "@bwd/shared";
+import { BM_SUBJECTS, fmtGrade, neededGrade, plural, type PortfolioEntry } from "@bwd/shared";
 import { Button, Dialog, DialogActions, Icon, SelectField, TextField, useToast } from "@/components/ui";
 
 type Semester = { n: number; label: string };
@@ -271,4 +271,46 @@ export function EfzValue({ id, label, value }: { id: string; label: string; valu
     router.refresh();
   }
   return <input className="inp efz-v" aria-label={`Note ${label}`} inputMode="decimal" value={v} placeholder="–" onChange={(e) => setV(e.target.value)} onBlur={save} onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()} />;
+}
+
+/** "Was brauche ich?": Wunschnote und Gewicht der nächsten Probe → nötige Note (wie die Zeugnisnote gerundet). */
+export function WishGrade({ entries, current, module }: { entries: { value: number; weight: number }[]; current: number | null; module: boolean }) {
+  const weights = entries.map((e) => e.weight).filter((w) => w > 0);
+  const common = weights.length ? [...weights].sort((a, b) => weights.filter((x) => x === b).length - weights.filter((x) => x === a).length)[0]! : 1;
+  const targets = module ? [4, 4.5, 5, 5.5, 6] : [4, 4.5, 5, 5.5, 6];
+  const start = current === null ? 4 : Math.min(6, targets.find((t) => t > current) ?? 6);
+  const [target, setTarget] = useState(start);
+  const [weight, setWeight] = useState(String(common));
+  const w = Number(weight.replace(",", "."));
+  const r = Number.isFinite(w) && w > 0 ? neededGrade(entries, target, w, module ? "module" : "subject") : null;
+  return (
+    <section className="card wish" aria-labelledby="wish-h">
+      <h2 id="wish-h" className="box-t">
+        Was brauche ich?
+      </h2>
+      <div className="row2">
+        <SelectField label={module ? "Modulnote" : "Zeugnisnote"} value={target} onChange={(e) => setTarget(Number(e.target.value))}>
+          {targets.map((t) => (
+            <option key={t} value={t}>
+              {fmtGrade(t)}
+            </option>
+          ))}
+        </SelectField>
+        <TextField label="Gewicht der Probe" value={weight} inputMode="decimal" onChange={(e) => setWeight(e.target.value)} />
+      </div>
+      <p className="wish-r" aria-live="polite">
+        {!r ? (
+          "Gewicht fehlt."
+        ) : r.kind === "safe" ? (
+          <>Schon sicher: auch mit einer 1 bleibt es mindestens eine {fmtGrade(target)}.</>
+        ) : r.kind === "impossible" ? (
+          <>Mit einer Probe nicht erreichbar, höchstens {fmtGrade(r.best)}.</>
+        ) : (
+          <>
+            Du brauchst mindestens eine <b>{fmtGrade(r.value)}</b>.
+          </>
+        )}
+      </p>
+    </section>
+  );
 }

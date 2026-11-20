@@ -78,3 +78,33 @@ describe("Notenportfolio wie die Excel-Vorlage", () => {
     expect(normalizeSubject("Modul 320")).toBeNull();
   });
 });
+
+describe("Wunschnote", () => {
+  const ma = [
+    { value: 4.5, weight: 1 },
+    { value: 5, weight: 1 },
+    { value: 4, weight: 0.5 },
+  ];
+  it("braucht für 5 eine bestimmte Note, rechnet wie die Zeugnisnote", async () => {
+    const { neededGrade, subjectGrade } = await import("../src/portfolio");
+    const r = neededGrade(ma, 5, 1);
+    expect(r.kind).toBe("need");
+    const v = (r as { value: number }).value;
+    expect(subjectGrade([...ma, { value: v, weight: 1 }])!.grade).toBe(5);
+    expect(subjectGrade([...ma, { value: Math.round((v - 0.1) * 10) / 10, weight: 1 }])!.grade).toBe(4.5);
+  });
+
+  it("schon sicher oder nicht erreichbar", async () => {
+    const { neededGrade } = await import("../src/portfolio");
+    expect(neededGrade([{ value: 6, weight: 3 }], 4, 1)).toEqual({ kind: "safe" });
+    expect(neededGrade([{ value: 3, weight: 5 }], 5.5, 1)).toEqual({ kind: "impossible", best: 3.5 });
+    expect(neededGrade([], 5, 1)).toEqual({ kind: "need", value: 4.8 });
+  });
+
+  it("Informatikmodul rundet auf 0.1", async () => {
+    const { neededGrade, moduleGrade } = await import("../src/portfolio");
+    const r = neededGrade([{ value: 5.3, weight: 40 }], 5.5, 60, "module") as { kind: string; value: number };
+    expect(r.kind).toBe("need");
+    expect(moduleGrade([{ value: 5.3, weight: 40 }, { value: r.value, weight: 60 }])).toBeGreaterThanOrEqual(5.5);
+  });
+});
