@@ -96,9 +96,11 @@ export default async function Home() {
 
           <Card className="h-nw" aria-labelledby="nw-h">
             <CardHead id="nw-h" title="Mitteilungen" href="/mitteilungen" />
-            {h.news.map((n) => (
-              <ListRow key={n.id} href={`/mitteilungen/${n.id}`} title={n.title} sub={`${n.author ?? ""} · ${fmtDate(n.publishedAt.slice(0, 10))}`} />
-            ))}
+            {h.news.length === 0 ? (
+              <p className="empty-s">Keine Mitteilungen.</p>
+            ) : (
+              h.news.map((n) => <ListRow key={n.id} href={`/mitteilungen/${n.id}`} title={n.title} sub={`${n.author ?? ""} · ${fmtDate(n.publishedAt.slice(0, 10))}`} />)
+            )}
           </Card>
         </div>
       </div>

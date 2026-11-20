@@ -57,7 +57,7 @@ import {
   type Timetable,
   nextLesson,
 } from "@bwd/shared";
-import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import type { Db } from "./client";
 import * as s from "./schema";
 
@@ -102,8 +102,7 @@ export async function getMe(db: Db, userId: string, now: Now = getNow()): Promis
   const { u, c } = row;
   const [unread] = await db.select({ n: sql<number>`count(*)` }).from(s.notifications).where(and(eq(s.notifications.userId, userId), isNull(s.notifications.readAt)));
   const { contingent } = await getAbsences(db, userId, now);
-  const [newsTotal] = await db.select({ n: sql<number>`count(*)` }).from(s.news);
-  const [newsRead] = await db.select({ n: sql<number>`count(*)` }).from(s.newsRead).where(eq(s.newsRead.userId, userId));
+  const unreadNews = (await getNews(db, userId)).filter((n) => n.unread).length;
   return {
     id: u.id,
     firstName: u.firstName,
@@ -115,7 +114,7 @@ export async function getMe(db: Db, userId: string, now: Now = getNow()): Promis
     program: c?.program ?? null,
     classTeacher: c?.classTeacher ?? null,
     settings: await getSettings(db, userId),
-    counts: { unreadNotifications: Number(unread?.n ?? 0), contingentAvailable: contingent.available, contingentSize: contingent.size, unreadNews: Number(newsTotal?.n ?? 0) - Number(newsRead?.n ?? 0) },
+    counts: { unreadNotifications: Number(unread?.n ?? 0), contingentAvailable: contingent.available, contingentSize: contingent.size, unreadNews },
   };
 }
 
@@ -509,13 +508,29 @@ export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
 
 // ---------- Mitteilungen ----------
 
+/** Für alle oder für die eigene Klasse (Beispieldaten gehören zur Demo-Klasse). */
+async function visibleFor(db: Db, userId: string) {
+  const classId = await classOf(db, userId);
+  return {
+    news: classId ? or(isNull(s.news.classId), eq(s.news.classId, classId)) : isNull(s.news.classId),
+    documents: classId ? or(isNull(s.documents.classId), eq(s.documents.classId, classId)) : isNull(s.documents.classId),
+  };
+}
+
 export async function getNews(db: Db, userId: string): Promise<NewsItem[]> {
-  const rows = await db.select({ n: s.news, r: s.newsRead.userId }).from(s.news).leftJoin(s.newsRead, and(eq(s.newsRead.newsId, s.news.id), eq(s.newsRead.userId, userId))).orderBy(desc(s.news.pinned), desc(s.news.publishedAt));
+  const v = await visibleFor(db, userId);
+  const rows = await db
+    .select({ n: s.news, r: s.newsRead.userId })
+    .from(s.news)
+    .leftJoin(s.newsRead, and(eq(s.newsRead.newsId, s.news.id), eq(s.newsRead.userId, userId)))
+    .where(v.news)
+    .orderBy(desc(s.news.pinned), desc(s.news.publishedAt));
   return rows.map(({ n, r }) => ({ id: n.id, title: n.title, teaser: n.teaser, author: n.author, publishedAt: n.publishedAt, pinned: n.pinned, unread: !r }));
 }
 
 export async function getNewsArticle(db: Db, userId: string, id: string, now: Now, markRead = true): Promise<NewsArticle | null> {
-  const n = (await db.select().from(s.news).where(eq(s.news.id, id)).limit(1))[0];
+  const v = await visibleFor(db, userId);
+  const n = (await db.select().from(s.news).where(and(eq(s.news.id, id), v.news)).limit(1))[0];
   if (!n) return null;
   const read = (await db.select().from(s.newsRead).where(and(eq(s.newsRead.newsId, id), eq(s.newsRead.userId, userId))).limit(1))[0];
   if (markRead && !read) await db.insert(s.newsRead).values({ newsId: id, userId }).onConflictDoNothing();
@@ -541,8 +556,9 @@ function toDocument(d: typeof s.documents.$inferSelect, now: Now): DocumentItem 
 
 export const DOCUMENT_GROUPS = ["Prüfungspläne", "Formulare", "Reglemente", "Merkblätter"];
 
-export async function getDocuments(db: Db, now: Now, q = "", group?: string): Promise<DocumentGroups> {
-  const rows = await db.select().from(s.documents).orderBy(asc(s.documents.sort));
+export async function getDocuments(db: Db, userId: string, now: Now, q = "", group?: string): Promise<DocumentGroups> {
+  const v = await visibleFor(db, userId);
+  const rows = await db.select().from(s.documents).where(v.documents).orderBy(asc(s.documents.sort));
   const all = rows.map((d) => toDocument(d, now));
   const needle = q.trim().toLocaleLowerCase("de-CH");
   const names = [...DOCUMENT_GROUPS, ...new Set(all.map((d) => d.group).filter((g) => !DOCUMENT_GROUPS.includes(g)))];
@@ -554,8 +570,9 @@ export async function getDocuments(db: Db, now: Now, q = "", group?: string): Pr
   return { groups, total: all.length };
 }
 
-export async function getDocument(db: Db, id: string) {
-  return (await db.select().from(s.documents).where(eq(s.documents.id, id)).limit(1))[0] ?? null;
+export async function getDocument(db: Db, userId: string, id: string) {
+  const v = await visibleFor(db, userId);
+  return (await db.select().from(s.documents).where(and(eq(s.documents.id, id), v.documents)).limit(1))[0] ?? null;
 }
 
 export async function getLinks(db: Db): Promise<LinkItem[]> {
@@ -762,7 +779,7 @@ export async function search(db: Db, userId: string, now: Now, q: string): Promi
   const subjects = allSubjects
     .filter((x) => x.code !== "SOL" && has(x.name, x.short, x.code))
     .map((x) => ({ code: x.code, name: x.name, average: grades.subjects.find((g) => g.code === x.code)?.average ?? null }));
-  const docs = (await getDocuments(db, now)).groups.flatMap((g) => g.items).filter((d) => has(d.title, d.note, d.group));
+  const docs = (await getDocuments(db, userId, now)).groups.flatMap((g) => g.items).filter((d) => has(d.title, d.note, d.group));
   const links = (await getLinks(db)).filter((l) => has(l.title, l.sub));
   const news = (await getNews(db, userId)).filter((n) => has(n.title, n.teaser));
   return { subjects, documents: docs, links, news };

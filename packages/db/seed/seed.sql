@@ -462,16 +462,16 @@ INSERT INTO dispensation_lessons (dispensation_id, period, subject_code) VALUES 
 INSERT INTO dispensation_lessons (dispensation_id, period, subject_code) VALUES ('di-1', 4, NULL);
 INSERT INTO dispensation_lessons (dispensation_id, period, subject_code) VALUES ('di-2', 1, NULL);
 INSERT INTO dispensation_lessons (dispensation_id, period, subject_code) VALUES ('di-2', 2, NULL);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-pruefungsplan-1-semester-2026-27', 'Prüfungspläne', 'Prüfungsplan 1. Semester 2026/27', 'PDF', 245760, 'aktualisiert 20.10.2026', 'dokumente/pruefungsplan-1-semester-2026-27.pdf', '2026-10-20', 0);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-pruefungsplan-bm-abschluss-2027', 'Prüfungspläne', 'Prüfungsplan BM-Abschluss 2027', 'PDF', 184320, '01.09.2026', 'dokumente/pruefungsplan-bm-abschluss-2027.pdf', '2026-09-01', 1);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-urlaubsgesuch', 'Formulare', 'Urlaubsgesuch', 'PDF', 92160, 'zum Ausfüllen', 'dokumente/urlaubsgesuch.pdf', '2026-08-01', 0);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-gesuch-um-dispensation', 'Formulare', 'Gesuch um Dispensation', 'PDF', 112640, 'zum Ausfüllen', 'dokumente/gesuch-um-dispensation.pdf', '2026-08-01', 1);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-arztzeugnis-vorlage', 'Formulare', 'Arztzeugnis Vorlage', 'PDF', 61440, NULL, 'dokumente/arztzeugnis-vorlage.pdf', '2026-08-01', 2);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-absenzenreglement', 'Reglemente', 'Absenzenreglement', 'PDF', 327680, 'gültig ab 1.8.2026', 'dokumente/absenzenreglement.pdf', '2026-08-01', 0);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-promotionsreglement-bm', 'Reglemente', 'Promotionsreglement BM', 'PDF', 419840, NULL, 'dokumente/promotionsreglement-bm.pdf', '2026-08-01', 1);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-hausordnung', 'Reglemente', 'Hausordnung', 'PDF', 153600, NULL, 'dokumente/hausordnung.pdf', '2026-08-01', 2);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-merkblatt-nachpruefungen', 'Merkblätter', 'Merkblatt Nachprüfungen', 'PDF', 122880, NULL, 'dokumente/merkblatt-nachpruefungen.pdf', '2026-08-01', 0);
-INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort) VALUES ('d-wlan-und-drucken', 'Merkblätter', 'WLAN und Drucken', 'PDF', 204800, NULL, 'dokumente/wlan-und-drucken.pdf', '2026-08-01', 1);
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-pruefungsplan-1-semester-2026-27', 'Prüfungspläne', 'Prüfungsplan 1. Semester 2026/27', 'PDF', 245760, 'aktualisiert 20.10.2026', 'dokumente/pruefungsplan-1-semester-2026-27.pdf', '2026-10-20', 0, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-pruefungsplan-bm-abschluss-2027', 'Prüfungspläne', 'Prüfungsplan BM-Abschluss 2027', 'PDF', 184320, '01.09.2026', 'dokumente/pruefungsplan-bm-abschluss-2027.pdf', '2026-09-01', 1, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-urlaubsgesuch', 'Formulare', 'Urlaubsgesuch', 'PDF', 92160, 'zum Ausfüllen', 'dokumente/urlaubsgesuch.pdf', '2026-08-01', 0, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-gesuch-um-dispensation', 'Formulare', 'Gesuch um Dispensation', 'PDF', 112640, 'zum Ausfüllen', 'dokumente/gesuch-um-dispensation.pdf', '2026-08-01', 1, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-arztzeugnis-vorlage', 'Formulare', 'Arztzeugnis Vorlage', 'PDF', 61440, NULL, 'dokumente/arztzeugnis-vorlage.pdf', '2026-08-01', 2, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-absenzenreglement', 'Reglemente', 'Absenzenreglement', 'PDF', 327680, 'gültig ab 1.8.2026', 'dokumente/absenzenreglement.pdf', '2026-08-01', 0, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-promotionsreglement-bm', 'Reglemente', 'Promotionsreglement BM', 'PDF', 419840, NULL, 'dokumente/promotionsreglement-bm.pdf', '2026-08-01', 1, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-hausordnung', 'Reglemente', 'Hausordnung', 'PDF', 153600, NULL, 'dokumente/hausordnung.pdf', '2026-08-01', 2, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-merkblatt-nachpruefungen', 'Merkblätter', 'Merkblatt Nachprüfungen', 'PDF', 122880, NULL, 'dokumente/merkblatt-nachpruefungen.pdf', '2026-08-01', 0, 'c-im24b');
+INSERT INTO documents (id, grp, title, file_type, size_bytes, note, r2_key, updated_at, sort, class_id) VALUES ('d-wlan-und-drucken', 'Merkblätter', 'WLAN und Drucken', 'PDF', 204800, NULL, 'dokumente/wlan-und-drucken.pdf', '2026-08-01', 1, 'c-im24b');
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-outlook', 'Microsoft 365', 'Outlook', 'E-Mail und Kalender', 'https://outlook.office.com/mail/', 0, 'Ou', 1);
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-teams', 'Microsoft 365', 'Teams', 'Klassen-Teams und Chats', 'https://teams.microsoft.com/', 1, 'Te', 1);
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-onedrive', 'Microsoft 365', 'OneDrive', 'Deine Dateien', 'https://www.office.com/launch/onedrive', 2, 'OD', 1);
@@ -480,21 +480,21 @@ INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-moo
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-webuntis', 'Schule', 'WebUntis', 'Stundenplan im Original', 'https://bwd-bern.webuntis.com/', 0, 'Un', 0);
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-bwdbern-ch', 'Schule', 'bwdbern.ch', 'Website der Schule', 'https://www.bwdbern.ch/', 1, 'bw', 0);
 INSERT INTO links (id, grp, title, sub, url, sort, badge, accent) VALUES ('k-mediothek', 'Schule', 'Mediothek', 'Bücher und Medien', 'https://www.bwdbern.ch/mediothek', 2, 'Me', 0);
-INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id) VALUES ('pp', 'Prüfungsplan 1. Semester ist online', 'Alle Prüfungstermine bis Ende Januar. Bitte kontrolliere deine Klasse und melde Überschneidungen bis 6. November.', 'Der Prüfungsplan für das 1. Semester 2026/27 ist ab sofort verfügbar. Er enthält alle Prüfungen bis Ende Januar für alle Klassen.
+INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id, class_id) VALUES ('pp', 'Prüfungsplan 1. Semester ist online', 'Alle Prüfungstermine bis Ende Januar. Bitte kontrolliere deine Klasse und melde Überschneidungen bis 6. November.', 'Der Prüfungsplan für das 1. Semester 2026/27 ist ab sofort verfügbar. Er enthält alle Prüfungen bis Ende Januar für alle Klassen.
 
 Bitte kontrolliere die Termine deiner Klasse. Wenn sich zwei Prüfungen am selben Tag überschneiden oder du an einem Termin fehlen musst, melde dich bis 6. November bei deiner Klassenlehrperson.
 
 - Nachprüfungen finden am Mittwochnachmittag statt.
-- Für Dispensationen gibt es ein Formular unter Dokumente.', 'Schulleitung', '2026-10-20T08:00', 1, 'd-pruefungsplan-1-semester-2026-27');
-INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id) VALUES ('ia', 'Informationsabend BM 2 am 5. November', 'Für alle, die nach der Lehre die BM 2 machen möchten. 18:30 in der Aula, Anmeldung nicht nötig.', 'Für alle, die nach der Lehre die BM 2 machen möchten. Der Informationsabend findet am 5. November um 18:30 in der Aula statt.
+- Für Dispensationen gibt es ein Formular unter Dokumente.', 'Schulleitung', '2026-10-20T08:00', 1, 'd-pruefungsplan-1-semester-2026-27', 'c-im24b');
+INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id, class_id) VALUES ('ia', 'Informationsabend BM 2 am 5. November', 'Für alle, die nach der Lehre die BM 2 machen möchten. 18:30 in der Aula, Anmeldung nicht nötig.', 'Für alle, die nach der Lehre die BM 2 machen möchten. Der Informationsabend findet am 5. November um 18:30 in der Aula statt.
 
-Eine Anmeldung ist nicht nötig.', 'BM-Abteilung', '2026-10-19T08:00', 0, NULL);
-INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id) VALUES ('me', 'Mensa: neue Öffnungszeiten ab November', 'Die Mensa öffnet neu um 07:15 und ist am Mittwochnachmittag geschlossen.', 'Die Mensa öffnet ab November neu um 07:15.
+Eine Anmeldung ist nicht nötig.', 'BM-Abteilung', '2026-10-19T08:00', 0, NULL, 'c-im24b');
+INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id, class_id) VALUES ('me', 'Mensa: neue Öffnungszeiten ab November', 'Die Mensa öffnet neu um 07:15 und ist am Mittwochnachmittag geschlossen.', 'Die Mensa öffnet ab November neu um 07:15.
 
-Am Mittwochnachmittag bleibt sie geschlossen.', 'Hausdienst', '2026-10-16T08:00', 0, NULL);
-INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id) VALUES ('sp', 'Herbstsporttag: Anmeldung bis 30. Oktober', 'Wähle dein Angebot im Formular. Ohne Anmeldung wirst du einer Gruppe zugeteilt.', 'Wähle dein Angebot für den Herbstsporttag im Formular bis 30. Oktober.
+Am Mittwochnachmittag bleibt sie geschlossen.', 'Hausdienst', '2026-10-16T08:00', 0, NULL, 'c-im24b');
+INSERT INTO news (id, title, teaser, body_md, author, published_at, pinned, document_id, class_id) VALUES ('sp', 'Herbstsporttag: Anmeldung bis 30. Oktober', 'Wähle dein Angebot im Formular. Ohne Anmeldung wirst du einer Gruppe zugeteilt.', 'Wähle dein Angebot für den Herbstsporttag im Formular bis 30. Oktober.
 
-Ohne Anmeldung wirst du einer Gruppe zugeteilt.', 'Fachschaft Sport', '2026-10-14T08:00', 0, NULL);
+Ohne Anmeldung wirst du einer Gruppe zugeteilt.', 'Fachschaft Sport', '2026-10-14T08:00', 0, NULL, 'c-im24b');
 INSERT INTO news_read (news_id, user_id) VALUES ('me', 'u-selin');
 INSERT INTO news_read (news_id, user_id) VALUES ('sp', 'u-selin');
 INSERT INTO notifications (id, user_id, kind, icon, title, body, href, created_at, read_at) VALUES ('n-1', 'u-selin', 'warn', 'swap', 'Raumänderung', 'Wirtschaft und Recht, 4. und 5. Lektion in B 015 statt A 207', '/stundenplan?ansicht=tag', '2026-10-26T09:45', NULL);

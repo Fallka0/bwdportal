@@ -245,7 +245,7 @@ describe("Infos", () => {
   });
 
   it("Dokumente: 10 in 4 Gruppen, Suche ohne Treffer", async () => {
-    const d = await q.getDocuments(db, NOW);
+    const d = await q.getDocuments(db, U, NOW);
     expect(d.total).toBe(10);
     expect(d.groups.map((g) => [g.name, g.total])).toEqual([
       ["Prüfungspläne", 2],
@@ -254,9 +254,9 @@ describe("Infos", () => {
       ["Merkblätter", 2],
     ]);
     expect(d.groups[0]?.items[0]?.isNew).toBe(true);
-    const none = await q.getDocuments(db, NOW, "Zeugnis xyz");
+    const none = await q.getDocuments(db, U, NOW, "Zeugnis xyz");
     expect(none.groups.every((g) => g.items.length === 0)).toBe(true);
-    const f = await q.getDocuments(db, NOW, "", "Formulare");
+    const f = await q.getDocuments(db, U, NOW, "", "Formulare");
     expect(f.groups.flatMap((g) => g.items)).toHaveLength(3);
   });
 
@@ -313,6 +313,20 @@ describe("Stand des Imports", () => {
     expect((await q.timetableSource(db, later)).stale).toBe(false);
     await db.insert(schema.importRuns).values({ id: "r-untis", source: "webuntis", startedAt: "2026-10-26T09:01", finishedAt: "2026-10-26T09:01", ok: true, lessons: 1, error: null });
     expect((await q.timetableSource(db, later)).stale).toBe(true);
+  });
+});
+
+describe("Echte Konten", () => {
+  it("sehen keine erfundenen Mitteilungen und Dokumente der Demo-Klasse", async () => {
+    const real = await q.findOrCreateUser(db, { email: "mia.real@bwdbern.ch", firstName: "", lastName: "", oid: "r1" }, NOW, "IM24a");
+    expect(await q.getNews(db, real.id)).toEqual([]);
+    expect((await q.getDocuments(db, real.id, NOW)).total).toBe(0);
+    expect(await q.getNewsArticle(db, real.id, "pp", NOW)).toBeNull();
+    expect(await q.getDocument(db, real.id, "d-pruefungsplan-1-semester-2026-27")).toBeNull();
+    expect((await q.getMe(db, real.id, NOW))?.counts.unreadNews).toBe(0);
+    expect((await q.search(db, real.id, NOW, "Prüfungsplan")).documents).toEqual([]);
+    // Demo-Konto sieht sie weiterhin
+    expect((await q.getNews(db, U)).length).toBeGreaterThan(0);
   });
 });
 
