@@ -1,6 +1,6 @@
 import { config, microsoftLogo, type DemoAccount } from "@bwd/shared";
 import { Redirect, router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "@/lib/api";
@@ -8,24 +8,33 @@ import { useAuth } from "@/lib/auth";
 import { font, fs, radius, size, sp, tracking, useTheme } from "@/theme";
 import { Banner, Icon, Sheet, T } from "@/ui";
 
+type Methods = { mock: boolean; microsoft: boolean; planary: boolean };
+
 export default function Login() {
   const { c } = useTheme();
-  const { status, signIn, signInMicrosoft } = useAuth();
+  const { status, signIn, signInWith } = useAuth();
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [accounts, setAccounts] = useState<DemoAccount[] | null>(null);
   const [foreign, setForeign] = useState(false);
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
-  const [microsoft, setMicrosoft] = useState(false);
+  const [methods, setMethods] = useState<Methods | null>(null);
+
+  useEffect(() => {
+    api
+      .authConfig()
+      .then(setMethods)
+      .catch(() => setFailure("Das Portal ist nicht erreichbar. Versuche es nochmals."));
+  }, []);
 
   if (status === "in") return <Redirect href="/" />;
 
-  async function microsoftLogin() {
+  async function login(provider: "microsoft" | "planary", signup = false) {
     setOpen(false);
     setFailure("");
     setForeign(false);
-    const r = await signInMicrosoft();
+    const r = await signInWith(provider, signup);
     if (r.ok) router.replace("/");
     else if (!("cancelled" in r)) {
       if (r.foreign) setForeign(true);
@@ -33,18 +42,10 @@ export default function Login() {
     }
   }
 
-  async function openChooser() {
+  async function openDemo() {
     setFailure("");
+    setOpen(true);
     try {
-      const cfg = await api.authConfig();
-      setMicrosoft(cfg.microsoft);
-      // Nur Microsoft: direkt dorthin. Sonst Auswahl mit Demo-Konten (und Microsoft, falls eingerichtet).
-      if (!cfg.mock) {
-        if (cfg.microsoft) await microsoftLogin();
-        else setFailure("Die Anmeldung mit Microsoft ist noch nicht eingerichtet.");
-        return;
-      }
-      setOpen(true);
       setAccounts((await api.accounts()).accounts);
     } catch {
       setOpen(false);
@@ -62,6 +63,7 @@ export default function Login() {
     else setFailure(r.message);
   }
 
+  const m = methods;
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top + sp[8], paddingBottom: insets.bottom + sp[9], paddingHorizontal: sp[9] }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: sp[4] }}>
@@ -83,18 +85,15 @@ export default function Login() {
           </Banner>
         )}
         {!!failure && <Banner tone="err">{failure}</Banner>}
-        <Pressable
-          accessibilityRole="button"
-          onPress={openChooser}
-          style={({ pressed }) => ({ height: 56, borderRadius: radius.xl, backgroundColor: pressed ? c.btnHover : c.btn, flexDirection: "row", alignItems: "center", gap: sp[6], paddingHorizontal: sp[8], transform: [{ scale: pressed ? 0.98 : 1 }] })}
-        >
-          <View style={{ width: 20, flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
-            {microsoftLogo.map((col) => (
-              <View key={col} style={{ width: 9, height: 9, backgroundColor: col }} />
-            ))}
-          </View>
-          <T style={{ fontFamily: font.body600, fontSize: fs.l, color: c.btnFg }}>Mit Microsoft anmelden</T>
-        </Pressable>
+        {m?.planary && <LoginButton label="Mit Planary-Konto anmelden" primary onPress={() => login("planary")} />}
+        {m?.microsoft && <LoginButton label="Mit Microsoft anmelden" microsoft primary={!m.planary} onPress={() => login("microsoft")} />}
+        {m?.mock && <LoginButton label="Demo-Konto wählen" primary={!m.planary && !m.microsoft} onPress={openDemo} />}
+        {m && !m.planary && !m.microsoft && !m.mock && <Banner tone="err">Die Anmeldung ist noch nicht eingerichtet.</Banner>}
+        {m?.planary && (
+          <Pressable accessibilityRole="link" onPress={() => login("planary", true)} hitSlop={8} style={{ minHeight: size.touchMin, justifyContent: "center", alignSelf: "flex-start" }}>
+            <T style={{ fontFamily: font.body600, fontSize: fs.m, textDecorationLine: "underline" }}>Planary-Konto erstellen</T>
+          </Pressable>
+        )}
         <T v="small" style={{ fontSize: fs.m }}>
           {config.school.emailPattern}
         </T>
@@ -105,7 +104,6 @@ export default function Login() {
       </View>
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Demo-Konto wählen">
-        {microsoft && <AccountRow title="Echtes Microsoft-Konto" sub={config.school.emailPattern} busy={false} onPress={microsoftLogin} />}
         {(accounts ?? []).map((a) => (
           <AccountRow key={a.id} title={a.name} sub={`${a.classCode ?? ""} · ${a.email}`} initials={a.name.split(" ").map((p) => p[0]).join("")} busy={busy === a.id} onPress={() => choose(a.id)} />
         ))}
@@ -113,6 +111,37 @@ export default function Login() {
         <T v="small">Demo-Modus</T>
       </Sheet>
     </View>
+  );
+}
+
+function LoginButton({ label, primary, microsoft, onPress }: { label: string; primary?: boolean; microsoft?: boolean; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => ({
+        height: 56,
+        borderRadius: radius.xl,
+        backgroundColor: primary ? (pressed ? c.btnHover : c.btn) : "transparent",
+        borderWidth: primary ? 0 : 1,
+        borderColor: c.ruleStrong,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: sp[6],
+        paddingHorizontal: sp[8],
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
+    >
+      {microsoft && (
+        <View style={{ width: 20, flexDirection: "row", flexWrap: "wrap", gap: 2 }}>
+          {microsoftLogo.map((col) => (
+            <View key={col} style={{ width: 9, height: 9, backgroundColor: col }} />
+          ))}
+        </View>
+      )}
+      <T style={{ fontFamily: font.body600, fontSize: fs.l, color: primary ? c.btnFg : c.ink }}>{label}</T>
+    </Pressable>
   );
 }
 

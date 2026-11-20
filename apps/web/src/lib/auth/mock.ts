@@ -3,7 +3,7 @@ import { config } from "@bwd/shared";
 import type { ServerEnv } from "../env";
 import { FOREIGN_ACCOUNT_ID, MSG_FOREIGN, type AuthProvider, type SignInRequest, type SignInResult } from "./types";
 
-/** Demo-Anmeldung: nur mit AUTH_MODE=mock. Konten kommen aus dem Seed. */
+/** Demo-Anmeldung: nur wenn AUTH_METHODS mock enthält. Konten kommen aus dem Seed. */
 export class MockAuthProvider implements AuthProvider {
   readonly name = "mock" as const;
   constructor(private env: ServerEnv) {}

@@ -35,14 +35,17 @@
     }
   ],
   "vars": {
-    // mock, microsoft oder both (Demo-Konten und Microsoft). Ohne MS_CLIENT_ID und Secret wie mock.
-    "AUTH_MODE": "both",
+    // Anmeldungen, kommagetrennt: planary (Planary-Konto), microsoft (Entra ID), mock (Demo-Konten, nur lokal in .dev.vars)
+    "AUTH_METHODS": "planary,microsoft",
+    // Planary-Login; bwdportal.planary.ch muss dort in ALLOWED_RETURN_TO_ORIGINS stehen
+    "PLANARY_AUTH_URL": "https://auth.planary.ch",
     // Entra-ID-App-Registrierung (öffentlich). Das Secret MS_CLIENT_SECRET kommt per `wrangler secret put`.
     "MS_CLIENT_ID": "ed293a80-42f1-4cb8-bba6-623d341e28cb",
     "MS_TENANT": "common",
-    // Zusätzlich erlaubte Konto-Domains zum Testen (neben der Schul-Domain), kommagetrennt
-    "AUTH_EXTRA_DOMAINS": "gmail.com",
-    // Klasse für neue Microsoft-Konten, solange keine Zuordnung aus dem Schulsystem kommt
+    // Zusätzlich erlaubte Konto-Domains zum Testen (neben der Schul-Domain), kommagetrennt. Im Deployment leer:
+    // die SOL-Unterlagen sind Dokumente der Schule.
+    "AUTH_EXTRA_DOMAINS": "",
+    // Klasse für neue Konten (Microsoft und Planary), solange keine Zuordnung aus dem Schulsystem kommt
     "DEFAULT_CLASS": "IM24a",
     // Öffentliche Adresse für Open Graph und Meta
     "SITE_URL": "https://bwdportal.planary.ch"

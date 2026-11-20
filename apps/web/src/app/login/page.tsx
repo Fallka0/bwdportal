@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { demoAccounts } from "@bwd/db";
 import { config } from "@bwd/shared";
-import { currentUserId, microsoftAllowed, mockAllowed } from "@/lib/auth";
+import { currentUserId, microsoftAllowed, mockAllowed, planaryAllowed } from "@/lib/auth";
 import { msConfigured } from "@/lib/auth/microsoft";
 import { serverEnv } from "@/lib/env";
 import { LoginView } from "./LoginView";
@@ -19,9 +19,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <LoginView
       mock={mock}
       microsoft={microsoftAllowed(env) && msConfigured(env.ms)}
+      planary={planaryAllowed(env)}
       accounts={accounts}
       emailPattern={config.school.emailPattern}
-      initialError={fehler === "konto" ? "konto" : fehler === "microsoft" ? "microsoft" : null}
+      initialError={fehler === "konto" || fehler === "microsoft" || fehler === "planary" ? fehler : null}
     />
   );
 }

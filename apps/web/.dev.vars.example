@@ -1,4 +1,6 @@
 NEXTJS_ENV=development
+# Lokal zusätzlich die Demo-Konten (Tests melden sich damit an)
+AUTH_METHODS=mock,planary,microsoft
 # Microsoft-Login lokal (Werte aus der Entra-ID-App-Registrierung)
 # MS_CLIENT_ID=
 # MS_CLIENT_SECRET=
