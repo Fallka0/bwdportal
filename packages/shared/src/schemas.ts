@@ -33,6 +33,8 @@ export const Me = z.object({
   classTeacher: z.string().nullable(),
   settings: Settings,
   counts: z.object({ unreadNotifications: z.number(), contingentAvailable: z.number(), contingentSize: z.number(), unreadNews: z.number() }),
+  /** student oder teacher (admin.planary.ch) */
+  role: z.enum(["student", "teacher"]).default("student"),
 });
 export type Me = z.infer<typeof Me>;
 

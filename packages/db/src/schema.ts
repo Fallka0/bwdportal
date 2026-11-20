@@ -10,7 +10,10 @@ export const classes = sqliteTable("classes", {
   id: text("id").primaryKey(),
   code: text("code").notNull().unique(),
   program: text("program"),
+  /** Anzeigename (Beispieldaten, Import); mit Konto gilt classTeacherId */
   classTeacher: text("class_teacher"),
+  /** Klassenlehrperson mit Konto (Rolle teacher), gesetzt in admin.planary.ch */
+  classTeacherId: text("class_teacher_id"),
 });
 
 export const users = sqliteTable("users", {
@@ -19,9 +22,29 @@ export const users = sqliteTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   classId: text("class_id").references(() => classes.id),
+  /** student oder teacher; Lehrpersonen werden in admin.planary.ch bestimmt */
   role: text("role").notNull().default("student"),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  lastLoginAt: text("last_login_at"),
 });
+
+export const roles = ["student", "teacher"] as const;
+export type Role = (typeof roles)[number];
+
+/** Was eine Lehrperson unterrichtet: Klasse und Fach. Sie sieht nur diese Fächer dieser Klassen. */
+export const teacherAssignments = sqliteTable(
+  "teacher_assignments",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    subjectCode: text("subject_code").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.classId, t.subjectCode] }), index("teacher_assignments_class").on(t.classId)],
+);
 
 export const sessions = sqliteTable("sessions", {
   id: text("id").primaryKey(),

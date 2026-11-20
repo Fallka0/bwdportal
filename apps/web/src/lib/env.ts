@@ -30,12 +30,14 @@ export type ServerEnv = {
   /** Klasse für neue Microsoft-Konten (Kürzel, z. B. IM24a), solange keine Zuordnung aus dem Schulsystem kommt */
   defaultClass: string | null;
   isProd: boolean;
+  /** Schlüssel für /api/internal (admin.planary.ch über planary-org); ohne Schlüssel ist die interne API aus */
+  internalKey: string | null;
 };
 
 /** Bindings und Variablen aus Cloudflare (lokal über wrangler, siehe next.config.ts). */
 export async function serverEnv(): Promise<ServerEnv> {
   const { env } = await getCloudflareContext({ async: true });
-  const e = env as Omit<CloudflareEnv, "AUTH_MODE" | "DEMO_NOW"> & { DEMO_NOW?: string; AUTH_MODE?: string; AUTH_METHODS?: string; PLANARY_AUTH_URL?: string; MS_CLIENT_ID?: string; MS_CLIENT_SECRET?: string; MS_TENANT?: string; AUTH_EXTRA_DOMAINS?: string; DEFAULT_CLASS?: string };
+  const e = env as Omit<CloudflareEnv, "AUTH_MODE" | "DEMO_NOW"> & { DEMO_NOW?: string; AUTH_MODE?: string; AUTH_METHODS?: string; PLANARY_AUTH_URL?: string; MS_CLIENT_ID?: string; MS_CLIENT_SECRET?: string; MS_TENANT?: string; AUTH_EXTRA_DOMAINS?: string; DEFAULT_CLASS?: string; INTERNAL_KEY?: string };
   const extraDomains = (e.AUTH_EXTRA_DOMAINS ?? "").split(",").map((d) => d.trim().toLowerCase()).filter(Boolean);
   return {
     db: createDb(e.DB),
@@ -49,5 +51,6 @@ export async function serverEnv(): Promise<ServerEnv> {
     extraDomains,
     defaultClass: e.DEFAULT_CLASS?.trim() || null,
     isProd: process.env.NODE_ENV === "production",
+    internalKey: e.INTERNAL_KEY?.trim() || null,
   };
 }

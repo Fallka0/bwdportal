@@ -8,3 +8,5 @@ AUTH_METHODS=mock,planary,microsoft
 # AUTH_EXTRA_DOMAINS=
 # Lokal: Zeit auf den Stichtag der Beispieldaten (für Tests und Screenshots). Im Deployment gilt die echte Zeit.
 DEMO_NOW=2026-10-26T10:20:00
+# Interne API für admin.planary.ch (über planary-org): langer Zufallswert, lokal beliebig
+# INTERNAL_KEY=
