@@ -3,10 +3,21 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import type { Subject, TestItem } from "@bwd/shared";
-import { Button, Dialog, DialogActions, SelectField, TextArea, TextField, useToast } from "@/components/ui";
+import { fmtLong, type Subject, type TestItem } from "@bwd/shared";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  SelectField,
+  TextArea,
+  TextField,
+  useToast,
+} from "@/components/ui";
 
-type Options = { subjects: Subject[]; classes: { classCode: string; subject: Subject }[] };
+type Options = {
+  subjects: Subject[];
+  classes: { classCode: string; subject: Subject }[];
+};
 
 export function EditTestLink({ id, label }: { id: string; label: string }) {
   const path = usePathname();
@@ -14,8 +25,14 @@ export function EditTestLink({ id, label }: { id: string; label: string }) {
   const q = new URLSearchParams(sp.toString());
   q.set("bearbeiten", id);
   q.delete("neu");
+  q.delete("pruefung");
   return (
-    <Link className="btn btn-line btn-s" href={`${path}?${q.toString()}`} scroll={false} aria-label={label}>
+    <Link
+      className="btn btn-line btn-s"
+      href={`${path}?${q.toString()}`}
+      scroll={false}
+      aria-label={label}
+    >
       Bearbeiten
     </Link>
   );
@@ -27,7 +44,7 @@ function useClose() {
   const sp = useSearchParams();
   const base = () => {
     const q = new URLSearchParams(sp.toString());
-    ["neu", "bearbeiten"].forEach((k) => q.delete(k));
+    ["neu", "bearbeiten", "pruefung"].forEach((k) => q.delete(k));
     const s = q.toString();
     return s ? `${path}?${s}` : path;
   };
@@ -40,32 +57,76 @@ function useClose() {
   };
 }
 
-async function send(url: string, method: string, body?: unknown): Promise<string | null> {
+async function send(
+  url: string,
+  method: string,
+  body?: unknown,
+): Promise<string | null> {
   try {
-    const res = await fetch(url, { method, headers: body ? { "content-type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
+    const res = await fetch(url, {
+      method,
+      headers: body ? { "content-type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
     if (res.ok) return null;
-    const b = (await res.json().catch(() => null)) as { error?: { message: string } } | null;
-    return b?.error?.message ?? "Speichern fehlgeschlagen. Versuche es nochmals.";
+    const b = (await res.json().catch(() => null)) as {
+      error?: { message: string };
+    } | null;
+    return (
+      b?.error?.message ?? "Speichern fehlgeschlagen. Versuche es nochmals."
+    );
   } catch {
     return "Keine Verbindung. Versuche es nochmals.";
   }
 }
 
 /** Öffnet "Neue Prüfung" (?neu=1) oder "Prüfung bearbeiten" (?bearbeiten=id, nur eigene). */
-export function TestDialogs({ tests, options, teacher }: { tests: TestItem[]; options: Options; teacher: boolean }) {
+export function TestDialogs({
+  tests,
+  options,
+  teacher,
+}: {
+  tests: TestItem[];
+  options: Options;
+  teacher: boolean;
+}) {
   const sp = useSearchParams();
-  if (sp.get("neu") === "1") return <TestDialog key="new" options={options} teacher={teacher} />;
+  if (sp.get("neu") === "1")
+    return <TestDialog key="new" options={options} teacher={teacher} />;
+  const show = sp.get("pruefung");
+  const detail = show ? tests.find((t) => t.id === show) : undefined;
+  if (detail) return <TestDetail key={detail.id} test={detail} />;
   const id = sp.get("bearbeiten");
   const test = id ? tests.find((t) => t.id === id && t.mine) : undefined;
-  return test ? <TestDialog key={test.id} options={options} teacher={teacher} test={test} /> : null;
+  return test ? (
+    <TestDialog key={test.id} options={options} teacher={teacher} test={test} />
+  ) : null;
 }
 
-function TestDialog({ options, teacher, test }: { options: Options; teacher: boolean; test?: TestItem }) {
+function TestDialog({
+  options,
+  teacher,
+  test,
+}: {
+  options: Options;
+  teacher: boolean;
+  test?: TestItem;
+}) {
   const { close, done } = useClose();
   const toast = useToast();
-  const pairs = options.classes.map((c) => ({ key: `${c.classCode}|${c.subject.code}`, label: `${c.subject.name} · ${c.classCode}`, ...c }));
-  const [pair, setPair] = useState(test?.classCode ? `${test.classCode}|${test.subject.code}` : (pairs[0]?.key ?? ""));
-  const [subject, setSubject] = useState(test?.subject.code ?? options.subjects[0]?.code ?? "");
+  const pairs = options.classes.map((c) => ({
+    key: `${c.classCode}|${c.subject.code}`,
+    label: `${c.subject.name} · ${c.classCode}`,
+    ...c,
+  }));
+  const [pair, setPair] = useState(
+    test?.classCode
+      ? `${test.classCode}|${test.subject.code}`
+      : (pairs[0]?.key ?? ""),
+  );
+  const [subject, setSubject] = useState(
+    test?.subject.code ?? options.subjects[0]?.code ?? "",
+  );
   const [date, setDate] = useState(test?.date ?? "");
   const [title, setTitle] = useState(test?.title ?? "");
   const [description, setDescription] = useState(test?.description ?? "");
@@ -73,14 +134,30 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
   const [busy, setBusy] = useState(false);
   const [ask, setAsk] = useState(false);
   // Eine bestehende Prüfung, deren Zuteilung entfernt wurde, bleibt wählbar, damit sie gelöscht werden kann
-  const subjects = test && !test.classCode && !options.subjects.some((s) => s.code === test.subject.code) ? [test.subject, ...options.subjects] : options.subjects;
+  const subjects =
+    test &&
+    !test.classCode &&
+    !options.subjects.some((s) => s.code === test.subject.code)
+      ? [test.subject, ...options.subjects]
+      : options.subjects;
 
   async function save() {
     setBusy(true);
     setError("");
     const [classCode, pairSubject] = pair.split("|");
-    const body = { date, title, description: description || null, ...(teacher ? { classCode, subject: pairSubject } : { subject }) };
-    const err = test ? await send(`/api/v1/tests/${encodeURIComponent(test.id)}`, "PATCH", body) : await send("/api/v1/tests", "POST", body);
+    const body = {
+      date,
+      title,
+      description: description || null,
+      ...(teacher ? { classCode, subject: pairSubject } : { subject }),
+    };
+    const err = test
+      ? await send(
+          `/api/v1/tests/${encodeURIComponent(test.id)}`,
+          "PATCH",
+          body,
+        )
+      : await send("/api/v1/tests", "POST", body);
     setBusy(false);
     if (err) return setError(err);
     toast.show(test ? "Prüfung geändert." : "Prüfung gespeichert.");
@@ -89,7 +166,10 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
 
   async function remove() {
     setBusy(true);
-    const err = await send(`/api/v1/tests/${encodeURIComponent(test!.id)}`, "DELETE");
+    const err = await send(
+      `/api/v1/tests/${encodeURIComponent(test!.id)}`,
+      "DELETE",
+    );
     setBusy(false);
     if (err) return setError(err);
     toast.show("Prüfung gelöscht.");
@@ -97,9 +177,17 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
   }
 
   return (
-    <Dialog open onClose={close} title={test ? "Prüfung bearbeiten" : "Neue Prüfung"}>
+    <Dialog
+      open
+      onClose={close}
+      title={test ? "Prüfung bearbeiten" : "Neue Prüfung"}
+    >
       {teacher ? (
-        <SelectField label="Klasse und Fach" value={pair} onChange={(e) => setPair(e.target.value)}>
+        <SelectField
+          label="Klasse und Fach"
+          value={pair}
+          onChange={(e) => setPair(e.target.value)}
+        >
           {pairs.map((p) => (
             <option key={p.key} value={p.key}>
               {p.label}
@@ -107,7 +195,11 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
           ))}
         </SelectField>
       ) : (
-        <SelectField label="Fach" value={subject} onChange={(e) => setSubject(e.target.value)}>
+        <SelectField
+          label="Fach"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+        >
           {subjects.map((s) => (
             <option key={s.code} value={s.code}>
               {s.name}
@@ -115,9 +207,27 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
           ))}
         </SelectField>
       )}
-      <TextField label="Datum" type="date" value={date} required onChange={(e) => setDate(e.target.value)} />
-      <TextField label="Titel" value={title} maxLength={80} required onChange={(e) => setTitle(e.target.value)} />
-      <TextArea label="Beschreibung" value={description} maxLength={1000} rows={3} onChange={(e) => setDescription(e.target.value)} />
+      <TextField
+        label="Datum"
+        type="date"
+        value={date}
+        required
+        onChange={(e) => setDate(e.target.value)}
+      />
+      <TextField
+        label="Titel"
+        value={title}
+        maxLength={80}
+        required
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <TextArea
+        label="Beschreibung"
+        value={description}
+        maxLength={1000}
+        rows={3}
+        onChange={(e) => setDescription(e.target.value)}
+      />
       {error && (
         <p className="f-e" role="alert">
           {error}
@@ -139,10 +249,47 @@ function TestDialog({ options, teacher, test }: { options: Options; teacher: boo
             Abbrechen
           </Button>
         )}
-        <Button icon="check" busy={busy} disabled={!title.trim() || !date || (teacher ? !pair : !subject)} onClick={save}>
+        <Button
+          icon="check"
+          busy={busy}
+          disabled={!title.trim() || !date || (teacher ? !pair : !subject)}
+          onClick={save}
+        >
           Prüfung speichern
         </Button>
       </DialogActions>
+    </Dialog>
+  );
+}
+
+/** Details einer Prüfung aus dem Kalender; eigene lassen sich von hier aus bearbeiten. */
+function TestDetail({ test }: { test: TestItem }) {
+  const { close } = useClose();
+  return (
+    <Dialog open onClose={close} title={`${test.subject.name}: ${test.title}`}>
+      <dl className="kv">
+        <dt>Datum</dt>
+        <dd>{fmtLong(test.date, true)}</dd>
+        <dt>{test.classCode ? "Klasse" : "Für"}</dt>
+        <dd>{test.classCode ?? "Nur für dich"}</dd>
+        {test.author && (
+          <>
+            <dt>Erfasst von</dt>
+            <dd>{test.author}</dd>
+          </>
+        )}
+        {test.description && (
+          <>
+            <dt>Beschreibung</dt>
+            <dd style={{ whiteSpace: "pre-line" }}>{test.description}</dd>
+          </>
+        )}
+      </dl>
+      {test.mine && (
+        <DialogActions>
+          <EditTestLink id={test.id} label={`${test.title} bearbeiten`} />
+        </DialogActions>
+      )}
     </Dialog>
   );
 }
