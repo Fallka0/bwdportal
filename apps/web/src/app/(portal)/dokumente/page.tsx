@@ -8,11 +8,11 @@ import { DocSearch, DocTabs } from "./DocControls";
 export const metadata: Metadata = { title: "Dokumente" };
 
 export default async function Documents({ searchParams }: { searchParams: Promise<{ q?: string; gruppe?: string }> }) {
-  const { env } = await requireUser();
+  const { env, me } = await requireUser();
   const sp = await searchParams;
   const q = (sp.q ?? "").slice(0, 80);
   const group = sp.gruppe;
-  const d = await getDocuments(env.db, env.now, q, group);
+  const d = await getDocuments(env.db, me.id, env.now, q, group);
   const shown = d.groups.filter((g) => g.items.length);
   return (
     <>

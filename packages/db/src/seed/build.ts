@@ -241,7 +241,7 @@ export function buildSeed(): SeedData {
     g.items.forEach((it, i) => {
       const s = slug(it.title);
       const updated = it.isNew ? "2026-10-20" : it.note && /\d{2}\.\d{2}\.\d{4}/.test(it.note) ? parseCh(it.note) : "2026-08-01";
-      d.documents!.push({ id: `d-${s}`, grp: g.group, title: it.title, file_type: it.type, size_bytes: kb(it.size), note: it.note, r2_key: `dokumente/${s}.pdf`, updated_at: updated, sort: i });
+      d.documents!.push({ id: `d-${s}`, grp: g.group, title: it.title, file_type: it.type, size_bytes: kb(it.size), note: it.note, r2_key: `dokumente/${s}.pdf`, updated_at: updated, sort: i, class_id: CLASS_ID });
     }),
   );
 
@@ -283,6 +283,8 @@ export function buildSeed(): SeedData {
     published_at: `${parseCh(n.date)}T08:00`,
     pinned: n.pinned ? 1 : 0,
     document_id: n.id === "pp" ? "d-pruefungsplan-1-semester-2026-27" : null,
+    // Erfunden: nur für die Demo-Klasse, echte Konten sehen sie nicht
+    class_id: CLASS_ID,
   }));
   d.news_read = f.news.filter((n) => !n.unread).map((n) => ({ news_id: n.id, user_id: DEMO_USERS.selin }));
 

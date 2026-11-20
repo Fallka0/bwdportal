@@ -217,6 +217,8 @@ export const documents = sqliteTable("documents", {
   updatedAt: text("updated_at"),
   /** Ergänzung: Reihenfolge innerhalb der Gruppe wie im Design. */
   sort: integer("sort").notNull().default(0),
+  /** Nur für diese Klasse sichtbar; leer = für alle. Die erfundenen Beispieldaten gehören zur Demo-Klasse. */
+  classId: text("class_id").references(() => classes.id),
 });
 
 export const links = sqliteTable("links", {
@@ -240,6 +242,8 @@ export const news = sqliteTable("news", {
   publishedAt: text("published_at").notNull(),
   pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
   documentId: text("document_id"),
+  /** Nur für diese Klasse sichtbar; leer = für alle. Die erfundenen Beispieldaten gehören zur Demo-Klasse. */
+  classId: text("class_id").references(() => classes.id),
 });
 
 export const newsRead = sqliteTable(
