@@ -73,6 +73,7 @@ import {
   nextLesson,
 } from "@bwd/shared";
 import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { listTests, markTests, testsBetween } from "./tests";
 import type { Db } from "./client";
 import * as s from "./schema";
 
@@ -253,7 +254,7 @@ export async function timetableSource(db: Db, now: Now): Promise<Timetable["sour
 }
 
 export async function getTimetable(db: Db, userId: string, from: string, to: string, now: Now): Promise<Timetable> {
-  return { from, to, lessons: await lessonsBetween(db, userId, from, to), source: await timetableSource(db, now) };
+  return { from, to, lessons: await markTests(db, userId, await lessonsBetween(db, userId, from, to)), source: await timetableSource(db, now) };
 }
 
 // ---------- Noten ----------
@@ -718,7 +719,7 @@ export async function deleteDispensation(db: Db, userId: string, id: string): Pr
 // ---------- Übersicht ----------
 
 export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
-  const lessons = await lessonsBetween(db, userId, now.date, now.date);
+  const lessons = await markTests(db, userId, await lessonsBetween(db, userId, now.date, now.date));
   const abs = await getAbsences(db, userId, now);
   return {
     today: now.date,
@@ -728,12 +729,13 @@ export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
     absences: { contingent: abs.contingent, recent: abs.items.slice(0, 2) },
     recentGrades: await recentGrades(db, userId, 3),
     news: (await getNews(db, userId)).slice(0, 2),
+    tests: await listTests(db, userId, now, { to: addDays(now.date, 14), limit: 3 }),
   };
 }
 
 /** Übersicht einer Lehrperson: heutige Lektionen, ihre Klassen mit Fächern und Mitteilungen. */
 export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<TeacherHome> {
-  const lessons = await lessonsBetween(db, userId, now.date, now.date);
+  const lessons = await markTests(db, userId, await lessonsBetween(db, userId, now.date, now.date));
   const scope = await teacherScope(db, userId);
   const own = await db.select({ id: s.classes.id, code: s.classes.code, program: s.classes.program }).from(s.classes).where(eq(s.classes.classTeacherId, userId));
   const byClass = new Map<string, TeacherHome["classes"][number] & { id: string }>();
@@ -765,6 +767,7 @@ export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<
     lessons,
     classes: [...byClass.values()].sort((a, b) => a.code.localeCompare(b.code)).map(({ id: _id, ...c }) => c),
     news: (await getNews(db, userId)).slice(0, 3),
+    tests: await listTests(db, userId, now, { to: addDays(now.date, 14), limit: 4 }),
   };
 }
 
@@ -1176,6 +1179,9 @@ export async function calendarEvents(db: Db, userId: string, now: Now): Promise<
   for (const r of await examsFor(db, userId)) {
     const sub = (await db.select().from(s.subjects).where(eq(s.subjects.code, r.exam.subjectCode)).limit(1))[0];
     events.push({ uid: `${r.exam.id}@bwd-portal`, summary: `Prüfung ${sub?.name ?? r.exam.subjectCode}: ${r.exam.title}`, date: r.exam.date, description: r.value !== null ? `Note ${fmtGrade(r.value)}` : null });
+  }
+  for (const t of await testsBetween(db, userId, from, to)) {
+    events.push({ uid: `${t.id}@bwd-portal`, summary: `Prüfung ${t.subject.name}${t.classCode ? ` ${t.classCode}` : ""}: ${t.title}`, date: t.date, description: t.description });
   }
   const plan = await db
     .select({ p: s.solPlan, d: s.solDays, t: s.solTasks, sub: s.subjects })

@@ -60,8 +60,36 @@ export const Lesson = z.object({
   originalRoom: z.string().nullable(),
   /** Nur im Stundenplan einer Lehrperson: die Klasse der Lektion */
   classCode: z.string().nullable().optional(),
+  /** Prüfung in dieser Lektion (Titel), aus dem Prüfungskalender */
+  test: z.string().nullable().optional(),
 });
 export type Lesson = z.infer<typeof Lesson>;
+
+/** Prüfungskalender: Prüfung einer Klasse (Lehrperson) oder eigene Prüfung (nur für mich). */
+export const TestItem = z.object({
+  id: z.string(),
+  date,
+  subject: Subject,
+  title: z.string(),
+  description: z.string().nullable(),
+  /** Klasse; leer bei eigenen Prüfungen von Lernenden */
+  classCode: z.string().nullable(),
+  /** Name der Lehrperson, die sie erfasst hat; leer bei eigenen */
+  author: z.string().nullable(),
+  /** Ich habe sie erfasst und darf sie bearbeiten */
+  mine: z.boolean(),
+});
+export type TestItem = z.infer<typeof TestItem>;
+
+export const TestInput = z.object({
+  date,
+  subject: z.string().trim().min(1, "Fach fehlt.").max(8),
+  title: z.string().trim().min(1, "Titel fehlt.").max(80),
+  description: z.string().trim().max(1000).nullable().optional(),
+  /** Nur Lehrpersonen: Klasse, für die die Prüfung gilt */
+  classCode: z.string().trim().max(12).nullable().optional(),
+});
+export type TestInput = z.infer<typeof TestInput>;
 
 export const TimetableSourceInfo = z.object({
   name: z.string(),
@@ -322,6 +350,8 @@ export const Home = z.object({
   absences: z.object({ contingent: AbsenceContingent, recent: z.array(Absence) }),
   recentGrades: z.array(RecentGrade),
   news: z.array(NewsItem),
+  /** Prüfungen der nächsten zwei Wochen */
+  tests: z.array(TestItem).default([]),
 });
 export type Home = z.infer<typeof Home>;
 
@@ -341,6 +371,7 @@ export const TeacherHome = z.object({
   lessons: z.array(Lesson),
   classes: z.array(TeacherClass),
   news: z.array(NewsItem),
+  tests: z.array(TestItem).default([]),
 });
 export type TeacherHome = z.infer<typeof TeacherHome>;
 

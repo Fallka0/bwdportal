@@ -6,6 +6,7 @@ import { Card, CardHead, Icon, LinkButton, ListRow, Status } from "@/components/
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
 import { NextCard } from "./NextCard";
+import { TestsCard } from "./TestsCard";
 import { TeacherHome } from "./TeacherHome";
 
 export const metadata: Metadata = { title: "Übersicht" };
@@ -85,6 +86,8 @@ export default async function Home() {
               <ListRow key={a.id} href="/absenzen" title={`${fmtWeekdayShort(a.date)} · ${plural(a.lessons.length, "Lektion", "Lektionen")}`} sub={a.subjectsLabel} end={<Status tone={a.status === "unexcused" ? "err" : a.status === "dispensed" ? "ok" : "info"}>{a.status === "unexcused" ? "Unentschuldigt" : a.status === "dispensed" ? "Dispensiert" : "Kontingent"}</Status>} />
             ))}
           </Card>
+
+          <TestsCard tests={h.tests} />
 
           <Card className="h-gr" aria-labelledby="gr-h">
             <CardHead id="gr-h" title="Neue Noten" href="/noten" linkLabel="Alle Noten" />

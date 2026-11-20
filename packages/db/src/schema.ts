@@ -136,6 +136,28 @@ export const exams = sqliteTable("exams", {
   classAverage: real("class_average"),
 });
 
+/**
+ * Prüfungskalender: Prüfungen einer Lehrperson für eine Klasse (class_id gesetzt, Fach zugewiesen) oder
+ * eigene Prüfungen von Lernenden (class_id leer, nur für sie sichtbar). Bearbeiten darf nur, wer sie erfasst hat.
+ */
+export const tests = sqliteTable(
+  "tests",
+  {
+    id: text("id").primaryKey(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    classId: text("class_id").references(() => classes.id, { onDelete: "cascade" }),
+    subjectCode: text("subject_code").notNull(),
+    date: text("date").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => [index("tests_class_date").on(t.classId, t.date), index("tests_owner").on(t.ownerId)],
+);
+
 export const grades = sqliteTable(
   "grades",
   {

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { IconName } from "@bwd/shared/icons";
-import { getSolCalendar } from "@bwd/db";
-import { WEEKDAYS, daysBetween, weekday } from "@bwd/shared";
+import { getSolCalendar, listTests } from "@bwd/db";
+import { WEEKDAYS, daysBetween, fmtWeekdayDate, weekday } from "@bwd/shared";
 import { AndroidAppLink } from "@/components/app/AndroidApp";
 import { Icon } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
@@ -15,7 +15,9 @@ export default async function More() {
   const teacher = me.role === "teacher";
   const sol = teacher ? null : await getSolCalendar(env.db, me.id, env.now);
   const solSub = sol?.day ? (sol.day.date === env.now.date ? "SOL-Tag heute" : daysBetween(env.now.date, sol.day.date) < 7 ? `SOL-Tag am ${WEEKDAYS[weekday(sol.day.date)]}` : "") : "";
+  const next = (await listTests(env.db, me.id, env.now, { limit: 1 }))[0];
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
+    { href: "/pruefungen", title: "Prüfungen", sub: next ? `Nächste ${fmtWeekdayDate(next.date)}` : "", icon: "note" },
     ...(teacher
       ? []
       : [

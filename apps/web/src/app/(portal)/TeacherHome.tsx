@@ -5,6 +5,7 @@ import { Card, CardHead, Icon, ListRow } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import type { ServerEnv } from "@/lib/env";
 import { NextCard } from "./NextCard";
+import { TestsCard } from "./TestsCard";
 
 /** Übersicht einer Lehrperson: nächste Lektion, heute, ihre Klassen, Mitteilungen. */
 export async function TeacherHome({ env, me }: { env: ServerEnv; me: Me }) {
@@ -78,6 +79,8 @@ export async function TeacherHome({ env, me }: { env: ServerEnv; me: Me }) {
               ))
             )}
           </Card>
+
+          <TestsCard tests={h.tests} teacher />
 
           <Card className="h-nw" aria-labelledby="nw-h">
             <CardHead id="nw-h" title="Mitteilungen" href="/mitteilungen" />
