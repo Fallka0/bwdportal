@@ -25,6 +25,7 @@ export const users = sqliteTable("users", {
   /** student oder teacher; Lehrpersonen werden in admin.planary.ch bestimmt */
   role: text("role").notNull().default("student"),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  /** Zuletzt angemeldet oder aktiv (Wanduhrzeit, auf 10 Minuten genau) */
   lastLoginAt: text("last_login_at"),
 });
 

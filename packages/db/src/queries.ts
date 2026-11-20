@@ -144,12 +144,21 @@ export async function createSession(db: Db, userId: string, now: Now, days = 30)
 }
 
 export async function sessionUser(db: Db, sessionId: string, now: Now): Promise<string | null> {
-  const r = (await db.select().from(s.sessions).where(eq(s.sessions.id, sessionId)).limit(1))[0];
+  const r = (
+    await db
+      .select({ userId: s.sessions.userId, expiresAt: s.sessions.expiresAt, seen: s.users.lastLoginAt })
+      .from(s.sessions)
+      .innerJoin(s.users, eq(s.users.id, s.sessions.userId))
+      .where(eq(s.sessions.id, sessionId))
+      .limit(1)
+  )[0];
   if (!r) return null;
   if (r.expiresAt < now.stamp) {
     await db.delete(s.sessions).where(eq(s.sessions.id, sessionId));
     return null;
   }
+  // Zuletzt aktiv (users.last_login_at): höchstens einmal pro 10 Minuten schreiben ("2026-11-20T08:1")
+  if (!r.seen || r.seen.slice(0, 15) < now.stamp.slice(0, 15)) await db.update(s.users).set({ lastLoginAt: now.stamp }).where(eq(s.users.id, r.userId));
   return r.userId;
 }
 

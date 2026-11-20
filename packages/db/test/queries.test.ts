@@ -36,6 +36,17 @@ describe("Konto", () => {
     await q.deleteSession(db, s2.id);
     expect(await q.sessionUser(db, s2.id, NOW)).toBeNull();
   });
+
+  it("Zuletzt aktiv: bei Anmeldung und Nutzung, höchstens alle 10 Minuten", async () => {
+    const seen = async () => (await db.select({ v: schema.users.lastLoginAt }).from(schema.users).where(eq(schema.users.id, U)))[0]!.v;
+    const at = (time: string) => ({ date: NOW.date, time, stamp: `${NOW.date}T${time}` });
+    const s = await q.createSession(db, U, at("08:00"), 1);
+    expect(await seen()).toBe(`${NOW.date}T08:00`);
+    await q.sessionUser(db, s.id, at("08:07"));
+    expect(await seen()).toBe(`${NOW.date}T08:00`);
+    await q.sessionUser(db, s.id, at("08:12"));
+    expect(await seen()).toBe(`${NOW.date}T08:12`);
+  });
 });
 
 describe("Stundenplan", () => {
