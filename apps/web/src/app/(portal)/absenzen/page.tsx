@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAbsences } from "@bwd/db";
-import { fmtShortLoose, monthShort, plural, type Absence, type Dispensation } from "@bwd/shared";
-import { Empty, Kpis, Status, type StatusTone } from "@/components/ui";
+import { config, fmtShortLoose, monthShort, plural, type Absence, type Dispensation } from "@bwd/shared";
+import { Banner, Empty, Kpis, Status, type StatusTone } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { EditLink, NewButton, NoticeForms } from "./NoticeForms";
 
@@ -84,6 +84,19 @@ export default async function Absences({ searchParams }: { searchParams: Promise
       <div className="seg-app" style={{ marginBottom: "var(--sp-5)" }}>
         <NewButton kind={kind} wide />
       </div>
+      {tab !== "absenzen" && !config.absenceSystem.connected && (
+        <Banner
+          action={
+            config.services.absenzendatenbank ? (
+              <a className="btn btn-line btn-s" href={config.services.absenzendatenbank} target="_blank" rel="noopener noreferrer">
+                Absenzendatenbank öffnen
+              </a>
+            ) : undefined
+          }
+        >
+          <b>Nur im Portal gespeichert.</b> Die Schule sieht {tab === "abmeldungen" ? "Abmeldungen" : "Gesuche"} nur in der Absenzendatenbank, trage sie dort ein.
+        </Banner>
+      )}
       {tab === "absenzen" && <AbsenceList items={a.items} subjects={a.subjects} fach={sp.fach} />}
       {tab === "abmeldungen" &&
         (a.notices.length === 0 ? (

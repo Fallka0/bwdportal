@@ -18,7 +18,8 @@
     "teams": "https://teams.microsoft.com/",
     "outlook": "https://outlook.office.com/mail/",
     "onedrive": "https://www.office.com/launch/onedrive",
-    "onenote": "https://www.onenote.com/notebooks"
+    "onenote": "https://www.onenote.com/notebooks",
+    "absenzendatenbank": "https://absenzen.bwdbern.ch/lernende_anzeigen"
   },
   "periods": [
     {
@@ -98,5 +99,9 @@
     "lessons": 20,
     "per": "semester",
     "status": "aus der Absenzendatenbank (20 Lektionen pro Semester)"
+  },
+  "absenceSystem": {
+    "connected": false,
+    "status": "Abmeldungen und Gesuche im Portal erreichen die Schule nicht; gemeldet wird in der Absenzendatenbank (services.absenzendatenbank). Auf true setzen, wenn die Schule das Portal dafür nutzt."
   }
 }
