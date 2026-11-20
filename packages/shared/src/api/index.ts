@@ -24,6 +24,7 @@ import {
   SolPlanCreate,
   SolPortfolio,
   SolTasks,
+  type SolStatus,
   SubjectGrades,
   Timetable,
 } from "../schemas";
@@ -82,7 +83,7 @@ export function createApiClient(opts: ApiClientOptions) {
   };
 
   return {
-    authConfig: () => call(z.object({ mock: z.boolean(), microsoft: z.boolean() }), "GET", "/auth/config"),
+    authConfig: () => call(z.object({ mock: z.boolean(), microsoft: z.boolean(), planary: z.boolean().default(false) }), "GET", "/auth/config"),
     accounts: () => call(z.object({ accounts: z.array(DemoAccount) }), "GET", "/auth/accounts"),
     /** Einmal-Code aus dem Microsoft-Login gegen das Session-Token tauschen. */
     exchange: (code: string) => call(z.object({ token: z.string() }), "POST", "/auth/exchange", { code }),
@@ -103,7 +104,7 @@ export function createApiClient(opts: ApiClientOptions) {
     updateDispensation: (id: string, input: DispensationSubmit) => call(Dispensation, "PATCH", `/absences/dispensations/${encodeURIComponent(id)}`, input),
     deleteDispensation: (id: string) => call(Ok, "DELETE", `/absences/dispensations/${encodeURIComponent(id)}`),
     solTasks: (block?: number) => call(SolTasks, "GET", `/sol/tasks${q({ block })}`),
-    setSolProgress: (id: string, percent: number) => call(Ok, "PATCH", `/sol/tasks/${encodeURIComponent(id)}`, { percent }),
+    setSolStatus: (id: string, status: SolStatus) => call(Ok, "PATCH", `/sol/tasks/${encodeURIComponent(id)}`, { status }),
     solCalendar: (day?: string) => call(SolCalendar, "GET", `/sol/plan${q({ day })}`),
     addSolPlan: (input: SolPlanCreate) => call(z.object({ id: z.string() }), "POST", "/sol/plan", input),
     deleteSolPlan: (id: string) => call(Ok, "DELETE", `/sol/plan${q({ id })}`),

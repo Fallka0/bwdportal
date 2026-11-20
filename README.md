@@ -4,7 +4,7 @@ Ein Portal für Lernende der bwd Bern: Stundenplan, Noten, Absenzen, SOL, Mittei
 
 Schulprojekt. **Alle Personen, Noten und Absenzen sind erfunden.** Kein offizielles Produkt der Schule.
 
-- Web: https://bwdportal.planary.ch (Demo-Anmeldung: "Mit Microsoft anmelden", dann "Selin Hofer"). Lässt sich als App installieren (PWA).
+- Web: https://bwdportal.planary.ch (Anmeldung mit Planary-Konto oder Microsoft, nur mit Adresse der bwd). Lässt sich als App installieren (PWA).
 - Projektdoku: [docs/PROJEKTDOKU.md](docs/PROJEKTDOKU.md)
 - Vorgaben und Design: [handoff/](handoff/)
 
@@ -58,21 +58,26 @@ BASE_URL=<Adresse> pnpm --filter @bwd/web e2e  # gegen ein Deployment mit DEMO_N
 | `pnpm db:reset` | lokales D1 neu aufsetzen |
 | `pnpm timetable:import -- --source webuntis` | Stundenplan importieren, siehe [tools/import](tools/import/README.md) |
 | `pnpm sol:import -- --file <datei>` | SOL-Daten einer Klasse importieren |
+| `pnpm sol:files -- suggest …` / `import …` | SOL-Dateien zuordnen und hochladen, siehe [tools/import](tools/import/README.md) |
 | `pnpm --filter @bwd/web run deploy` | Web auf Cloudflare bauen und veröffentlichen |
 
 ## Anmeldung
 
-`AUTH_MODE` in `apps/web/wrangler.jsonc`:
+`AUTH_METHODS` in `apps/web/wrangler.jsonc`, kommagetrennt:
 
-| Wert | Verhalten |
+| Wert | Anmeldung |
 |---|---|
-| `mock` | nur Demo-Konten |
-| `microsoft` | nur Microsoft (Entra ID) |
-| `both` | Demo-Konten und "Echtes Microsoft-Konto" (Vorführung) |
+| `planary` | Planary-Konto (auth.planary.ch): E-Mail und Passwort mit bestätigter Adresse, Google oder GitHub |
+| `microsoft` | Microsoft (Entra ID) |
+| `mock` | Demo-Konten, nur lokal (`apps/web/.dev.vars`) und in den Tests |
 
-Microsoft braucht eine App-Registrierung in Entra ID (Web, Redirect-URIs `https://bwdportal.planary.ch/api/v1/auth/callback` und `http://localhost:3000/api/v1/auth/callback`). Die Client-ID steht als `MS_CLIENT_ID` in `wrangler.jsonc`, das Secret kommt mit `npx wrangler secret put MS_CLIENT_SECRET` (lokal in `apps/web/.dev.vars`). Zugelassen sind nur Konten mit der Schul-Domain aus `config/portal.json`; zum Testen weitere über `AUTH_EXTRA_DOMAINS`. Ohne Client-ID und Secret verhält sich `both` wie `mock`.
+Im Deployment gilt `planary,microsoft`. Zugelassen sind nur Adressen der Schul-Domain aus `config/portal.json`, zum Testen weitere über `AUTH_EXTRA_DOMAINS` (im Deployment leer: die SOL-Unterlagen sind Dokumente der Schule). Ein Konto ist dasselbe, egal ob über Planary oder Microsoft angemeldet (gleiche E-Mail-Adresse).
 
-Neue Microsoft-Konten kommen in die Klasse aus `DEFAULT_CLASS` (zurzeit `IM24a`), solange die Zuordnung nicht aus dem Schulsystem kommt. Die Klasse wird bei Bedarf angelegt; ein Konto ohne Klasse bekommt sie beim nächsten Login.
+Planary: `PLANARY_AUTH_URL` zeigt auf auth.planary.ch, dort muss die Adresse des Portals in `ALLOWED_RETURN_TO_ORIGINS` stehen (lokal ist `http://localhost:3000` erlaubt). Der Rücksprung landet auf `/login/planary`; das Portal prüft das Token bei `/api/auth/me` und verwirft das Refresh-Token von Planary, danach gilt die eigene Session.
+
+Microsoft braucht eine App-Registrierung in Entra ID (Web, Redirect-URIs `https://bwdportal.planary.ch/api/v1/auth/callback` und `http://localhost:3000/api/v1/auth/callback`). Die Client-ID steht als `MS_CLIENT_ID` in `wrangler.jsonc`, das Secret kommt mit `npx wrangler secret put MS_CLIENT_SECRET` (lokal in `apps/web/.dev.vars`).
+
+Neue Konten kommen in die Klasse aus `DEFAULT_CLASS` (zurzeit `IM24a`), solange die Zuordnung nicht aus dem Schulsystem kommt. Die Klasse wird bei Bedarf angelegt; ein Konto ohne Klasse bekommt sie beim nächsten Login.
 
 ## Deployment (Cloudflare)
 

@@ -317,7 +317,7 @@ export function buildSeed(): SeedData {
       const id = `t-${g.subject.toLowerCase()}-${t.code}`;
       const s = `${g.subject.toLowerCase()}-sol-${t.code.replace(".", "-")}`;
       d.sol_tasks.push({ id, block_id: "b-3", subject_code: g.subject, code: t.code, title: t.title, minutes: t.minutes, sharepoint_url: svc.sharepointSol + s, r2_key: `sol/auftraege/${s}.pdf` });
-      d.sol_progress.push({ task_id: id, user_id: DEMO_USERS.selin, percent: t.progress });
+      d.sol_progress.push({ task_id: id, user_id: DEMO_USERS.selin, status: t.progress >= 100 ? "done" : t.progress > 0 ? "started" : "open" });
     }
   }
   const nextSol = "sd-2026-10-30";

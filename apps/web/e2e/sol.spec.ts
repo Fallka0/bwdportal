@@ -34,16 +34,15 @@ test("Portfolio speichern", async ({ page }) => {
   await expect(page.getByText("Mathe 3.02 und 3.03 am Morgen, danach Englisch Reading.").first()).toBeVisible();
 });
 
-test("Fortschritt setzen und Filter nach Fach", async ({ page }) => {
+test("Stand setzen und Filter nach Fach", async ({ page }) => {
   await page.goto("/sol");
-  const slider = page.getByRole("slider", { name: "Fortschritt Mathe 3.03 Lineare Optimierung II" });
-  await slider.focus();
-  await page.keyboard.press("ArrowRight");
-  const saved = page.waitForResponse((r) => r.url().includes("/api/v1/sol/tasks/") && r.request().method() === "PATCH" && r.request().postData()?.includes("20") === true);
-  await page.keyboard.press("ArrowRight");
+  const stand = page.getByRole("group", { name: "Stand Mathe 3.03 Lineare Optimierung II" });
+  const saved = page.waitForResponse((r) => r.url().includes("/api/v1/sol/tasks/") && r.request().method() === "PATCH");
+  await stand.getByRole("button", { name: "Erledigt" }).click();
   await saved;
   await page.reload();
-  await expect(page.getByRole("slider", { name: "Fortschritt Mathe 3.03 Lineare Optimierung II" })).toHaveValue("20");
+  await expect(page.getByRole("group", { name: "Stand Mathe 3.03 Lineare Optimierung II" }).getByRole("button", { name: "Erledigt" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/von \d+ erledigt/).first()).toBeVisible();
   await page.getByRole("navigation", { name: "Fach" }).getByRole("link", { name: "Franz" }).click();
   await expect(page.getByRole("heading", { level: 2, name: "Französisch" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Mathematik" })).toHaveCount(0);

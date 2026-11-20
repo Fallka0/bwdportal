@@ -6,18 +6,21 @@ import type { Me } from "@bwd/shared";
 import { serverEnv, type ServerEnv } from "../env";
 import { MicrosoftAuthProvider } from "./microsoft";
 import { MockAuthProvider } from "./mock";
+import { PlanaryAuthProvider } from "./planary";
 import type { AuthProvider } from "./types";
 
 export const SESSION_COOKIE = "bwd_session";
 
 /** Anbieter für eine Anmeldeart. Sessions sind bei beiden gleich, darum genügt für getSession/signOut einer. */
-export function authProvider(env: ServerEnv, kind?: "mock" | "microsoft"): AuthProvider {
-  const k = kind ?? (env.authMode === "microsoft" ? "microsoft" : "mock");
-  return k === "mock" ? new MockAuthProvider(env) : new MicrosoftAuthProvider(env);
+export function authProvider(env: ServerEnv, kind?: "mock" | "microsoft" | "planary"): AuthProvider {
+  if (kind === "planary") return new PlanaryAuthProvider(env);
+  if (kind === "microsoft") return new MicrosoftAuthProvider(env);
+  return new MockAuthProvider(env);
 }
 
-export const mockAllowed = (env: ServerEnv) => env.authMode === "mock" || env.authMode === "both";
-export const microsoftAllowed = (env: ServerEnv) => env.authMode === "microsoft" || env.authMode === "both";
+export const mockAllowed = (env: ServerEnv) => env.authMethods.has("mock");
+export const microsoftAllowed = (env: ServerEnv) => env.authMethods.has("microsoft");
+export const planaryAllowed = (env: ServerEnv) => env.authMethods.has("planary") && !!env.planaryUrl;
 
 /**
  * Session-ID aus dem Bearer-Token (App), dem Cookie (Web) oder, nur für Downloads unter /api/v1/files,

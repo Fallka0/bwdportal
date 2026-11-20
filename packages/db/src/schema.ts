@@ -303,17 +303,46 @@ export const solTasks = sqliteTable("sol_tasks", {
   title: text("title").notNull(),
   minutes: integer("minutes").notNull(),
   sharepointUrl: text("sharepoint_url"),
+  /** Platzhalter-PDF der Beispieldaten; echte Dateien stehen in sol_task_files */
   r2Key: text("r2_key"),
 });
+
+export const solFileKinds = ["task", "material", "solution"] as const;
+
+/**
+ * Dateien eines Auftrags aus dem SOL-Ordner: der Auftrag selbst, Unterlagen, Lösungen. Das Original (Word, PDF,
+ * PowerPoint, Audio, Video, Bild) liegt unter `key`; Word und PowerPoint zusätzlich als PDF unter `pdfKey`.
+ */
+export const solTaskFiles = sqliteTable(
+  "sol_task_files",
+  {
+    id: text("id").primaryKey(),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => solTasks.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: solFileKinds }).notNull(),
+    name: text("name").notNull(),
+    /** Endung des Originals: docx, pdf, pptx, mp3, mp4, jpg … */
+    ext: text("ext").notNull(),
+    key: text("key").notNull(),
+    pdfKey: text("pdf_key"),
+    bytes: integer("bytes").notNull().default(0),
+    sort: integer("sort").notNull().default(0),
+  },
+  (t) => [index("sol_task_files_task").on(t.taskId), check("sol_task_files_kind_check", sql`${t.kind} IN ('task','material','solution')`)],
+);
+
+/** Stand eines SOL-Auftrags pro Person: offen, angefangen, erledigt. */
+export const solStatuses = ["open", "started", "done"] as const;
 
 export const solProgress = sqliteTable(
   "sol_progress",
   {
     taskId: text("task_id").notNull(),
     userId: text("user_id").notNull(),
-    percent: integer("percent").notNull().default(0),
+    status: text("status", { enum: solStatuses }).notNull().default("open"),
   },
-  (t) => [primaryKey({ columns: [t.taskId, t.userId] }), check("sol_progress_percent_check", sql`${t.percent} BETWEEN 0 AND 100`)],
+  (t) => [primaryKey({ columns: [t.taskId, t.userId] }), check("sol_progress_status_check", sql`${t.status} IN ('open','started','done')`)],
 );
 
 export const solPlan = sqliteTable("sol_plan", {

@@ -9,7 +9,7 @@ test("ohne Anmeldung geht es zum Login", async ({ page }) => {
 
 test("fremdes Konto zeigt den Fehler aus dem Design", async ({ page }) => {
   await page.goto("/login");
-  await page.getByRole("button", { name: "Mit Microsoft anmelden" }).click();
+  await page.getByRole("button", { name: "Demo-Konto wählen" }).click();
   await page.getByRole("button", { name: /Anderes Microsoft-Konto/ }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Dieses Konto gehört nicht zur bwd." })).toBeVisible();
 });

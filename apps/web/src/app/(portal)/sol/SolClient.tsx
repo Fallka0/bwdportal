@@ -1,9 +1,9 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState, type CSSProperties } from "react";
-import { fromMin, toMin } from "@bwd/shared";
-import { Button, Icon, SelectField, StaticField, TextArea, TextField, useToast } from "@/components/ui";
+import { useState } from "react";
+import { fileTypeLabel, fmtBytes, fromMin, SOL_STATUS_LABEL, toMin, type SolFile, type SolStatus } from "@bwd/shared";
+import { Button, Dialog, DialogActions, Icon, Segment, SelectField, StaticField, TextArea, TextField, useToast } from "@/components/ui";
 
 export function BlockSelect({ blocks, value, tab }: { blocks: number[]; value: number; tab: string }) {
   const router = useRouter();
@@ -23,44 +23,87 @@ export function BlockSelect({ blocks, value, tab }: { blocks: number[]; value: n
 }
 
 /** Fortschritt eines Auftrags: sieht aus wie der Balken, lässt sich mit Maus, Touch und Pfeiltasten in 10er-Schritten setzen. */
-export function ProgressSlider({ id, title, value }: { id: string; title: string; value: number }) {
+/** Stand eines Auftrags: Offen, Angefangen, Erledigt. Speichert sofort, bei Fehler zurück. */
+export function StatusControl({ id, title, value }: { id: string; title: string; value: SolStatus }) {
   const [v, setV] = useState(value);
   const router = useRouter();
-  // Anfragen nacheinander senden, damit die letzte Eingabe gewinnt (keine Wettläufe bei schnellen Tasten).
-  const queue = useRef<Promise<void>>(Promise.resolve());
-  const saved = useRef(value);
-  const commit = (n: number) => {
-    queue.current = queue.current.then(async () => {
-      if (n === saved.current) return;
-      const before = saved.current;
-      const r = await fetch(`/api/v1/sol/tasks/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ percent: n }) }).catch(() => null);
-      if (!r?.ok) {
-        setV(before);
-        return;
-      }
-      saved.current = n;
-      if ((n === 100) !== (before === 100)) router.refresh();
-    });
-  };
+  const toast = useToast();
+  async function set(next: SolStatus) {
+    if (next === v) return;
+    const before = v;
+    setV(next);
+    const r = await fetch(`/api/v1/sol/tasks/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ status: next }) }).catch(() => null);
+    if (!r?.ok) {
+      setV(before);
+      toast.show("Speichern fehlgeschlagen. Versuche es nochmals.");
+      return;
+    }
+    router.refresh();
+  }
   return (
-    <span className="so-p">
-      <input
-        className="prog"
-        type="range"
-        min={0}
-        max={100}
-        step={10}
-        value={v}
-        aria-label={`Fortschritt ${title}`}
-        aria-valuetext={`${v} Prozent`}
-        style={{ "--p": `${v}%` } as CSSProperties}
-        onChange={(e) => setV(Number(e.target.value))}
-        onPointerUp={(e) => commit(Number(e.currentTarget.value))}
-        onKeyUp={(e) => commit(Number(e.currentTarget.value))}
-        onBlur={(e) => commit(Number(e.currentTarget.value))}
-      />
-      {v} %
+    <span className="so-st">
+      <Segment label={`Stand ${title}`} value={v} onChange={set} options={(["open", "started", "done"] as const).map((s) => ({ value: s, label: SOL_STATUS_LABEL[s] }))} />
     </span>
+  );
+}
+
+/** Links einer Datei: "PDF" (Fassung oder Original) und das Original nach Typ ("Word", "Audio" …). */
+export function FileLinks({ file: f, label, quick }: { file: SolFile; label: string; quick?: boolean }) {
+  const cls = quick ? "fl q" : "fl";
+  const type = fileTypeLabel(f.ext);
+  const download = !/^(PDF|Audio|Video|Bild)$/.test(type);
+  return (
+    <>
+      {f.pdfHref && (
+        <a className={cls} href={f.pdfHref} target="_blank" rel="noopener" aria-label={`${label} als PDF öffnen`}>
+          PDF
+        </a>
+      )}
+      <a className={cls} href={f.href} {...(download ? { download: true } : { target: "_blank", rel: "noopener" })} aria-label={`${label} als ${type} ${download ? "herunterladen" : "öffnen"}`}>
+        {type}
+      </a>
+    </>
+  );
+}
+
+const GROUPS: [SolFile["kind"], string][] = [
+  ["task", "Auftrag"],
+  ["material", "Unterlagen"],
+  ["solution", "Lösungen"],
+];
+
+/** Alle Dateien eines Auftrags: Auftrag, Unterlagen, Lösungen, je als PDF und Word. */
+export function FilesButton({ title, files }: { title: string; files: SolFile[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="fl" onClick={() => setOpen(true)} aria-label={`Alle ${files.length} Dateien zu ${title}`}>
+        {`${files.length} Dateien`}
+      </button>
+      <Dialog open={open} onClose={() => setOpen(false)} title={title}>
+        {GROUPS.map(([kind, label]) => {
+          const list = files.filter((f) => f.kind === kind);
+          if (!list.length) return null;
+          return (
+            <section key={kind} className="sf" aria-label={label}>
+              <h3 className="f-l">{label}</h3>
+              {list.map((f) => (
+                <div key={f.id} className="sf-r">
+                  <span className="sf-n">{f.name}</span>
+                  <span className="sf-s">{f.bytes ? fmtBytes(f.bytes) : ""}</span>
+                  <FileLinks file={f} label={f.name} />
+                </div>
+              ))}
+            </section>
+          );
+        })}
+        <DialogActions>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Schliessen
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 

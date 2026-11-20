@@ -14,7 +14,7 @@ type SignInResult = { ok: true } | { ok: false; foreign: boolean; message: strin
 type Ctx = {
   status: Status;
   signIn: (accountId: string) => Promise<SignInResult>;
-  signInMicrosoft: () => Promise<SignInResult | { ok: false; cancelled: true }>;
+  signInWith: (provider: "microsoft" | "planary", signup?: boolean) => Promise<SignInResult | { ok: false; cancelled: true }>;
   signOut: () => Promise<void>;
 };
 const AuthCtx = createContext<Ctx | null>(null);
@@ -65,16 +65,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Microsoft-Login über das Portal: der Server spricht mit Entra ID und schickt einen Einmal-Code
-   * zurück an die App (bwdportal://auth oder in Expo Go exp://…/--/auth). Der Code wird gegen das Token getauscht.
+   * Login über das Portal (Microsoft oder Planary): der Server spricht mit dem Anbieter und schickt einen
+   * Einmal-Code zurück an die App (bwdportal://auth oder in Expo Go exp://…/--/auth). Der Code wird gegen das Token getauscht.
    */
-  const signInMicrosoft = useCallback(async () => {
+  const signInWith = useCallback(async (provider: "microsoft" | "planary", signup = false) => {
+    const name = provider === "planary" ? "Planary" : "Microsoft";
     const returnUrl = Linking.createURL("auth");
-    const r = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/v1/auth/microsoft?app=${encodeURIComponent(returnUrl)}`, returnUrl);
+    const r = await WebBrowser.openAuthSessionAsync(`${API_URL}/api/v1/auth/${provider}?app=${encodeURIComponent(returnUrl)}${signup ? "&signup=1" : ""}`, returnUrl);
     if (r.type !== "success") return { ok: false as const, cancelled: true as const };
     const params = new URL(r.url).searchParams;
     const fehler = params.get("fehler");
-    if (fehler) return { ok: false as const, foreign: fehler === "konto", message: fehler === "konto" ? "Dieses Konto gehört nicht zur bwd." : "Die Anmeldung mit Microsoft hat nicht geklappt." };
+    if (fehler) return { ok: false as const, foreign: fehler === "konto", message: fehler === "konto" ? "Dieses Konto gehört nicht zur bwd." : `Die Anmeldung mit ${name} hat nicht geklappt.` };
     try {
       const { token } = await api.exchange(params.get("code") ?? "");
       setApiToken(token);
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStatus("in");
       return { ok: true as const };
     } catch (e) {
-      return { ok: false as const, foreign: false, message: e instanceof ApiFailure ? e.message : "Die Anmeldung mit Microsoft hat nicht geklappt." };
+      return { ok: false as const, foreign: false, message: e instanceof ApiFailure ? e.message : `Die Anmeldung mit ${name} hat nicht geklappt.` };
     }
   }, []);
 
@@ -91,6 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await clear();
   }, [clear]);
 
-  const value = useMemo(() => ({ status, signIn, signInMicrosoft, signOut }), [status, signIn, signInMicrosoft, signOut]);
+  const value = useMemo(() => ({ status, signIn, signInWith, signOut }), [status, signIn, signInWith, signOut]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }

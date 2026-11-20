@@ -47,6 +47,9 @@ import {
   type SolCalendar,
   type SolPlanCreate,
   type SolPortfolio,
+  type SolFile,
+  type SolFileKind,
+  type SolStatus,
   type SolTasks,
   type SubjectGrades,
   type Timetable,
@@ -594,7 +597,7 @@ export async function getSolTasks(db: Db, userId: string, now: Now, blockN?: num
   const block = blockN ? (blocks.find((b) => b.n === blockN) ?? null) : currentBlock(blocks, now.date);
   const tasks = block
     ? await db
-        .select({ t: s.solTasks, p: s.solProgress.percent, sub: s.subjects })
+        .select({ t: s.solTasks, p: s.solProgress.status, sub: s.subjects })
         .from(s.solTasks)
         .innerJoin(s.subjects, eq(s.solTasks.subjectCode, s.subjects.code))
         .leftJoin(s.solProgress, and(eq(s.solProgress.taskId, s.solTasks.id), eq(s.solProgress.userId, userId)))
@@ -611,21 +614,39 @@ export async function getSolTasks(db: Db, userId: string, now: Now, blockN?: num
   // Reihenfolge wie im Design: Fächer nach erstem Auftrag in der Seed-Reihenfolge
   const subjectOrder = ["MA", "M", "EN", "E", "DE", "D", "FRW", "WR", "FR", "F"];
   order.sort((a, b) => (subjectOrder.indexOf(a) + 1 || 99) - (subjectOrder.indexOf(b) + 1 || 99));
+  const fileRows = tasks.length
+    ? await db
+        .select()
+        .from(s.solTaskFiles)
+        .where(inArray(s.solTaskFiles.taskId, tasks.map((x) => x.t.id)))
+        .orderBy(asc(s.solTaskFiles.sort))
+    : [];
+  const kindOrder: Record<SolFileKind, number> = { task: 0, material: 1, solution: 2 };
+  const filesOf = (t: typeof s.solTasks.$inferSelect): SolFile[] => {
+    const mine = fileRows.filter((f) => f.taskId === t.id).sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || a.sort - b.sort);
+    if (mine.length) {
+      return mine.map((f) => {
+        const href = `/api/v1/files/sol-file/${encodeURIComponent(f.id)}`;
+        return { id: f.id, kind: f.kind, name: f.name, ext: f.ext, bytes: f.bytes, href, pdfHref: f.pdfKey ? `${href}?format=pdf` : null };
+      });
+    }
+    // Beispieldaten: ein Platzhalter-PDF pro Auftrag
+    return t.r2Key ? [{ id: t.id, kind: "task", name: t.title, ext: "pdf", bytes: 0, href: `/api/v1/files/sol/${encodeURIComponent(t.id)}`, pdfHref: null }] : [];
+  };
   const groups = order.map((code) => {
     const mine = tasks.filter((x) => x.t.subjectCode === code);
     const sub = mine[0]!.sub;
     return {
       subject: { code: sub.code, name: sub.name, short: sub.short },
       teacher: teachers.find((t) => t.sub === code)?.name ?? null,
-      tasks: mine.map(({ t, p }) => ({ id: t.id, subjectCode: t.subjectCode, code: t.code, title: t.title, minutes: t.minutes, percent: p ?? 0, sharepointUrl: t.sharepointUrl, hasFile: !!t.r2Key })),
+      tasks: mine.map(({ t, p }) => ({ id: t.id, subjectCode: t.subjectCode, code: t.code, title: t.title, minutes: t.minutes, status: p ?? "open", sharepointUrl: t.sharepointUrl, files: filesOf(t) })),
     };
   });
   return { blocks: blocks.map((b) => ({ id: b.id, n: b.n, starts: b.starts, ends: b.ends })), block: block ? { id: block.id, n: block.n, starts: block.starts, ends: block.ends } : null, groups };
 }
 
-export async function setSolProgress(db: Db, userId: string, taskId: string, percent: number) {
-  const p = Math.max(0, Math.min(100, Math.round(percent)));
-  await db.insert(s.solProgress).values({ taskId, userId, percent: p }).onConflictDoUpdate({ target: [s.solProgress.taskId, s.solProgress.userId], set: { percent: p } });
+export async function setSolStatus(db: Db, userId: string, taskId: string, status: SolStatus) {
+  await db.insert(s.solProgress).values({ taskId, userId, status }).onConflictDoUpdate({ target: [s.solProgress.taskId, s.solProgress.userId], set: { status } });
 }
 
 export async function solDays(db: Db, userId: string) {

@@ -200,7 +200,13 @@ describe("SOL", () => {
     expect(t.block?.n).toBe(3);
     expect(t.blocks.map((b) => b.n)).toEqual([3, 2, 1]);
     expect(t.groups.map((g) => g.subject.code)).toEqual(["MA", "EN", "DE", "FRW", "WR", "FR"]);
-    expect(t.groups[0]?.tasks[0]).toMatchObject({ code: "3.01", title: "Repetition Terme II", minutes: 90, percent: 100 });
+    expect(t.groups[0]?.tasks[0]).toMatchObject({ code: "3.01", title: "Repetition Terme II", minutes: 90, status: "done", files: [{ kind: "task", ext: "pdf", href: "/api/v1/files/sol/t-ma-3.01", pdfHref: null }] });
+  });
+
+  it("Stand setzen: offen, angefangen, erledigt", async () => {
+    await q.setSolStatus(db, U, "t-ma-3.02", "started");
+    const t = await q.getSolTasks(db, U, NOW);
+    expect(t.groups[0]?.tasks.find((x) => x.id === "t-ma-3.02")?.status).toBe("started");
   });
 
   it("Kalender zeigt den nächsten SOL-Tag (Freitag, 30. Oktober) mit Plan und Präsenz", async () => {
