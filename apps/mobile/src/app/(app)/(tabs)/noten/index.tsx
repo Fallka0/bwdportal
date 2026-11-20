@@ -119,7 +119,10 @@ function Row({ s, first, short, onPress }: { s: PortfolioSubjectRow; first: bool
         <T v="box" numberOfLines={2}>
           {title}
         </T>
-        <T v="small">{plural(s.count, "Probe", "Proben")}</T>
+        <T v="small">
+          {plural(s.count, "Probe", "Proben")}
+          {s.needFor4 ? ` · für eine 4 nächste Probe ${fmtGrade(s.needFor4)}` : ""}
+        </T>
       </View>
       <Grade value={s.grade} />
       <Icon name="chev-r" small color={c.text2} />

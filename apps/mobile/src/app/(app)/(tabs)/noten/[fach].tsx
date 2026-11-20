@@ -3,6 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { GradeSheet } from "@/grades/GradeSheets";
+import { WishGrade } from "@/grades/WishGrade";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { ErrorState, Screen } from "@/shell/Screen";
@@ -91,6 +92,7 @@ export default function Subject() {
                   {d.classAverage !== null && <T style={{ fontFamily: font.display400, fontSize: fs.base, color: dark ? c.ink : c.btnFg, opacity: 0.75 }}>Klasse {fmtGrade(d.classAverage)}</T>}
                 </View>
               </View>
+              <WishGrade entries={d.entries} current={d.grade} module={d.code === "IN"} />
               {chrono.length > 1 && (
                 <Card>
                   <T v="box" accessibilityRole="header">

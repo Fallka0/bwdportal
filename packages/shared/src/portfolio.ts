@@ -118,3 +118,31 @@ export const STATUS_LABEL: Record<"bm" | "efz" | "internship", Record<Status, st
   efz: { ok: "EFZ auf Kurs", risk: "EFZ gefährdet", fail: "EFZ nicht auf Kurs" },
   internship: { ok: "Praktikum auf Kurs", risk: "Praktikum gefährdet", fail: "Praktikum nicht auf Kurs" },
 };
+
+/**
+ * Wunschnote: welche Note braucht die nächste Probe (Gewicht `weight`), damit die Zeugnisnote `target` erreicht?
+ * Fach: Zeugnisnote auf 0.5, also reicht ein Schnitt ab target − 0.25; Informatikmodul: auf 0.1, ab target − 0.05.
+ * Ergebnis auf 0.1 aufgerundet. "safe": schon mit einer 1 erreicht; "impossible": auch eine 6 reicht nicht.
+ */
+export function neededGrade(entries: Entry[], target: number, weight: number, kind: "subject" | "module" = "subject"): { kind: "safe" } | { kind: "impossible"; best: number } | { kind: "need"; value: number } {
+  const counted = entries.filter((e) => e.value >= 1 && e.weight > 0);
+  const w = Math.max(weight, 0.0001);
+  const sum = counted.reduce((s, e) => s + e.value * e.weight, 0);
+  const total = counted.reduce((s, e) => s + e.weight, 0);
+  const threshold = target - (kind === "subject" ? 0.25 : 0.05);
+  const x = (threshold * (total + w) - sum) / w;
+  const reached = (v: number) => {
+    const raw = (sum + v * w) / (total + w);
+    return (kind === "subject" ? roundHalf(raw) : round1(raw)) >= target;
+  };
+  if (reached(1)) return { kind: "safe" };
+  if (!reached(6)) {
+    const raw = (sum + 6 * w) / (total + w);
+    return { kind: "impossible", best: kind === "subject" ? roundHalf(raw) : round1(raw) };
+  }
+  // Auf 0.1 aufrunden und prüfen (Rundungsgrenzen genau treffen)
+  let v = Math.max(1, Math.ceil(x * 10 - 1e-9) / 10);
+  while (v > 1 && reached(round1(v - 0.1))) v = round1(v - 0.1);
+  while (!reached(v) && v < 6) v = round1(v + 0.1);
+  return { kind: "need", value: v };
+}

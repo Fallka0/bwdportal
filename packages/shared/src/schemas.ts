@@ -347,6 +347,8 @@ export const PortfolioSubjectRow = z.object({
   raw: z.number().nullable(),
   grade: z.number().nullable(),
   count: z.number(),
+  /** Unter 4: nötige Note der nächsten Probe (übliches Gewicht des Fachs) für eine 4; null, wenn nicht nötig oder unerreichbar */
+  needFor4: z.number().nullable().optional(),
 });
 export type PortfolioSubjectRow = z.infer<typeof PortfolioSubjectRow>;
 

@@ -25,6 +25,7 @@ function Row({ s, href, short }: { s: PortfolioSubjectRow; href: string; short: 
         <span className="s">
           {plural(s.count, "Probe", "Proben")}
           {s.raw !== null && s.module === null ? ` · Schnitt ${s.raw.toFixed(2)}` : ""}
+          {s.needFor4 ? ` · für eine 4 nächste Probe ${fmtGrade(s.needFor4)}` : ""}
         </span>
       </span>
       <span className={low ? "gb low" : "gb"} aria-hidden="true">
