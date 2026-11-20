@@ -89,7 +89,7 @@ export default async function Home() {
               <p className="empty-s">Noch keine Noten.</p>
             ) : (
               h.recentGrades.map((g) => (
-                <ListRow key={g.examId} href={`/noten/${g.subjectCode}`} title={g.subjectName} sub={`${g.title} · ${fmtShort(g.date)}`} end={<span className={isInsufficient(g.value) ? "gv low" : "gv"}>{fmtGrade(g.value)}</span>} />
+                <ListRow key={g.examId} href={`/noten/${g.subjectCode}?semester=${g.semester ?? ""}${g.module ? `&modul=${g.module}` : ""}`} title={g.subjectName} sub={`${g.title} · ${fmtShort(g.date)}`} end={<span className={isInsufficient(g.value) ? "gv low" : "gv"}>{fmtGrade(g.value)}</span>} />
               ))
             )}
           </Card>

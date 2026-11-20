@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { login } from "./helpers";
 
-const PAGES = ["/", "/stundenplan", "/stundenplan?ansicht=tag", "/noten", "/noten/MA", "/absenzen", "/absenzen?tab=abmeldungen", "/absenzen?tab=dispensationen&neu=gesuch", "/sol", "/sol?tab=kalender", "/sol?tab=portfolio", "/mitteilungen", "/mitteilungen/pp", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/mehr"];
+const PAGES = ["/", "/stundenplan", "/stundenplan?ansicht=tag", "/noten", "/noten/MA", "/noten?ansicht=efz", "/noten?import=1", "/absenzen", "/absenzen?tab=abmeldungen", "/absenzen?tab=dispensationen&neu=gesuch", "/sol", "/sol?tab=kalender", "/sol?tab=portfolio", "/mitteilungen", "/mitteilungen/pp", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/mehr"];
 
 for (const scheme of ["light", "dark"] as const) {
   test(`Barrierefreiheit (axe, WCAG 2.2 AA) im Design ${scheme}`, async ({ page }) => {

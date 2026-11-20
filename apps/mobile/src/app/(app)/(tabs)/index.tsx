@@ -72,7 +72,7 @@ function HomeBody({ h, firstName, classCode }: { h: Home; firstName: string; cla
         <CardHead title="Neue Noten" linkLabel="Alle Noten" onLink={() => router.navigate("/noten")} />
         {h.recentGrades.length === 0 && <T tone="text2">Noch keine Noten.</T>}
         {h.recentGrades.map((g, i) => (
-          <ListRow key={g.examId} first={i === 0} onPress={() => router.navigate(`/noten/${g.subjectCode}`)} title={g.subjectName} sub={`${g.title} · ${fmtShort(g.date)}`} end={<Grade value={g.value} />} />
+          <ListRow key={g.examId} first={i === 0} onPress={() => router.navigate(`/noten/${g.subjectCode}?semester=${g.semester ?? ""}${g.module ? `&modul=${g.module}` : ""}`)} title={g.subjectName} sub={`${g.title} · ${fmtShort(g.date)}`} end={<Grade value={g.value} />} />
         ))}
       </Card>
       <Card>

@@ -131,6 +131,49 @@ export const grades = sqliteTable(
  * Absenz, wie die Lehrperson sie erfasst (Absenzenreglement Art. 6a): Tag und Lektionen.
  * Ob eine Lektion dispensiert, aufs Kontingent oder unentschuldigt zählt, ergibt sich aus Abmeldungen und Gesuchen.
  */
+/**
+ * Eigene Noten wie im Notenportfolio IMS: pro BM-Semester (1 bis 6) Fach, Informatikmodul (IN), Probe, Note, Gewicht.
+ * Kommt aus dem Excel-Import oder wird im Portal erfasst. Datum der Probe, wenn bekannt; sonst zählt `enteredAt`.
+ */
+export const myGrades = sqliteTable(
+  "my_grades",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    semester: integer("semester").notNull(),
+    subject: text("subject").notNull(),
+    module: text("module"),
+    moduleName: text("module_name"),
+    title: text("title").notNull(),
+    value: real("value").notNull(),
+    weight: real("weight").notNull().default(1),
+    date: text("date"),
+    enteredAt: text("entered_at").notNull(),
+    classAverage: real("class_average"),
+    sort: integer("sort").notNull().default(0),
+  },
+  (t) => [index("my_grades_user_semester").on(t.userId, t.semester), check("my_grades_value_check", sql`${t.value} BETWEEN 1 AND 6`), check("my_grades_semester_check", sql`${t.semester} BETWEEN 1 AND 6`)],
+);
+
+/** EFZ-Übersicht: Informatikmodule (gibb) und überbetriebliche Kurse (üK) pro Ausbildungsjahr. */
+export const myEfz = sqliteTable(
+  "my_efz",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    year: integer("year").notNull(),
+    place: text("place", { enum: ["gibb", "uek"] }).notNull(),
+    module: text("module").notNull(),
+    name: text("name").notNull(),
+    value: real("value"),
+  },
+  (t) => [index("my_efz_user").on(t.userId), check("my_efz_place_check", sql`${t.place} IN ('gibb','uek')`)],
+);
+
 export const absences = sqliteTable(
   "absences",
   {

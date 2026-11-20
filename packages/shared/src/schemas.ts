@@ -76,7 +76,7 @@ export const SubjectAverage = z.object({
 });
 export type SubjectAverage = z.infer<typeof SubjectAverage>;
 
-export const RecentGrade = z.object({ examId: z.string(), subjectCode: z.string(), subjectName: z.string(), title: z.string(), date, value: z.number() });
+export const RecentGrade = z.object({ examId: z.string(), subjectCode: z.string(), subjectName: z.string(), title: z.string(), date, value: z.number(), semester: z.number().optional(), module: z.string().nullable().optional() });
 export type RecentGrade = z.infer<typeof RecentGrade>;
 
 export const GradesOverview = z.object({
@@ -322,3 +322,101 @@ export type DemoAccount = z.infer<typeof DemoAccount>;
 
 export const ApiError = z.object({ error: z.object({ code: z.string(), message: z.string(), field: z.string().optional() }) });
 export type ApiError = z.infer<typeof ApiError>;
+
+// ---------- Notenportfolio (eigene Noten, BM-Semester 1 bis 6, EFZ) ----------
+
+export const PortfolioStatus = z.enum(["ok", "risk", "fail"]);
+
+export const PortfolioEntry = z.object({
+  id: z.string(),
+  title: z.string(),
+  value: z.number(),
+  weight: z.number(),
+  date: date.nullable(),
+  enteredAt: date,
+  classAverage: z.number().nullable(),
+});
+export type PortfolioEntry = z.infer<typeof PortfolioEntry>;
+
+/** Fach oder Informatikmodul im Semester: Schnitt ungerundet, Zeugnisnote (Fach auf 0.5, Modul auf 0.1). */
+export const PortfolioSubjectRow = z.object({
+  code: z.string(),
+  name: z.string(),
+  module: z.string().nullable(),
+  moduleName: z.string().nullable(),
+  raw: z.number().nullable(),
+  grade: z.number().nullable(),
+  count: z.number(),
+});
+export type PortfolioSubjectRow = z.infer<typeof PortfolioSubjectRow>;
+
+export const PortfolioSemester = z.object({
+  n: z.number(),
+  label: z.string(),
+  /** Semester mit Noten und das laufende, für die Auswahl */
+  semesters: z.array(z.object({ n: z.number(), label: z.string(), count: z.number() })),
+  current: z.number().nullable(),
+  count: z.number(),
+  subjects: z.array(PortfolioSubjectRow),
+  modules: z.array(PortfolioSubjectRow),
+  informatics: z.object({ raw: z.number(), grade: z.number() }).nullable(),
+  summary: z.object({
+    bm: z.number().nullable(),
+    efz: z.number().nullable(),
+    insufficient: z.number(),
+    deviation: z.number(),
+    bmStatus: PortfolioStatus.nullable(),
+    efzStatus: PortfolioStatus.nullable(),
+    internship: PortfolioStatus.nullable(),
+  }),
+});
+export type PortfolioSemester = z.infer<typeof PortfolioSemester>;
+
+export const PortfolioSubjectDetail = z.object({
+  semester: z.number(),
+  label: z.string(),
+  code: z.string(),
+  name: z.string(),
+  module: z.string().nullable(),
+  moduleName: z.string().nullable(),
+  teacher: z.string().nullable(),
+  raw: z.number().nullable(),
+  grade: z.number().nullable(),
+  classAverage: z.number().nullable(),
+  entries: z.array(PortfolioEntry),
+});
+export type PortfolioSubjectDetail = z.infer<typeof PortfolioSubjectDetail>;
+
+export const EfzModule = z.object({ id: z.string(), year: z.number(), place: z.enum(["gibb", "uek"]), module: z.string(), name: z.string(), value: z.number().nullable() });
+export type EfzModule = z.infer<typeof EfzModule>;
+
+export const EfzOverview = z.object({
+  modules: z.array(EfzModule),
+  gibb: z.number().nullable(),
+  uek: z.number().nullable(),
+  total: z.number().nullable(),
+  status: PortfolioStatus.nullable(),
+  internship: PortfolioStatus.nullable(),
+});
+export type EfzOverview = z.infer<typeof EfzOverview>;
+
+const grade = z.number().min(1, "Noten gehen von 1 bis 6.").max(6, "Noten gehen von 1 bis 6.");
+
+/** Probe erfassen oder ändern. Informatik braucht die Modulnummer. */
+export const PortfolioEntryInput = z
+  .object({
+    semester: z.number().int().min(1).max(6),
+    subject: z.string().min(1).max(8),
+    module: z.string().regex(/^\d{3}$/, "Modulnummer mit drei Ziffern.").nullable().optional(),
+    title: z.string().trim().min(1, "Titel fehlt.").max(80),
+    value: grade,
+    weight: z.number().min(0).max(1000),
+    date: date.nullable().optional(),
+  })
+  .refine((v) => v.subject !== "IN" || !!v.module, { message: "Modulnummer fehlt.", path: ["module"] });
+export type PortfolioEntryInput = z.infer<typeof PortfolioEntryInput>;
+
+export const EfzValueInput = z.object({ value: grade.nullable() });
+
+export const PortfolioImportResult = z.object({ entries: z.number(), semesters: z.number(), efz: z.number(), nameMatches: z.boolean() });
+export type PortfolioImportResult = z.infer<typeof PortfolioImportResult>;

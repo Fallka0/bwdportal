@@ -13,6 +13,22 @@ import {
   periodStart,
   semesterOf,
   type AbsenceLessonState,
+  BM_SUBJECTS,
+  bmSemester,
+  efzSummary,
+  informatics,
+  moduleGrade,
+  semesterLabel,
+  semesterSummary,
+  subjectGrade,
+  type EfzOverview,
+  type Portfolio,
+  type PortfolioEntry,
+  type PortfolioEntryInput,
+  type PortfolioImportResult,
+  type PortfolioSemester,
+  type PortfolioSubjectDetail,
+  type PortfolioSubjectRow,
   type SubjectLimit,
   type AbsenceNotice,
   type AbsenceNoticeSubmit,
@@ -28,14 +44,12 @@ import {
   nameFromSchoolEmail,
   nameMatchesAddress,
   round1,
-  weightedAverage,
   type Absence,
   type IcsEvent,
   type AbsencesOverview,
   type DemoAccount,
   type DocumentGroups,
   type DocumentItem,
-  type GradesOverview,
   type Home,
   type Lesson,
   type LinkItem,
@@ -53,7 +67,6 @@ import {
   type SolFileKind,
   type SolStatus,
   type SolTasks,
-  type SubjectGrades,
   type Timetable,
   nextLesson,
 } from "@bwd/shared";
@@ -216,70 +229,227 @@ async function examsFor(db: Db, userId: string, semester?: number, subject?: str
   return rows;
 }
 
-function avgOf(rows: ExamRow[]): number | null {
-  const a = weightedAverage(rows.filter((r) => r.value !== null).map((r) => ({ value: r.value!, weight: r.exam.weight })));
-  return a === null ? null : round1(a);
+
+// ---------- Notenportfolio (eigene Noten wie in der Excel-Vorlage der Schule) ----------
+
+/** Reihenfolge der Vorlage; DE, FR, EN (Stundenplan-Kürzel) zählen wie D, F, E. */
+const orderOf = (code: string) => {
+  const alias: Record<string, string> = { DE: "D", FR: "F", EN: "E", M: "MA" };
+  const i = BM_SUBJECTS.findIndex((x) => x.code === (alias[code] ?? code));
+  return i === -1 ? 99 : i;
+};
+
+async function subjectNames(db: Db): Promise<Map<string, string>> {
+  const rows = await db.select({ code: s.subjects.code, name: s.subjects.name }).from(s.subjects);
+  const m = new Map(rows.map((r) => [r.code, r.name]));
+  // Kürzel der Vorlage gehen vor (D = Deutsch, auch wenn der Stundenplan D anders nennt)
+  for (const b of BM_SUBJECTS) m.set(b.code, b.name);
+  return m;
 }
 
-export async function getGrades(db: Db, userId: string, semester: number): Promise<GradesOverview> {
-  const rows = (await examsFor(db, userId, semester)).filter((r) => r.value !== null);
-  const subjectRows = await db
-    .select({ sub: s.subjects, t: s.teachers })
-    .from(s.classSubjects)
-    .innerJoin(s.subjects, eq(s.classSubjects.subjectCode, s.subjects.code))
-    .leftJoin(s.teachers, eq(s.classSubjects.teacherCode, s.teachers.code))
-    .where(eq(s.classSubjects.classId, (await classOf(db, userId)) ?? ""));
-  const subjects = subjectRows
-    .map(({ sub, t }) => {
-      const mine = rows.filter((r) => r.exam.subjectCode === sub.code);
-      return { code: sub.code, name: sub.name, short: sub.code, teacher: t?.name ?? null, examCount: mine.length, average: avgOf(mine) };
-    })
-    .filter((x) => x.examCount > 0)
-    .sort((a, b) => (b.average ?? 0) - (a.average ?? 0) || a.name.localeCompare(b.name));
-  const avgs = subjects.map((x) => x.average!).filter((x) => x !== null);
+async function classCodeOf(db: Db, userId: string): Promise<string> {
+  const r = (await db.select({ code: s.classes.code }).from(s.users).leftJoin(s.classes, eq(s.users.classId, s.classes.id)).where(eq(s.users.id, userId)).limit(1))[0];
+  return r?.code ?? "";
+}
+
+async function efzNames(db: Db, userId: string): Promise<Map<string, string>> {
+  const rows = await db.select({ module: s.myEfz.module, name: s.myEfz.name }).from(s.myEfz).where(eq(s.myEfz.userId, userId));
+  return new Map(rows.map((r) => [r.module, r.name]));
+}
+
+/** Ein Semester wie das Blatt "Noten_BM_Sem_n": Fächer, Informatikmodule, BM- und EFZ-Schnitt, Ampeln. */
+export async function getPortfolioSemester(db: Db, userId: string, now: Now, n?: number): Promise<PortfolioSemester> {
+  const code = await classCodeOf(db, userId);
+  const current = bmSemester(code, now.date, config.secondSemesterStart);
+  const all = await db.select().from(s.myGrades).where(eq(s.myGrades.userId, userId));
+  const counts = new Map<number, number>();
+  for (const r of all) counts.set(r.semester, (counts.get(r.semester) ?? 0) + 1);
+  const sem = n && n >= 1 && n <= 6 ? n : (current ?? Math.max(1, ...counts.keys()));
+  const list = [...new Set([...counts.keys(), ...(current ? [current] : [])])].sort((a, b) => b - a);
+  const rows = all.filter((r) => r.semester === sem);
+  const names = await subjectNames(db);
+  const modNames = await efzNames(db, userId);
+  const bySubject = new Map<string, typeof rows>();
+  for (const r of rows) {
+    const k = r.subject === "IN" ? `IN#${r.module ?? ""}` : r.subject;
+    bySubject.set(k, [...(bySubject.get(k) ?? []), r]);
+  }
+  const subjects: PortfolioSubjectRow[] = [];
+  const modules: PortfolioSubjectRow[] = [];
+  for (const [k, list] of bySubject) {
+    const first = list[0]!;
+    if (first.subject === "IN") {
+      const grade = moduleGrade(list);
+      modules.push({ code: "IN", name: `Modul ${first.module}`, module: first.module, moduleName: first.moduleName ?? modNames.get(first.module ?? "") ?? null, raw: grade, grade, count: list.length });
+    } else {
+      const g = subjectGrade(list);
+      subjects.push({ code: k, name: names.get(k) ?? k, module: null, moduleName: null, raw: g?.raw ?? null, grade: g?.grade ?? null, count: list.length });
+    }
+  }
+  subjects.sort((a, b) => orderOf(a.code) - orderOf(b.code) || a.name.localeCompare(b.name, "de"));
+  modules.sort((a, b) => (a.module ?? "").localeCompare(b.module ?? ""));
+  const inf = informatics(modules.map((m) => m.grade));
   return {
-    semester,
-    average: avgs.length ? round1(avgs.reduce((a, b) => a + b, 0) / avgs.length) : null,
-    examCount: rows.length,
-    insufficient: subjects.filter((x) => x.average !== null && x.average < 4).length,
+    n: sem,
+    label: semesterLabel(code, sem),
+    semesters: list.map((x) => ({ n: x, label: semesterLabel(code, x), count: counts.get(x) ?? 0 })),
+    current,
+    count: rows.length,
     subjects,
+    modules,
+    informatics: inf,
+    summary: semesterSummary(
+      subjects.map((x) => ({ code: x.code, grade: x.grade })),
+      inf?.raw ?? null,
+    ),
   };
 }
 
-export async function recentGrades(db: Db, userId: string, limit = 3): Promise<RecentGrade[]> {
+/** Proben eines Fachs (oder Informatikmoduls) in einem Semester, neuste zuerst. */
+export async function getPortfolioSubject(db: Db, userId: string, now: Now, subject: string, n?: number, module?: string | null): Promise<PortfolioSubjectDetail | null> {
+  const code = await classCodeOf(db, userId);
+  const sem = n && n >= 1 && n <= 6 ? n : (bmSemester(code, now.date, config.secondSemesterStart) ?? 1);
+  const conds = [eq(s.myGrades.userId, userId), eq(s.myGrades.semester, sem), eq(s.myGrades.subject, subject)];
+  if (subject === "IN" && module) conds.push(eq(s.myGrades.module, module));
   const rows = await db
-    .select({ e: s.exams, g: s.grades, sub: s.subjects })
-    .from(s.grades)
-    .innerJoin(s.exams, eq(s.grades.examId, s.exams.id))
-    .innerJoin(s.subjects, eq(s.exams.subjectCode, s.subjects.code))
-    .where(eq(s.grades.userId, userId))
-    .orderBy(desc(s.exams.date))
-    .limit(limit);
-  return rows.map(({ e, g, sub }) => ({ examId: e.id, subjectCode: sub.code, subjectName: sub.name, title: e.title, date: e.date, value: g.value }));
-}
-
-export async function getSubjectGrades(db: Db, userId: string, subjectCode: string, semester = 1): Promise<SubjectGrades | null> {
-  const sub = (await db.select().from(s.subjects).where(eq(s.subjects.code, subjectCode)).limit(1))[0];
-  if (!sub) return null;
-  const classId = await classOf(db, userId);
-  const t = (
+    .select()
+    .from(s.myGrades)
+    .where(and(...conds))
+    .orderBy(desc(sql`coalesce(${s.myGrades.date}, ${s.myGrades.enteredAt})`), desc(s.myGrades.sort));
+  const names = await subjectNames(db);
+  if (!rows.length && !names.has(subject)) return null;
+  const teacher = (
     await db
       .select({ name: s.teachers.name })
       .from(s.classSubjects)
       .leftJoin(s.teachers, eq(s.classSubjects.teacherCode, s.teachers.code))
-      .where(and(eq(s.classSubjects.classId, classId ?? ""), eq(s.classSubjects.subjectCode, subjectCode)))
+      .where(and(eq(s.classSubjects.classId, (await classOf(db, userId)) ?? ""), eq(s.classSubjects.subjectCode, subject)))
       .limit(1)
   )[0];
-  const rows = await examsFor(db, userId, semester, subjectCode);
-  // Klassenschnitt des Fachs: Mittel der Klassenschnitte der Prüfungen, ungewichtet (wie im Design: 4.4, 4.7, 4.1 → 4.4).
-  const classAvg = weightedAverage(rows.filter((r) => r.exam.classAverage !== null).map((r) => ({ value: r.exam.classAverage!, weight: 1 })));
+  const g = subject === "IN" ? (() => { const m = moduleGrade(rows); return m === null ? null : { raw: m, grade: m }; })() : subjectGrade(rows);
+  // Klassenschnitt (Beispieldaten): Mittel der Klassenschnitte der Proben, ungewichtet
+  const ca = rows.filter((r) => r.classAverage !== null).map((r) => r.classAverage!);
   return {
-    subject: { code: sub.code, name: sub.name, short: sub.short },
-    teacher: t?.name ?? null,
-    exams: rows.map((r) => ({ id: r.exam.id, title: r.exam.title, date: r.exam.date, weight: r.exam.weight, classAverage: r.exam.classAverage, value: r.value })),
-    average: avgOf(rows),
-    classAverage: classAvg === null ? null : round1(classAvg),
+    semester: sem,
+    label: semesterLabel(code, sem),
+    code: subject,
+    name: subject === "IN" && module ? `Modul ${module}` : (names.get(subject) ?? subject),
+    module: module ?? null,
+    moduleName: rows[0]?.moduleName ?? (module ? ((await efzNames(db, userId)).get(module) ?? null) : null),
+    teacher: teacher?.name ?? null,
+    raw: g?.raw ?? null,
+    grade: g?.grade ?? null,
+    classAverage: ca.length ? round1(ca.reduce((a, b) => a + b, 0) / ca.length) : null,
+    entries: rows.map((r) => ({ id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage })),
   };
+}
+
+/** Neuste Noten für die Übersicht: nach Datum der Probe, sonst nach Erfassung. */
+export async function recentGrades(db: Db, userId: string, limit = 3): Promise<RecentGrade[]> {
+  const rows = await db
+    .select()
+    .from(s.myGrades)
+    .where(eq(s.myGrades.userId, userId))
+    .orderBy(desc(sql`coalesce(${s.myGrades.date}, ${s.myGrades.enteredAt})`), desc(s.myGrades.sort))
+    .limit(limit);
+  const names = await subjectNames(db);
+  return rows.map((r) => ({
+    examId: r.id,
+    subjectCode: r.subject,
+    subjectName: r.subject === "IN" ? `Informatik Modul ${r.module}` : (names.get(r.subject) ?? r.subject),
+    title: r.title,
+    date: r.date ?? r.enteredAt,
+    value: r.value,
+    semester: r.semester,
+    module: r.module,
+  }));
+}
+
+/** EFZ-Übersicht (Blatt "Noten_EFZ"). */
+export async function getEfz(db: Db, userId: string): Promise<EfzOverview> {
+  const rows = await db.select().from(s.myEfz).where(eq(s.myEfz.userId, userId)).orderBy(asc(s.myEfz.year), asc(s.myEfz.place), asc(s.myEfz.module));
+  const sum = efzSummary(rows.map((r) => ({ place: r.place, value: r.value })));
+  return { modules: rows.map((r) => ({ id: r.id, year: r.year, place: r.place, module: r.module, name: r.name, value: r.value })), ...sum };
+}
+
+/** In Gruppen einfügen: D1 erlaubt höchstens 100 Parameter pro Anweisung. */
+async function insertChunked<T extends Record<string, unknown>>(db: Db, table: Parameters<Db["insert"]>[0], rows: T[], perRow: number) {
+  const size = Math.max(1, Math.floor(99 / perRow));
+  for (let i = 0; i < rows.length; i += size) await db.insert(table).values(rows.slice(i, i + size) as never);
+}
+
+const normName = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+
+/**
+ * Notenportfolio übernehmen: ersetzt alle eigenen Noten und die EFZ-Übersicht. Proben ohne Datum gelten als heute
+ * erfasst. `nameMatches` sagt, ob Vor- und Nachname in der Datei zum Konto passen (Hinweis, kein Abbruch).
+ */
+export async function importPortfolio(db: Db, userId: string, p: Portfolio, now: Now): Promise<PortfolioImportResult> {
+  const user = await userById(db, userId);
+  const modNames = new Map(p.efz.map((e) => [e.module, e.name]));
+  const grades = p.semesters.flatMap((sem) =>
+    sem.subjects.flatMap((sub) =>
+      sub.entries.map((e, i) => ({
+        id: `mg-${randomId(8)}`,
+        userId,
+        semester: sem.n,
+        subject: sub.subject,
+        module: sub.module,
+        moduleName: sub.module ? (modNames.get(sub.module) ?? null) : null,
+        title: e.title.slice(0, 80),
+        value: e.value,
+        weight: e.weight,
+        date: null,
+        enteredAt: now.date,
+        classAverage: null,
+        sort: i,
+      })),
+    ),
+  );
+  const efz = p.efz.map((e) => ({ id: `me-${randomId(8)}`, userId, year: e.year, place: e.place, module: e.module, name: e.name.slice(0, 120), value: e.value }));
+  await db.delete(s.myGrades).where(eq(s.myGrades.userId, userId));
+  await db.delete(s.myEfz).where(eq(s.myEfz.userId, userId));
+  await insertChunked(db, s.myGrades, grades, 13);
+  await insertChunked(db, s.myEfz, efz, 7);
+  const nameMatches = !!user && normName(`${user.firstName}${user.lastName}`) === normName(`${p.firstName}${p.lastName}`);
+  return { entries: grades.length, semesters: new Set(grades.map((g) => g.semester)).size, efz: efz.length, nameMatches };
+}
+
+async function ownGrade(db: Db, userId: string, id: string) {
+  const r = (await db.select().from(s.myGrades).where(and(eq(s.myGrades.id, id), eq(s.myGrades.userId, userId))).limit(1))[0];
+  if (!r) throw new DomainError("not_found", "Diese Note gibt es nicht.");
+  return r;
+}
+
+/** Probe erfassen. Ohne Datum zählt der Tag der Erfassung. */
+export async function addPortfolioEntry(db: Db, userId: string, input: PortfolioEntryInput, now: Now): Promise<PortfolioEntry> {
+  const module = input.subject === "IN" ? (input.module ?? null) : null;
+  const moduleName = module ? ((await efzNames(db, userId)).get(module) ?? null) : null;
+  const id = `mg-${randomId(8)}`;
+  const [last] = await db.select({ n: sql<number>`coalesce(max(${s.myGrades.sort}), -1)` }).from(s.myGrades).where(and(eq(s.myGrades.userId, userId), eq(s.myGrades.semester, input.semester), eq(s.myGrades.subject, input.subject)));
+  await db.insert(s.myGrades).values({ id, userId, semester: input.semester, subject: input.subject, module, moduleName, title: input.title, value: input.value, weight: input.weight, date: input.date ?? null, enteredAt: now.date, classAverage: null, sort: Number(last?.n ?? -1) + 1 });
+  const r = await ownGrade(db, userId, id);
+  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage };
+}
+
+export async function updatePortfolioEntry(db: Db, userId: string, id: string, input: PortfolioEntryInput): Promise<PortfolioEntry> {
+  await ownGrade(db, userId, id);
+  const module = input.subject === "IN" ? (input.module ?? null) : null;
+  await db.update(s.myGrades).set({ semester: input.semester, subject: input.subject, module, title: input.title, value: input.value, weight: input.weight, date: input.date ?? null }).where(eq(s.myGrades.id, id));
+  const r = await ownGrade(db, userId, id);
+  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage };
+}
+
+export async function deletePortfolioEntry(db: Db, userId: string, id: string): Promise<void> {
+  await ownGrade(db, userId, id);
+  await db.delete(s.myGrades).where(eq(s.myGrades.id, id));
+}
+
+/** Note eines EFZ-Moduls setzen oder leeren. */
+export async function setEfzValue(db: Db, userId: string, id: string, value: number | null): Promise<void> {
+  const r = (await db.select().from(s.myEfz).where(and(eq(s.myEfz.id, id), eq(s.myEfz.userId, userId))).limit(1))[0];
+  if (!r) throw new DomainError("not_found", "Dieses Modul gibt es nicht.");
+  await db.update(s.myEfz).set({ value }).where(eq(s.myEfz.id, id));
 }
 
 export { fmtGrade };
@@ -774,11 +944,9 @@ export async function search(db: Db, userId: string, now: Now, q: string): Promi
   const needle = q.trim().toLocaleLowerCase("de-CH");
   if (needle.length < 2) return { subjects: [], documents: [], links: [], news: [] };
   const has = (...v: (string | null | undefined)[]) => v.some((x) => (x ?? "").toLocaleLowerCase("de-CH").includes(needle));
-  const grades = await getGrades(db, userId, 1);
-  const allSubjects = await db.select().from(s.subjects);
-  const subjects = allSubjects
-    .filter((x) => x.code !== "SOL" && has(x.name, x.short, x.code))
-    .map((x) => ({ code: x.code, name: x.name, average: grades.subjects.find((g) => g.code === x.code)?.average ?? null }));
+  // Fächer mit Noten im laufenden Semester, mit Zeugnisnote
+  const sem = await getPortfolioSemester(db, userId, now);
+  const subjects = sem.subjects.filter((x) => has(x.name, x.code)).map((x) => ({ code: x.code, name: x.name, average: x.grade }));
   const docs = (await getDocuments(db, userId, now)).groups.flatMap((g) => g.items).filter((d) => has(d.title, d.note, d.group));
   const links = (await getLinks(db)).filter((l) => has(l.title, l.sub));
   const news = (await getNews(db, userId)).filter((n) => has(n.title, n.teaser));

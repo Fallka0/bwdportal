@@ -8,3 +8,5 @@ export * from "./schemas";
 export * from "./domain";
 export * from "./timegrid";
 export * from "./ical";
+export * from "./portfolio";
+export * from "./portfolio-import";
