@@ -1,4 +1,4 @@
-# Stundenplan-Import
+# Stundenplan- und SOL-Import
 
 Holt Lektionen aus einer Quelle und schreibt sie in D1. Die Web-App und die App lesen nur aus D1, darum läuft die Demo auch ohne WebUntis. Hintergrund: `handoff/docs/WEBUNTIS.md`.
 
@@ -35,6 +35,21 @@ pnpm sol:import -- --file .local/im24a-sol.json --remote    # ins Deployment
 ```
 
 Die Datei (Form `SolInput` in `src/sol.ts`) enthält die Klasse, den Wochentag des SOL-Tags, die Blöcke als Kalenderwochen (`2026-W47`), die Aufträge mit Zeitvorgabe, die Präsenzen der Lehrpersonen und die Lehrperson pro Fach. Daraus entstehen Blöcke (Montag der ersten bis Freitag der letzten Woche), SOL-Tage, Aufträge und Präsenzen. Blöcke, Tage und Aufträge werden per Upsert geschrieben, damit Fortschritt und Plan der Lernenden bleiben; die Präsenzen der Klasse werden ersetzt. Die Fächer müssen schon in D1 sein (kommen mit dem Stundenplan).
+
+## SOL-Dateien
+
+Die Ordner der Schule (SharePoint, pro Fach ein ZIP) sind nicht einheitlich benannt. Darum zwei Schritte:
+
+```bash
+# 1. Vorschlag: Fach aus dem Ordner (02_Math, 03_Französisch …), Auftrag über die Nummer im Namen
+#    (M-SOL_4.01, F_SOL_3.1, SOL_Lernbaustein 6.1), sonst der einzige Auftrag des Fachs im Block
+pnpm sol:files -- suggest --dir <entpackter Ordner> --tasks .local/im24a-sol.json --out .local/sol-files-map.json
+# 2. Zuordnung prüfen und korrigieren: "task" ("F 3.1" oder null), "kind" (task, material, solution), "name"
+# 3. Import: Original nach R2, Word und PowerPoint zusätzlich als PDF (LibreOffice), Dateien der Aufträge in D1 ersetzen
+pnpm sol:files -- import --dir <entpackter Ordner> --map .local/sol-files-map.json --remote
+```
+
+Pro Auftrag ist eine Datei "der Auftrag" (bevorzugt ein "Lernbaustein"), weitere Dateien sind Unterlagen, Lösungen ("Lösung", "Loesung", "solutions", "corrigé", "_sol") werden als solche angezeigt. Audio und Video gibt es einzeln, nicht im Block-ZIP. LibreOffice: `brew install --cask libreoffice`. ZIP-Dateien mit Umlauten mit Python oder `ditto` entpacken, nicht mit `unzip`.
 
 ## Abbildung WebUntis
 | WebUntis | Portal |

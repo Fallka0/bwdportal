@@ -5,7 +5,7 @@ import { config, fmtLong, solColumns, toMin, WEEKDAYS, weekday } from "@bwd/shar
 import { Card, Empty, Icon } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
-import { BlockSelect, PlanForm, PortfolioForm, ProgressSlider } from "./SolClient";
+import { BlockSelect, FileLinks, FilesButton, PlanForm, PortfolioForm, StatusControl } from "./SolClient";
 
 export const metadata: Metadata = { title: "SOL" };
 
@@ -74,23 +74,30 @@ function Tasks({ tasks, fach, q }: { tasks: Awaited<ReturnType<typeof getSolTask
           <div className="sg-h">
             <h2 id={`sg-${g.subject.code}`}>{g.subject.name}</h2>
             {g.teacher && <span className="s">{g.teacher}</span>}
+            <span className="s done-n">
+              {g.tasks.filter((t) => t.status === "done").length} von {g.tasks.length} erledigt
+            </span>
           </div>
           <div className="card sg-l">
             {g.tasks.map((t) => (
-              <div key={t.id} className={t.percent === 100 ? "so done" : "so"}>
+              <div key={t.id} className={t.status === "done" ? "so done" : "so"}>
                 <span className="code">{t.code}</span>
                 <b className="so-t">{t.title}</b>
                 <span className="so-min">{t.minutes} Min.</span>
-                <ProgressSlider id={t.id} title={`${g.subject.short} ${t.code} ${t.title}`} value={t.percent} />
+                <StatusControl id={t.id} title={`${g.subject.short} ${t.code} ${t.title}`} value={t.status} />
                 <span className="so-a">
+                  {(() => {
+                    const main = t.files.find((f) => f.kind === "task");
+                    return (
+                      <>
+                        {main && <FileLinks file={main} label={`${t.code} ${t.title}`} quick={t.files.length > 1} />}
+                        {t.files.length > 1 && <FilesButton title={`${g.subject.short} ${t.code} ${t.title}`} files={t.files} />}
+                      </>
+                    );
+                  })()}
                   {t.sharepointUrl && (
-                    <a className="ib" href={t.sharepointUrl} target="_blank" rel="noopener noreferrer" aria-label={`${t.title} in SharePoint öffnen`} title="SharePoint">
+                    <a className="ib" href={t.sharepointUrl} target="_blank" rel="noopener noreferrer" aria-label={`${t.code} ${t.title} in SharePoint öffnen`} title="SharePoint">
                       <Icon name="arrow-ur" small />
-                    </a>
-                  )}
-                  {t.hasFile && (
-                    <a className="ib" href={`/api/v1/files/sol/${encodeURIComponent(t.id)}`} download aria-label={`${t.title} herunterladen`} title="Herunterladen">
-                      <Icon name="download" small />
                     </a>
                   )}
                 </span>
@@ -116,7 +123,7 @@ async function Calendar({ userId, env, dayId, q, tasks }: { userId: string; env:
   const plannedIds = new Set(cal.plan.map((p) => p.taskId));
   const plannedMin = (code: string) => cal.plan.filter((p) => p.subjectCode === code).reduce((m, p) => m + toMin(p.end) - toMin(p.start), 0);
   const openTasks = tasks.groups
-    .flatMap((g) => g.tasks.filter((t) => t.percent < 100 && !plannedIds.has(t.id)).map((t) => ({ id: t.id, label: `${g.subject.name} ${t.code} · ${t.title} · ${t.minutes} Min.`, short: `${g.subject.short} ${t.code}`, minutes: t.minutes, load: plannedMin(g.subject.code) })))
+    .flatMap((g) => g.tasks.filter((t) => t.status !== "done" && !plannedIds.has(t.id)).map((t) => ({ id: t.id, label: `${g.subject.name} ${t.code} · ${t.title} · ${t.minutes} Min.`, short: `${g.subject.short} ${t.code}`, minutes: t.minutes, load: plannedMin(g.subject.code) })))
     .sort((a, b) => a.load - b.load);
   return (
     <div className="cal">

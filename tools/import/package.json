@@ -9,7 +9,8 @@
     "sol": "tsx src/sol-cli.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sol:files": "tsx src/sol-files-cli.ts"
   },
   "dependencies": {
     "@bwd/db": "workspace:*",

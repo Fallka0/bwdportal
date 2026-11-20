@@ -1,4 +1,4 @@
-import { config, fmtLong, fromMin, solColumns, toMin, WEEKDAYS, weekday, type SolTasks } from "@bwd/shared";
+import { config, fileTypeLabel, fmtBytes, fmtLong, fromMin, SOL_STATUS_LABEL, solColumns, toMin, WEEKDAYS, weekday, type SolStatus, type SolTasks } from "@bwd/shared";
 import { ApiFailure } from "@bwd/shared/api";
 import { useState } from "react";
 import { Linking, Pressable, View } from "react-native";
@@ -8,7 +8,7 @@ import { useApi } from "@/lib/useApi";
 import { ErrorState, Screen } from "@/shell/Screen";
 import { font, fs, size, sp, useTheme } from "@/theme";
 import { TimeGrid } from "@/timegrid/TimeGrid";
-import { Button, Card, Empty, IconButton, Segment, SelectField, Sheet, SkBox, SkeletonArea, StaticField, T, TextField, TextTabs, useToast } from "@/ui";
+import { Button, Card, Empty, Icon, IconButton, Segment, SelectField, Sheet, SkBox, SkeletonArea, StaticField, T, TextField, TextTabs, useToast } from "@/ui";
 
 type Tab = "auftraege" | "kalender" | "portfolio";
 
@@ -46,15 +46,20 @@ export default function Sol() {
   );
 }
 
-async function openFile(path: string) {
+/** Datei im Browser öffnen. `path` ist eine API-Adresse (/api/v1/files/…); Links können keinen Header senden, darum ?t=. */
+async function openFile(path: string, query = "") {
   const t = await storage.get("session");
-  Linking.openURL(`${API_URL}/api/v1/files/${path}${t ? `?t=${encodeURIComponent(t)}` : ""}`);
+  const params = [query, t ? `t=${encodeURIComponent(t)}` : ""].filter(Boolean).join("&");
+  const url = path.startsWith("/") ? `${API_URL}${path}` : `${API_URL}/api/v1/files/${path}`;
+  Linking.openURL(`${url}${params ? `?${params}` : ""}`);
 }
+
+type Task = SolTasks["groups"][number]["tasks"][number];
 
 function Tasks({ data, reload }: { data: SolTasks; reload: () => Promise<void> }) {
   const { c } = useTheme();
   const [fach, setFach] = useState("alle");
-  const [edit, setEdit] = useState<{ id: string; title: string; percent: number } | null>(null);
+  const [open, setOpen] = useState<{ task: Task; title: string } | null>(null);
   if (!data.block || data.groups.length === 0) return <Empty icon="book" title={data.block ? `Keine Aufträge in Block ${data.block.n}.` : "Keine SOL-Blöcke."} />;
   const groups = data.groups.filter((g) => fach === "alle" || g.subject.code === fach);
   return (
@@ -67,66 +72,86 @@ function Tasks({ data, reload }: { data: SolTasks; reload: () => Promise<void> }
               {g.subject.name}
             </T>
             {g.teacher && <T v="small">{g.teacher}</T>}
+            <T v="small" style={{ marginLeft: "auto" }}>
+              {g.tasks.filter((t) => t.status === "done").length} von {g.tasks.length} erledigt
+            </T>
           </View>
           <Card pad={sp[7]} style={{ paddingVertical: sp[1] }}>
             {g.tasks.map((t, i) => {
-              const done = t.percent === 100;
+              const done = t.status === "done";
               return (
-                <View key={t.id} style={{ flexDirection: "row", alignItems: "center", gap: sp[5], paddingVertical: sp[4], borderTopWidth: i ? 1 : 0, borderTopColor: c.rule }}>
-                  <Pressable accessibilityRole="button" accessibilityLabel={`${t.code} ${t.title}, ${t.percent} Prozent. Fortschritt ändern`} onPress={() => setEdit({ id: t.id, title: `${g.subject.short} ${t.code} ${t.title}`, percent: t.percent })} style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: sp[5], minHeight: size.touchMin }}>
-                    <T style={{ fontFamily: font.body600, fontSize: fs.m, color: c.text2, width: 30 }}>{t.code}</T>
-                    <View style={{ flex: 1, gap: 4 }}>
-                      <T numberOfLines={1} style={{ fontFamily: done ? font.body600 : font.body700, fontSize: fs.base, color: done ? c.text2 : c.ink }}>
-                        {t.title}
-                      </T>
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: sp[4] }}>
-                        <View style={{ width: 120, height: 4, borderRadius: 2, backgroundColor: c.panel2, overflow: "hidden" }}>
-                          <View style={{ width: `${t.percent}%`, height: 4, backgroundColor: done ? c.text2 : c.ink }} />
-                        </View>
-                        <T v="small">{t.percent} %</T>
-                      </View>
-                    </View>
-                  </Pressable>
-                  {t.sharepointUrl ? <IconButton icon="arrow-ur" label={`${t.title} in SharePoint öffnen`} onPress={() => Linking.openURL(t.sharepointUrl!)} /> : t.hasFile ? <IconButton icon="download" label={`${t.title} herunterladen`} onPress={() => openFile(`sol/${encodeURIComponent(t.id)}`)} /> : null}
-                </View>
+                <Pressable
+                  key={t.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t.code} ${t.title}, ${t.minutes} Minuten, ${SOL_STATUS_LABEL[t.status]}`}
+                  onPress={() => setOpen({ task: t, title: `${g.subject.short} ${t.code} ${t.title}` })}
+                  style={{ flexDirection: "row", alignItems: "center", gap: sp[5], minHeight: size.touchMin, paddingVertical: sp[4], borderTopWidth: i ? 1 : 0, borderTopColor: c.rule }}
+                >
+                  <T style={{ fontFamily: font.body600, fontSize: fs.m, color: c.text2, width: 30 }}>{t.code}</T>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <T numberOfLines={1} style={{ fontFamily: done ? font.body600 : font.body700, fontSize: fs.base, color: done ? c.text2 : c.ink }}>
+                      {t.title}
+                    </T>
+                    <T v="small">
+                      {t.minutes} Min. · {SOL_STATUS_LABEL[t.status]}
+                    </T>
+                  </View>
+                  <Icon name="chev-r" small color={c.text2} />
+                </Pressable>
               );
             })}
           </Card>
         </View>
       ))}
-      {edit && <ProgressSheet edit={edit} onClose={() => setEdit(null)} onSaved={reload} />}
+      {open && <TaskSheet task={open.task} title={open.title} onClose={() => setOpen(null)} onSaved={reload} />}
     </>
   );
 }
 
-function ProgressSheet({ edit, onClose, onSaved }: { edit: { id: string; title: string; percent: number }; onClose: () => void; onSaved: () => Promise<void> }) {
-  const [v, setV] = useState(String(Math.round(edit.percent / 25) * 25));
-  const [busy, setBusy] = useState(false);
+/** Auftrag: Stand setzen, als PDF oder Word öffnen, in SharePoint öffnen. */
+function TaskSheet({ task, title, onClose, onSaved }: { task: Task; title: string; onClose: () => void; onSaved: () => Promise<void> }) {
+  const toast = useToast();
+  const [v, setV] = useState<SolStatus>(task.status);
+  async function set(next: SolStatus) {
+    const before = v;
+    setV(next);
+    try {
+      await api.setSolStatus(task.id, next);
+      await onSaved();
+    } catch {
+      setV(before);
+      toast.show("Speichern fehlgeschlagen. Versuche es nochmals.");
+    }
+  }
   return (
-    <Sheet
-      open
-      onClose={onClose}
-      title="Fortschritt"
-      actions={
-        <>
-          <Button label="Abbrechen" variant="ghost" onPress={onClose} />
-          <Button
-            label="Speichern"
-            haptic
-            busy={busy}
-            onPress={async () => {
-              setBusy(true);
-              await api.setSolProgress(edit.id, Number(v)).catch(() => {});
-              await onSaved();
-              setBusy(false);
-              onClose();
-            }}
-          />
-        </>
-      }
-    >
-      <T v="strong">{edit.title}</T>
-      <Segment label="Fortschritt" value={v} onChange={setV} options={["0", "25", "50", "75", "100"].map((x) => ({ value: x, label: `${x} %` }))} />
+    <Sheet open onClose={onClose} title="Auftrag" actions={<Button label="Fertig" onPress={onClose} />}>
+      <T v="strong">{title}</T>
+      <T v="small">{task.minutes} Min.</T>
+      <Segment label="Stand" value={v} onChange={set} options={(["open", "started", "done"] as const).map((s) => ({ value: s, label: SOL_STATUS_LABEL[s] }))} />
+      {([
+        ["task", "Auftrag"],
+        ["material", "Unterlagen"],
+        ["solution", "Lösungen"],
+      ] as const).map(([kind, label]) => {
+        const list = task.files.filter((f) => f.kind === kind);
+        if (!list.length) return null;
+        return (
+          <View key={kind} style={{ gap: sp[2] }}>
+            <T v="label">{label}</T>
+            {list.map((f) => (
+              <View key={f.id} style={{ flexDirection: "row", alignItems: "center", gap: sp[2], minHeight: size.touchMin }}>
+                <View style={{ flex: 1 }}>
+                  <T numberOfLines={2}>{f.name}</T>
+                  {f.bytes > 0 && <T v="small">{fmtBytes(f.bytes)}</T>}
+                </View>
+                {f.pdfHref && <Button label="PDF" variant="line" small onPress={() => openFile(f.href, "format=pdf")} />}
+                <Button label={fileTypeLabel(f.ext)} variant="line" small onPress={() => openFile(f.href)} />
+              </View>
+            ))}
+          </View>
+        );
+      })}
+      {task.sharepointUrl && <Button label="In SharePoint öffnen" variant="line" icon="arrow-ur" wide onPress={() => Linking.openURL(task.sharepointUrl!)} />}
     </Sheet>
   );
 }
@@ -170,7 +195,7 @@ function PlanSheet({ day, plan, tasks, onClose, onSaved }: { day: { id: string; 
   const planned = new Set(plan.map((p) => p.taskId));
   const load = (code: string) => plan.filter((p) => p.subjectCode === code).reduce((m, p) => m + toMin(p.end) - toMin(p.start), 0);
   const options = tasks.groups
-    .flatMap((g) => g.tasks.filter((t) => t.percent < 100 && !planned.has(t.id)).map((t) => ({ value: t.id, label: `${g.subject.name} ${t.code} · ${t.minutes} Min.`, name: `${g.subject.name} ${t.code}`, load: load(g.subject.code) })))
+    .flatMap((g) => g.tasks.filter((t) => t.status !== "done" && !planned.has(t.id)).map((t) => ({ value: t.id, label: `${g.subject.name} ${t.code} · ${t.minutes} Min.`, name: `${g.subject.name} ${t.code}`, load: load(g.subject.code) })))
     .sort((a, b) => a.load - b.load);
   const lastEnd = plan.reduce((m, p) => (p.end > m ? p.end : m), "08:00");
   const start = fromMin(Math.min(Math.ceil((toMin(lastEnd) + 5) / 5) * 5, 16 * 60 + 30));

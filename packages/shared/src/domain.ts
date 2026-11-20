@@ -192,3 +192,22 @@ export function parseBody(md: string | null): BodyBlock[] {
       return { type: "p", text: lines.join(" ") };
     });
 }
+
+/** Bezeichnung des Dateityps für Knöpfe: "Word", "PDF", "Audio" … */
+export function fileTypeLabel(ext: string): string {
+  const e = ext.toLowerCase();
+  if (e === "docx" || e === "doc") return "Word";
+  if (e === "pptx" || e === "ppt") return "PowerPoint";
+  if (e === "xlsx" || e === "xls") return "Excel";
+  if (e === "pdf") return "PDF";
+  if (["mp3", "m4a", "wav"].includes(e)) return "Audio";
+  if (["mp4", "mov", "m4v"].includes(e)) return "Video";
+  if (["jpg", "jpeg", "png", "gif", "heic"].includes(e)) return "Bild";
+  return e.toUpperCase();
+}
+
+/** Dateigrösse: "850 KB", "12 MB". */
+export function fmtBytes(n: number): string {
+  if (n >= 1_000_000) return `${Math.round(n / 1_000_000)} MB`;
+  return `${Math.max(1, Math.round(n / 1000))} KB`;
+}

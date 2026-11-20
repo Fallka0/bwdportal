@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { apiError, withUser } from "@/lib/api";
 import { downloadHeaders, fileName, fileOrPlaceholder } from "@/lib/files";
 
-/** Auftrag als PDF. ?inline=1 öffnet im Browser. */
+/** Auftrag der Beispieldaten als PDF (Platzhalter). Echte Dateien laufen über /files/sol-file. ?inline=1 öffnet im Browser. */
 export const GET = withUser(async ({ env, req }) => {
   const url = new URL(req.url);
   const id = decodeURIComponent(url.pathname.split("/").pop() ?? "");

@@ -615,7 +615,7 @@
 
 .so {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 72px 128px 84px;
+  grid-template-columns: 44px minmax(0, 1fr) 72px auto 200px;
   gap: var(--sp-6);
   align-items: center;
   min-height: 56px;
@@ -650,82 +650,80 @@
   color: var(--text2);
 }
 
-.so-p {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  font-size: var(--fs-m);
-  color: var(--text2);
+/* Stand im Auftrag: Umschalter auf der Kartenfläche */
+.so-st .seg {
+  background: var(--panel2);
 }
 
 .so-a {
   display: flex;
   justify-content: flex-end;
-  gap: var(--sp-0);
+  align-items: center;
+  gap: var(--sp-1);
 }
 
-/* Fortschritt als Regler in der Optik des Balkens.
-   Die Füllung ist eine einfarbige Fläche (gleiche Farbe am Anfang und Ende), kein sichtbarer Verlauf. */
-.prog {
-  --p: 0%;
-  flex: 1;
-  min-width: 0;
-  height: 24px;
-  margin: 0;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
+.so-a .fl {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-m);
+  font: 600 var(--fs-s) / 1 var(--font-body);
+  color: var(--ink);
+  text-decoration: none;
 }
 
-.prog::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(var(--ink), var(--ink)) 0 / var(--p) 100% no-repeat, var(--panel2);
-}
-
-.prog::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
+.so-a .fl:hover {
   background: var(--panel2);
 }
 
-.prog::-moz-range-progress {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--ink);
-}
-
-.prog::-webkit-slider-thumb {
-  appearance: none;
-  width: 4px;
-  height: 4px;
-  margin-top: 0;
+.so-a button.fl {
   border: 0;
-  background: transparent;
+  background: none;
+  cursor: pointer;
 }
 
-.prog::-moz-range-thumb {
-  width: 4px;
-  height: 4px;
-  border: 0;
-  background: transparent;
+.sf + .sf {
+  margin-top: var(--sp-5);
 }
 
-.prog:hover::-webkit-slider-thumb,
-.prog:focus-visible::-webkit-slider-thumb {
-  width: 12px;
-  height: 12px;
-  margin-top: -4px;
-  border-radius: 50%;
-  background: var(--ink);
+.sf-r {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  border-top: 1px solid var(--rule);
 }
 
-.so.done .prog::-webkit-slider-runnable-track {
-  background: linear-gradient(var(--text2), var(--text2)) 0 / var(--p) 100% no-repeat, var(--panel2);
+.sf-n {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.so.done .prog::-moz-range-progress {
-  background: var(--text2);
+.sf-s {
+  font-size: var(--fs-s);
+  color: var(--text2);
+}
+
+.sf .fl {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--r-m);
+  font: 600 var(--fs-s) / 1 var(--font-body);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sf .fl:hover {
+  background: var(--panel2);
+}
+
+.sg-h .done-n {
+  margin-left: auto;
 }
 
 .cal,
@@ -797,7 +795,7 @@
   }
 
   .so {
-    grid-template-columns: 36px minmax(0, 1fr) 40px;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
     row-gap: 2px;
     padding: var(--sp-4) 0;
@@ -816,23 +814,19 @@
     display: none;
   }
 
-  .so-p {
-    grid-column: 2;
+  .so-st {
+    grid-column: 2 / 4;
     grid-row: 2;
-    font-size: var(--fs-s);
   }
 
-  .so-p .prog {
-    max-width: 120px;
+  /* Schmal: bei mehreren Dateien nur "n Dateien", der Dialog hat alles */
+  .so-a .q {
+    display: none;
   }
 
   .so-a {
     grid-column: 3;
-    grid-row: 1 / 3;
-  }
-
-  .so-a .ib:last-child {
-    display: none;
+    grid-row: 1;
   }
 
   .sol-dl {

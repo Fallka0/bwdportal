@@ -198,15 +198,27 @@ export type DispensationSubmit = z.infer<typeof DispensationSubmit>;
 
 export const SolBlock = z.object({ id: z.string(), n: z.number(), starts: date.nullable(), ends: date.nullable() });
 
+/** Stand eines Auftrags: offen, angefangen, erledigt. */
+export const SolStatus = z.enum(["open", "started", "done"]);
+export type SolStatus = z.infer<typeof SolStatus>;
+export const SOL_STATUS_LABEL: Record<SolStatus, string> = { open: "Offen", started: "Angefangen", done: "Erledigt" };
+
+export const SolFileKind = z.enum(["task", "material", "solution"]);
+export type SolFileKind = z.infer<typeof SolFileKind>;
+/** Datei eines Auftrags: `href` liefert das Original (Endung `ext`), `pdfHref` die PDF-Fassung von Word und PowerPoint. */
+export const SolFile = z.object({ id: z.string(), kind: SolFileKind, name: z.string(), ext: z.string(), bytes: z.number(), href: z.string(), pdfHref: z.string().nullable() });
+export type SolFile = z.infer<typeof SolFile>;
+
 export const SolTask = z.object({
   id: z.string(),
   subjectCode: z.string(),
   code: z.string(),
   title: z.string(),
   minutes: z.number(),
-  percent: z.number(),
+  status: SolStatus,
   sharepointUrl: z.string().nullable(),
-  hasFile: z.boolean(),
+  /** Dateien: der Auftrag, Unterlagen, Lösungen. */
+  files: z.array(SolFile),
 });
 export type SolTask = z.infer<typeof SolTask>;
 
