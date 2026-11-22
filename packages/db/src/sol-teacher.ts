@@ -139,3 +139,27 @@ export async function deleteSolTaskFile(db: Db, userId: string, fileId: string):
   await db.delete(s.solTaskFiles).where(eq(s.solTaskFiles.id, fileId));
   return [f.key, ...(f.pdfKey ? [f.pdfKey] : [])];
 }
+
+/**
+ * Darf die Person den Auftrag lesen? Lernende der Klasse des Blocks, Lehrpersonen mit einem Fach in der Klasse
+ * und die Klassenlehrperson. Sonst null, damit die Route 404 antwortet und nichts über fremde Klassen verrät.
+ */
+export async function readableSolTask(db: Db, userId: string, taskId: string) {
+  const row = (
+    await db
+      .select({ task: s.solTasks, classId: s.solBlocks.classId, classTeacherId: s.classes.classTeacherId })
+      .from(s.solTasks)
+      .innerJoin(s.solBlocks, eq(s.solBlocks.id, s.solTasks.blockId))
+      .innerJoin(s.classes, eq(s.classes.id, s.solBlocks.classId))
+      .where(eq(s.solTasks.id, taskId))
+      .limit(1)
+  )[0];
+  if (!row) return null;
+  const u = (await db.select({ role: s.users.role, classId: s.users.classId }).from(s.users).where(eq(s.users.id, userId)).limit(1))[0];
+  if (!u) return null;
+  if (u.role === "teacher") {
+    if (row.classTeacherId === userId) return row.task;
+    return (await teacherScope(db, userId)).some((a) => a.classId === row.classId) ? row.task : null;
+  }
+  return u.classId === row.classId ? row.task : null;
+}

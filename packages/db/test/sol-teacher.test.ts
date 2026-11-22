@@ -62,4 +62,22 @@ describe("SOL für Lehrpersonen", () => {
     const de = (await t.getSolOverview(db, teacher, "IM24b", NOW)).groups.find((g) => !g.editable)!.tasks[0]!;
     await expect(t.deleteSolTask(db, teacher, de.id)).rejects.toThrow("nicht zugeteilt");
   });
+
+  it("Lesen nur in der eigenen Klasse: Lernende, zugeteilte Lehrperson, sonst null", async () => {
+    const taskId = (await q.getSolTasks(db, selin, NOW)).groups[0]!.tasks[0]!.id;
+    expect((await t.readableSolTask(db, selin, taskId))?.id).toBe(taskId);
+    expect((await t.readableSolTask(db, teacher, taskId))?.id).toBe(taskId);
+    await db.insert(schema.classes).values({ id: "c-other", code: "IM25a", program: "IM" });
+    await db.insert(schema.users).values([
+      { id: "u-out", email: "out@example.test", firstName: "Out", lastName: "Side", classId: "c-other", role: "student" },
+      { id: "u-t2", email: "t2@example.test", firstName: "Zweite", lastName: "Lehrperson", role: "teacher" },
+    ]);
+    await db.insert(schema.teacherAssignments).values({ userId: "u-t2", classId: "c-other", subjectCode: "MA" });
+    expect(await t.readableSolTask(db, "u-out", taskId)).toBeNull();
+    expect(await t.readableSolTask(db, "u-t2", taskId)).toBeNull();
+    expect(await t.readableSolTask(db, selin, "t-gibtsnicht")).toBeNull();
+    await a.adminUpdateClass(db, "IM24b", { classTeacherId: null });
+    await db.delete(schema.teacherAssignments).where(eq(schema.teacherAssignments.userId, teacher));
+    expect(await t.readableSolTask(db, teacher, taskId)).toBeNull();
+  });
 });

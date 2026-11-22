@@ -1,4 +1,4 @@
-import { schema } from "@bwd/db";
+import { readableSolTask, schema } from "@bwd/db";
 import { eq } from "drizzle-orm";
 import { apiError, withUser } from "@/lib/api";
 import { downloadHeaders, fileName } from "@/lib/files";
@@ -19,11 +19,11 @@ const TYPES: Record<string, string> = {
  * Datei eines SOL-Auftrags: das Original, mit ?format=pdf die PDF-Fassung (Word, PowerPoint).
  * PDF, Audio, Video und Bilder öffnen im Browser, alles andere wird heruntergeladen. Grosse Dateien werden gestreamt.
  */
-export const GET = withUser(async ({ env, req }) => {
+export const GET = withUser(async ({ env, userId, req }) => {
   const url = new URL(req.url);
   const id = decodeURIComponent(url.pathname.split("/").pop() ?? "");
   const f = (await env.db.select().from(schema.solTaskFiles).where(eq(schema.solTaskFiles.id, id)).limit(1))[0];
-  if (!f) return apiError(404, "not_found", "Diese Datei gibt es nicht.");
+  if (!f || !(await readableSolTask(env.db, userId, f.taskId))) return apiError(404, "not_found", "Diese Datei gibt es nicht.");
   const asPdf = url.searchParams.get("format") === "pdf" && !!f.pdfKey;
   const ext = asPdf ? "pdf" : f.ext;
   const obj = await env.files.get(asPdf ? f.pdfKey! : f.key).catch(() => null);
