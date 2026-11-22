@@ -14,6 +14,14 @@ export const TABS: { name: string; href: string; label: string; icon: IconName }
   { name: "(mehr)", href: "/mehr", label: "Mehr", icon: "grid4" },
 ];
 
+/** Lehrpersonen: Präsenz statt Noten. */
+export const TEACHER_TABS: typeof TABS = [
+  { name: "index", href: "/", label: "Übersicht", icon: "home" },
+  { name: "stundenplan", href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+  { name: "praesenz", href: "/praesenz", label: "Präsenz", icon: "check" },
+  { name: "(mehr)", href: "/mehr", label: "Mehr", icon: "grid4" },
+];
+
 /** Fläche der Tab-Bar. Liegt über dem Home-Indikator. */
 export function TabBarView({ children, ...rest }: ViewProps & { children?: ReactNode }) {
   const { c } = useTheme();

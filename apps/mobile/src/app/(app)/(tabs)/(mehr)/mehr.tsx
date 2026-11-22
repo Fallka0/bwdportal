@@ -11,9 +11,16 @@ export default function More() {
   const { c } = useTheme();
   const me = useMe();
   const n = me.data?.counts;
+  const teacher = me.data?.role === "teacher";
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
-    { href: "/sol", title: "SOL", sub: "SOL-Tag am Freitag", icon: "book" },
-    { href: "/absenzen", title: "Absenzen", sub: n ? `Kontingent ${n.contingentAvailable} von ${n.contingentSize}` : undefined, icon: "clock", dot: n?.contingentAvailable === 0 },
+    { href: "/pruefungen", title: "Prüfungen", icon: "note" },
+    ...(teacher
+      ? [{ href: "/klassen", title: "Klassen", sub: [...new Set(me.data?.teaches.map((t) => t.classCode) ?? [])].join(", ") || undefined, icon: "users" as const }]
+      : [
+          { href: "/klassenraum", title: "Klassenraum", sub: me.data?.classCode || undefined, icon: "msg" as const },
+          { href: "/sol", title: "SOL", sub: "SOL-Tag am Freitag", icon: "book" as const },
+          { href: "/absenzen", title: "Absenzen", sub: n ? `Kontingent ${n.contingentAvailable} von ${n.contingentSize}` : undefined, icon: "clock" as const, dot: n?.contingentAvailable === 0 },
+        ]),
     { href: "/mitteilungen", title: "Mitteilungen", sub: n?.unreadNews ? `${n.unreadNews} neu` : undefined, icon: "megaphone" },
     { href: "/dokumente", title: "Dokumente", icon: "folder" },
     { href: "/links", title: "Links", icon: "grid4" },

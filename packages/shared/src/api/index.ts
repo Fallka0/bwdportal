@@ -30,6 +30,22 @@ import {
   SolTasks,
   type SolStatus,
   Timetable,
+  TeacherHome,
+  TestItem,
+  type TestInput,
+  Subject,
+  AttendanceSlot,
+  AttendanceSheet,
+  TeacherClass,
+  ClassView,
+  Gradebook,
+  Assessment,
+  AssessmentSheet,
+  type AssessmentInput,
+  type AssessmentGradesInput,
+  Classroom,
+  ClassPost,
+  type ClassPostInput,
 } from "../schemas";
 
 export class ApiFailure extends Error {
@@ -127,6 +143,27 @@ export function createApiClient(opts: ApiClientOptions) {
     resetCalendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "POST", "/me/calendar"),
     markAllRead: () => call(Ok, "POST", "/notifications/read"),
     markRead: (ids: string[]) => call(Ok, "POST", "/notifications/read", { ids }),
+    // Prüfungen
+    tests: (opts: { past?: boolean; from?: string; to?: string } = {}) => call(z.object({ tests: z.array(TestItem) }), "GET", `/tests${q({ vergangen: opts.past ? "1" : undefined, von: opts.from, bis: opts.to })}`),
+    testOptions: () => call(z.object({ subjects: z.array(Subject), classes: z.array(z.object({ classCode: z.string(), subject: Subject })) }), "GET", "/tests/options"),
+    createTest: (input: TestInput) => call(TestItem, "POST", "/tests", input),
+    updateTest: (id: string, input: TestInput) => call(TestItem, "PATCH", `/tests/${encodeURIComponent(id)}`, input),
+    deleteTest: (id: string) => call(Ok, "DELETE", `/tests/${encodeURIComponent(id)}`),
+    // Lehrpersonen
+    teacherHome: () => call(TeacherHome, "GET", "/teacher/home"),
+    attendance: () => call(z.object({ slots: z.array(AttendanceSlot) }), "GET", "/attendance"),
+    attendanceSheet: (lessonId: string) => call(AttendanceSheet, "GET", `/attendance/${encodeURIComponent(lessonId)}`),
+    saveAttendance: (lessonId: string, absent: string[]) => call(AttendanceSheet, "PUT", `/attendance/${encodeURIComponent(lessonId)}`, { absent }),
+    classes: () => call(z.object({ classes: z.array(TeacherClass) }), "GET", "/classes"),
+    classView: (code: string) => call(ClassView, "GET", `/classes/${encodeURIComponent(code)}`),
+    gradebook: (classCode: string, subject: string, semester?: number) => call(Gradebook, "GET", `/gradebook${q({ klasse: classCode, fach: subject, semester })}`),
+    createAssessment: (input: AssessmentInput) => call(Assessment, "POST", "/assessments", input),
+    assessment: (id: string) => call(AssessmentSheet, "GET", `/assessments/${encodeURIComponent(id)}`),
+    saveAssessmentGrades: (id: string, input: AssessmentGradesInput) => call(AssessmentSheet, "PUT", `/assessments/${encodeURIComponent(id)}/grades`, input),
+    // Klassenraum
+    classroom: (classCode?: string, subject?: string) => call(Classroom, "GET", `/classroom${q({ klasse: classCode, fach: subject })}`),
+    createClassPost: (input: ClassPostInput) => call(ClassPost, "POST", "/classroom/posts", input),
+    deleteClassPost: (id: string) => call(Ok, "DELETE", `/classroom/posts/${encodeURIComponent(id)}`),
     /** Absolute URL für Dateien (Download mit Token als Query, weil Links keinen Header senden können). */
     fileUrl: (path: string) => `${opts.baseUrl}/api/v1${path}`,
   };
