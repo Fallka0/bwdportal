@@ -203,6 +203,47 @@ export const myGrades = sqliteTable(
   (t) => [index("my_grades_user_semester").on(t.userId, t.semester), check("my_grades_value_check", sql`${t.value} BETWEEN 1 AND 6`), check("my_grades_semester_check", sql`${t.semester} BETWEEN 1 AND 6`)],
 );
 
+/**
+ * Noten der Lehrpersonen: eine Probe pro Klasse und Fach (Kürzel der Vorlage, z. B. D für Deutsch) mit Gewicht und
+ * BM-Semester; die Noten der Lernenden in assessment_grades. Sobald eine Lehrperson in einem Fach und Semester Noten
+ * erfasst hat, zählen für die Lernenden nur noch diese (eigene Erfassungen bleiben sichtbar).
+ */
+export const assessments = sqliteTable(
+  "assessments",
+  {
+    id: text("id").primaryKey(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    subjectCode: text("subject_code").notNull(),
+    semester: integer("semester").notNull(),
+    title: text("title").notNull(),
+    date: text("date").notNull(),
+    weight: real("weight").notNull().default(1),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => [index("assessments_class_subject").on(t.classId, t.subjectCode, t.semester), check("assessments_semester_check", sql`${t.semester} BETWEEN 1 AND 6`)],
+);
+
+export const assessmentGrades = sqliteTable(
+  "assessment_grades",
+  {
+    assessmentId: text("assessment_id")
+      .notNull()
+      .references(() => assessments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    value: real("value").notNull(),
+    enteredAt: text("entered_at").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.assessmentId, t.userId] }), index("assessment_grades_user").on(t.userId), check("assessment_grades_value_check", sql`${t.value} BETWEEN 1 AND 6`)],
+);
+
 /** EFZ-Übersicht: Informatikmodule (gibb) und überbetriebliche Kurse (üK) pro Ausbildungsjahr. */
 export const myEfz = sqliteTable(
   "my_efz",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DomainError, getClassView } from "@bwd/db";
+import { DomainError, getClassView, gradebookSubjects } from "@bwd/db";
 import { fmtShort, plural } from "@bwd/shared";
 import { Card, Empty, Icon, ListRow, Status } from "@/components/ui";
 import { requireTeacher } from "@/lib/auth";
@@ -18,6 +18,7 @@ export default async function ClassPage({ params }: Props) {
     if (e instanceof DomainError) notFound();
     throw e;
   });
+  const books = await gradebookSubjects(env.db, me.id, c.code);
   return (
     <>
       <nav className="crumb" aria-label="Pfad">
@@ -33,6 +34,16 @@ export default async function ClassPage({ params }: Props) {
           <p className="ph-sub">{[c.program, c.subjects.map((s) => s.name).join(", "), c.classTeacher ? "Klassenlehrperson" : null].filter(Boolean).join(" · ")}</p>
         </div>
       </div>
+      {books.length > 0 && (
+        <Card aria-labelledby="nb-h" style={{ marginBottom: "var(--sp-5)" }}>
+          <h2 id="nb-h" className="box-t" style={{ marginBottom: "var(--sp-3)" }}>
+            Noten
+          </h2>
+          {books.map((b) => (
+            <ListRow key={b.subject.code} href={`/klassen/${encodeURIComponent(c.code)}/noten/${encodeURIComponent(b.subject.code)}`} title={b.subject.name} sub={plural(b.count, "Probe", "Proben")} end={b.edit ? undefined : <span className="lr-s">Nur ansehen</span>} />
+          ))}
+        </Card>
+      )}
       {c.students.length === 0 ? (
         <Empty icon="users" title="Keine Lernenden in dieser Klasse." />
       ) : (

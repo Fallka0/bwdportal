@@ -241,6 +241,15 @@
   border-top: 1px solid var(--rule);
 }
 
+.ex-off b,
+.ex-off .gv {
+  color: var(--text2);
+}
+
+.ex-off .gv {
+  text-decoration: line-through;
+}
+
 .ex:first-child {
   border-top: 0;
   padding-top: 0;
@@ -1761,4 +1770,78 @@
   .pres-a .btn {
     width: 100%;
   }
+}
+
+/* ---------- Notenbuch ---------- */
+.nbuch-wrap {
+  overflow-x: auto;
+}
+
+.nbuch {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-m);
+}
+
+.nbuch th,
+.nbuch td {
+  padding: var(--sp-4) var(--sp-4);
+  border-top: 1px solid var(--rule);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.nbuch thead th {
+  border-top: 0;
+  vertical-align: bottom;
+  font-weight: 600;
+}
+
+.nbuch thead th a {
+  display: grid;
+  gap: var(--sp-0);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nbuch thead th a span {
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  color: var(--text2);
+}
+
+.nbuch thead th a:hover b {
+  text-decoration: underline;
+}
+
+.nbuch th[scope="row"],
+.nbuch thead th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--panel);
+  text-align: left;
+  font-weight: 600;
+}
+
+.nbuch .nbuch-z {
+  font-weight: 700;
+}
+
+.nbuch .low {
+  color: var(--err);
+}
+
+.nbuch tfoot th,
+.nbuch tfoot td {
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.ge-in {
+  width: 88px;
+  text-align: center;
+}
+
+.ge-in.bad {
+  box-shadow: inset 0 0 0 1px var(--err);
 }

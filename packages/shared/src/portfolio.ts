@@ -18,6 +18,15 @@ export const BM_SUBJECTS = [
 ] as const;
 export type BmSubject = (typeof BM_SUBJECTS)[number]["code"];
 
+/**
+ * Gleiches Fach unter verschiedenen Kürzeln: Stundenplan und Zuteilungen nutzen DE, EN, FR; die Vorlage D, E, F.
+ * Noten werden über dieses Kürzel zusammengeführt (eigene, importierte und die der Lehrperson).
+ */
+export function bmCode(code: string): string {
+  const c = code.trim().toUpperCase();
+  return ({ DE: "D", EN: "E", FR: "F" } as Record<string, string>)[c] ?? c;
+}
+
 export const subjectName = (code: string) => BM_SUBJECTS.find((s) => s.code === code)?.name ?? code;
 
 /** Fachkürzel der Vorlage ("W+R") auf das Kürzel im Portal. */

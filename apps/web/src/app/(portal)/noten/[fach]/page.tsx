@@ -26,7 +26,7 @@ export default async function Subject({ params, searchParams }: Props) {
   const code = decodeURIComponent((await params).fach).toUpperCase();
   const s = await getPortfolioSubject(env.db, me.id, env.now, code, Number(sp.semester) || undefined, sp.modul);
   if (!s) notFound();
-  const chrono = [...s.entries].reverse();
+  const chrono = s.entries.filter((e) => e.counts).reverse();
   const when = (e: (typeof s.entries)[number]) => (e.date ? fmtWeekdayDate(e.date) : `Erfasst ${fmtShortLoose(e.enteredAt)}`);
   return (
     <>
@@ -62,18 +62,19 @@ export default async function Subject({ params, searchParams }: Props) {
             </h2>
             <div>
               {s.entries.map((e) => (
-                <div key={e.id} className="ex">
+                <div key={e.id} className={e.counts ? "ex" : "ex ex-off"}>
                   <span>
                     <b>{e.title}</b>
                     <span className="s">
                       {when(e)} · {weightLabel(e.weight)}
+                      {e.source === "teacher" ? ` · ${e.teacher ?? "Lehrperson"}` : e.counts ? "" : " · Eigene Erfassung, zählt nicht"}
                     </span>
                   </span>
                   <span className="w">
                     {e.classAverage !== null ? `Klasse ${fmtGrade(e.classAverage)} ` : ""}
-                    <EditLink id={e.id} label={`${e.title} bearbeiten`} />
+                    {e.source === "own" && <EditLink id={e.id} label={`${e.title} bearbeiten`} />}
                   </span>
-                  <span className={isInsufficient(e.value) ? "gv low" : "gv"}>
+                  <span className={isInsufficient(e.value) && e.counts ? "gv low" : "gv"}>
                     <span className="sr">Note </span>
                     {fmtGrade(e.value)}
                   </span>
@@ -92,7 +93,7 @@ export default async function Subject({ params, searchParams }: Props) {
                 {s.classAverage !== null && <span>Klasse {fmtGrade(s.classAverage)}</span>}
               </div>
             </section>
-            <WishGrade entries={s.entries} current={s.grade} module={s.code === "IN"} />
+            <WishGrade entries={s.entries.filter((e) => e.counts)} current={s.grade} module={s.code === "IN"} />
             {chrono.length > 1 && (
               <Card aria-labelledby="vl-h">
                 <h2 id="vl-h" className="box-t">
@@ -112,7 +113,7 @@ export default async function Subject({ params, searchParams }: Props) {
           </div>
         </div>
       )}
-      <GradeDialogs semester={s.semester} subject={s.code} module={s.module} entries={s.entries} />
+      <GradeDialogs semester={s.semester} subject={s.code} module={s.module} entries={s.entries.filter((e) => e.source === "own")} />
     </>
   );
 }
