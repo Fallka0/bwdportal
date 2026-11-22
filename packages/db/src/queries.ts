@@ -52,6 +52,7 @@ import {
   type DocumentGroups,
   type DocumentItem,
   type Home,
+  type TeacherClass,
   type TeacherHome,
   type Lesson,
   type LinkItem,
@@ -73,6 +74,7 @@ import {
   nextLesson,
 } from "@bwd/shared";
 import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { attendanceSlots } from "./attendance";
 import { listTests, markTests, testsBetween } from "./tests";
 import type { Db } from "./client";
 import * as s from "./schema";
@@ -734,25 +736,25 @@ export async function getHome(db: Db, userId: string, now: Now): Promise<Home> {
 }
 
 /** Übersicht einer Lehrperson: heutige Lektionen, ihre Klassen mit Fächern und Mitteilungen. */
-export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<TeacherHome> {
-  const lessons = await markTests(db, userId, await lessonsBetween(db, userId, now.date, now.date));
+/** Klassen einer Lehrperson: zugeteilte (mit Fächern) und die als Klassenlehrperson, mit Anzahl Lernende. */
+export async function teacherClasses(db: Db, userId: string): Promise<TeacherClass[]> {
   const scope = await teacherScope(db, userId);
-  const own = await db.select({ id: s.classes.id, code: s.classes.code, program: s.classes.program }).from(s.classes).where(eq(s.classes.classTeacherId, userId));
-  const byClass = new Map<string, TeacherHome["classes"][number] & { id: string }>();
+  const own = await db.select({ id: s.classes.id }).from(s.classes).where(eq(s.classes.classTeacherId, userId));
+  const byClass = new Map<string, TeacherClass & { id: string }>();
   for (const a of scope) {
     const c = byClass.get(a.classId) ?? { id: a.classId, code: a.classCode, program: null, subjects: [], students: 0, classTeacher: false };
     c.subjects.push({ code: a.subject, name: a.subjectName ?? a.subject, short: a.subjectShort ?? a.subject });
     byClass.set(a.classId, c);
   }
   for (const o of own) {
-    const c = byClass.get(o.id) ?? { id: o.id, code: o.code, program: null, subjects: [], students: 0, classTeacher: false };
+    const c = byClass.get(o.id) ?? { id: o.id, code: "", program: null, subjects: [], students: 0, classTeacher: false };
     c.classTeacher = true;
     byClass.set(o.id, c);
   }
   const ids = [...byClass.keys()];
   if (ids.length) {
-    const meta = await db.select({ id: s.classes.id, program: s.classes.program }).from(s.classes).where(inArray(s.classes.id, ids));
-    for (const m of meta) byClass.get(m.id)!.program = m.program;
+    const meta = await db.select({ id: s.classes.id, code: s.classes.code, program: s.classes.program }).from(s.classes).where(inArray(s.classes.id, ids));
+    for (const m of meta) Object.assign(byClass.get(m.id)!, { code: m.code, program: m.program });
     const counts = await db
       .select({ id: s.users.classId, n: sql<number>`count(*)` })
       .from(s.users)
@@ -760,14 +762,21 @@ export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<
       .groupBy(s.users.classId);
     for (const r of counts) if (r.id) byClass.get(r.id)!.students = Number(r.n);
   }
+  return [...byClass.values()].sort((a, b) => a.code.localeCompare(b.code)).map(({ id: _id, ...c }) => c);
+}
+
+/** Übersicht einer Lehrperson: heutige Lektionen, Präsenz, ihre Klassen mit Fächern, Prüfungen und Mitteilungen. */
+export async function getTeacherHome(db: Db, userId: string, now: Now): Promise<TeacherHome> {
+  const lessons = await markTests(db, userId, await lessonsBetween(db, userId, now.date, now.date));
   return {
     today: now.date,
     now: now.time,
     next: nextLesson(lessons, now.date, now.time),
     lessons,
-    classes: [...byClass.values()].sort((a, b) => a.code.localeCompare(b.code)).map(({ id: _id, ...c }) => c),
+    classes: await teacherClasses(db, userId),
     news: (await getNews(db, userId)).slice(0, 3),
     tests: await listTests(db, userId, now, { to: addDays(now.date, 14), limit: 4 }),
+    attendance: await attendanceSlots(db, userId, now.date, now.date),
   };
 }
 

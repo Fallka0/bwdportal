@@ -241,8 +241,32 @@ export const absenceLessons = sqliteTable(
       .references(() => absences.id, { onDelete: "cascade" }),
     period: integer("period").notNull(),
     subjectCode: text("subject_code"),
+    /** Präsenz im Portal: Lehrperson, die die Lektion erfasst hat, und wann (leer bei Import und Beispieldaten) */
+    recordedBy: text("recorded_by"),
+    recordedAt: text("recorded_at"),
   },
   (t) => [primaryKey({ columns: [t.absenceId, t.period] })],
+);
+
+/**
+ * Präsenz erfasst: eine Lektion (Klasse, Datum, Beginn, Fach) wurde kontrolliert. Fehlende Lernende stehen als
+ * absence_lessons; diese Zeile zeigt nur, dass die Kontrolle stattfand. Natürlicher Schlüssel statt Lektions-ID,
+ * damit ein neuer Import des Stundenplans die Erfassung nicht verliert.
+ */
+export const attendanceChecks = sqliteTable(
+  "attendance_checks",
+  {
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    date: text("date").notNull(),
+    startTime: text("start_time").notNull(),
+    subjectCode: text("subject_code").notNull(),
+    recordedBy: text("recorded_by").notNull(),
+    recordedAt: text("recorded_at").notNull(),
+    absent: integer("absent").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.classId, t.date, t.startTime, t.subjectCode] })],
 );
 
 /** Abmeldung (Absenzendatenbank der Schule, Art. 2b): von Lektion bis Lektion, mit Bemerkung. */

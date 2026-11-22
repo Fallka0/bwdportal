@@ -5,6 +5,7 @@ import { Card, CardHead, Icon, ListRow } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import type { ServerEnv } from "@/lib/env";
 import { NextCard } from "./NextCard";
+import { AttendanceRow } from "./praesenz/AttendanceRow";
 import { TestsCard } from "./TestsCard";
 
 /** Übersicht einer Lehrperson: nächste Lektion, heute, ihre Klassen, Mitteilungen. */
@@ -64,14 +65,20 @@ export async function TeacherHome({ env, me }: { env: ServerEnv; me: Me }) {
             </div>
           </section>
 
+          <Card className="h-att" aria-labelledby="pz-h">
+            <CardHead id="pz-h" title="Präsenz heute" href="/praesenz" />
+            {h.attendance.length === 0 ? <p className="empty-s">Heute keine Lektionen.</p> : h.attendance.map((s) => <AttendanceRow key={s.id} slot={s} now={env.now} />)}
+          </Card>
+
           <Card className="h-cls" aria-labelledby="kl-h">
-            <CardHead id="kl-h" title="Meine Klassen" />
+            <CardHead id="kl-h" title="Meine Klassen" href="/klassen" />
             {h.classes.length === 0 ? (
               <p className="empty-s">Noch keine Klassen zugeteilt.</p>
             ) : (
               h.classes.map((c) => (
                 <ListRow
                   key={c.code}
+                  href={`/klassen/${encodeURIComponent(c.code)}`}
                   title={c.code}
                   sub={[c.subjects.map((s) => s.name).join(", "), plural(c.students, "Lernende Person", "Lernende")].filter(Boolean).join(" · ")}
                   end={c.classTeacher ? <span className="lr-s">Klassenlehrperson</span> : undefined}

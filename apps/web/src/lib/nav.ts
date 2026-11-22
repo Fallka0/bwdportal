@@ -32,6 +32,8 @@ export const TEACHER_NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { href: "/", label: "Übersicht", icon: "home" },
       { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+      { href: "/praesenz", label: "Präsenz", icon: "check" },
+      { href: "/klassen", label: "Klassen", icon: "users" },
       { href: "/pruefungen", label: "Prüfungen", icon: "note" },
     ],
   },
@@ -41,6 +43,7 @@ export const TEACHER_NAV: { group: string; items: NavItem[] }[] = [
 export const TEACHER_TABS: NavItem[] = [
   { href: "/", label: "Übersicht", icon: "home" },
   { href: "/stundenplan", label: "Stundenplan", icon: "cal" },
+  { href: "/praesenz", label: "Präsenz", icon: "check" },
   { href: "/mehr", label: "Mehr", icon: "grid4" },
 ];
 
@@ -58,7 +61,7 @@ export const TABS: NavItem[] = [
 ];
 
 /** Bereiche, die in der App unter "Mehr" liegen. */
-export const IN_MORE = ["/mehr", "/pruefungen", "/sol", "/absenzen", "/mitteilungen", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/suche"];
+export const IN_MORE = ["/mehr", "/klassen", "/pruefungen", "/sol", "/absenzen", "/mitteilungen", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/suche"];
 
 export function isActive(href: string, path: string): boolean {
   if (href === "/") return path === "/";
@@ -70,7 +73,9 @@ export function isActive(href: string, path: string): boolean {
 export function backTarget(path: string): { href: string; label: string } | null {
   if (/^\/noten\/.+/.test(path)) return { href: "/noten", label: "Noten" };
   if (/^\/mitteilungen\/.+/.test(path)) return { href: "/mitteilungen", label: "Mitteilungen" };
-  if (["/", "/stundenplan", "/noten", "/mehr"].includes(path)) return null;
+  if (/^\/praesenz\/.+/.test(path)) return { href: "/praesenz", label: "Präsenz" };
+  if (/^\/klassen\/.+/.test(path)) return { href: "/klassen", label: "Klassen" };
+  if (["/", "/stundenplan", "/noten", "/praesenz", "/mehr"].includes(path)) return null;
   if (IN_MORE.some((p) => path === p)) return { href: "/mehr", label: "Mehr" };
   return { href: "/", label: "Übersicht" };
 }

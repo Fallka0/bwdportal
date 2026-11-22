@@ -355,6 +355,63 @@ export const Home = z.object({
 });
 export type Home = z.infer<typeof Home>;
 
+// ---------- Präsenz (Lehrpersonen) ----------
+
+/** Eine Kontrolle: eine Lektion oder eine Doppellektion desselben Fachs in derselben Klasse. */
+export const AttendanceSlot = z.object({
+  /** ID der ersten Lektion; Adresse der Erfassung */
+  id: z.string(),
+  date,
+  start: time,
+  end: time,
+  periods: z.array(z.number()),
+  classCode: z.string(),
+  subject: Subject,
+  room: z.string().nullable(),
+  /** Erfasst: wann und wie viele fehlten; null = noch offen */
+  checked: z.object({ at: z.string(), absent: z.number() }).nullable(),
+});
+export type AttendanceSlot = z.infer<typeof AttendanceSlot>;
+
+export const AttendanceStudent = z.object({
+  id: z.string(),
+  name: z.string(),
+  initials: z.string(),
+  absent: z.boolean(),
+  /** Abmeldung für diese Lektion vorhanden */
+  notice: z.boolean(),
+  /** Bewilligtes Gesuch für diese Lektion */
+  dispensed: z.boolean(),
+});
+export type AttendanceStudent = z.infer<typeof AttendanceStudent>;
+
+export const AttendanceSheet = z.object({ slot: AttendanceSlot, students: z.array(AttendanceStudent), editable: z.boolean() });
+export type AttendanceSheet = z.infer<typeof AttendanceSheet>;
+
+export const AttendanceInput = z.object({ absent: z.array(z.string()).max(200) });
+export type AttendanceInput = z.infer<typeof AttendanceInput>;
+
+/** Klasse aus Sicht einer Lehrperson; Absenzen nur für die Klassenlehrperson. */
+export const ClassStudent = z.object({
+  id: z.string(),
+  name: z.string(),
+  initials: z.string(),
+  email: z.string(),
+  absences: z
+    .object({ missed: z.number(), unexcused: z.number(), contingentAvailable: z.number(), contingentSize: z.number(), lastDate: date.nullable() })
+    .nullable(),
+});
+export type ClassStudent = z.infer<typeof ClassStudent>;
+
+export const ClassView = z.object({
+  code: z.string(),
+  program: z.string().nullable(),
+  classTeacher: z.boolean(),
+  subjects: z.array(Subject),
+  students: z.array(ClassStudent),
+});
+export type ClassView = z.infer<typeof ClassView>;
+
 export const TeacherClass = z.object({
   code: z.string(),
   program: z.string().nullable(),
@@ -372,6 +429,8 @@ export const TeacherHome = z.object({
   classes: z.array(TeacherClass),
   news: z.array(NewsItem),
   tests: z.array(TestItem).default([]),
+  /** Präsenz der heutigen Lektionen */
+  attendance: z.array(AttendanceSlot).default([]),
 });
 export type TeacherHome = z.infer<typeof TeacherHome>;
 
