@@ -31,3 +31,20 @@ test("Lehrperson: eigene Übersicht, Stundenplan mit Klasse, keine Bereiche der 
   await page.goto("/profil");
   await expect(page.locator("main")).toContainText("Mathematik IM24b");
 });
+
+test("App-API: Übersicht der Lehrperson und Prüfungen im Zeitraum", async ({ page }) => {
+  await login(page, "Regula Keller");
+  const home = await page.request.get("/api/v1/teacher/home");
+  expect(home.status()).toBe(200);
+  const h = (await home.json()) as { attendance: { periods: number[] }[]; classes: { code: string }[] };
+  expect(h.attendance.map((x) => x.periods)).toEqual([[1, 2]]);
+  expect(h.classes.map((x) => x.code)).toEqual(["IM24b"]);
+  const tests = await page.request.get("/api/v1/tests?von=2026-10-01&bis=2026-10-31");
+  expect(((await tests.json()) as { tests: { id: string }[] }).tests.map((x) => x.id)).toEqual(["ts-ma-1"]);
+});
+
+test("App-API: Lernende erhalten keine Übersicht der Lehrperson", async ({ page }) => {
+  await login(page);
+  expect((await page.request.get("/api/v1/teacher/home")).status()).toBe(403);
+});
+
