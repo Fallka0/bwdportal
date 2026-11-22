@@ -99,6 +99,13 @@
       "when": 1795309924614,
       "tag": "0013_push_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1795358492682,
+      "tag": "0014_sol_checkin",
+      "breakpoints": true
     }
   ]
 }

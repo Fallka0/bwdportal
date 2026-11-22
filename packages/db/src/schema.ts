@@ -605,6 +605,26 @@ export const solPortfolio = sqliteTable(
   (t) => [unique("sol_portfolio_user_day").on(t.userId, t.solDayId)],
 );
 
+/**
+ * QR-Check-in in der Lernzone: kurzlebiger Code für eine Klasse an einem SOL-Tag. Die Lehrperson zeigt ihn als
+ * QR-Code; er wird alle 20 Sekunden erneuert und gilt 45 Sekunden (expires_at in Millisekunden seit 1970).
+ */
+export const solCheckinCodes = sqliteTable(
+  "sol_checkin_codes",
+  {
+    code: text("code").primaryKey(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    solDayId: text("sol_day_id")
+      .notNull()
+      .references(() => solDays.id, { onDelete: "cascade" }),
+    createdBy: text("created_by").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("sol_checkin_codes_expires").on(t.expiresAt)],
+);
+
 /** Einmal-Code für die App nach dem Microsoft-Login (60 Sekunden gültig, nur einmal einlösbar). */
 export const loginCodes = sqliteTable("login_codes", {
   code: text("code").primaryKey(),

@@ -1996,3 +1996,31 @@
   display: inline-block;
   vertical-align: middle;
 }
+
+/* ---------- SOL-Check-in ---------- */
+.ci-qr {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+}
+
+.ci-code {
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  padding: var(--sp-5);
+  border-radius: var(--r-l);
+  /* Der QR-Code bringt seinen weissen Grund selbst mit (nötig zum Scannen) */
+  background: var(--raise);
+}
+
+.ci-code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ci-card {
+  display: grid;
+  gap: var(--sp-5);
+  max-width: 520px;
+}

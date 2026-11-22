@@ -45,11 +45,13 @@ export default async function SolTeacherPage({ params, searchParams }: Props) {
             </p>
           )}
         </div>
-        {o.blocks.length > 1 && (
-          <div className="ph-a">
-            <BlockPick blocks={o.blocks.map((b) => b.n)} value={o.block?.n ?? 0} base={base} />
-          </div>
-        )}
+        <div className="ph-a">
+          <Link className="btn btn-line" href={`${base}/checkin`}>
+            <Icon name="check" small />
+            Check-in
+          </Link>
+          {o.blocks.length > 1 && <BlockPick blocks={o.blocks.map((b) => b.n)} value={o.block?.n ?? 0} base={base} />}
+        </div>
       </div>
       {!o.block ? (
         <Empty icon="book" title="Diese Klasse hat noch keine SOL-Blöcke." />

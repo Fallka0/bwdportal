@@ -695,3 +695,31 @@ export const SolTaskInput = z.object({
   sharepointUrl: z.string().trim().url("Keine gültige Adresse.").max(500).nullable().optional(),
 });
 export type SolTaskInput = z.infer<typeof SolTaskInput>;
+
+// ---------- SOL-Check-in (QR in der Lernzone) ----------
+
+export const CheckinStudent = z.object({ id: z.string(), name: z.string(), checkIn: time.nullable(), checkOut: time.nullable() });
+
+/** Für die Lehrperson: Code zum Anzeigen (null, wenn heute kein SOL-Tag ist) und wer schon da ist. */
+export const CheckinBoard = z.object({
+  classCode: z.string(),
+  date,
+  day: z.object({ id: z.string(), date }).nullable(),
+  nextDay: date.nullable(),
+  code: z.string().nullable(),
+  /** Millisekunden seit 1970 */
+  expiresAt: z.number().nullable(),
+  students: z.array(CheckinStudent),
+});
+export type CheckinBoard = z.infer<typeof CheckinBoard>;
+
+/** Für die Lernende nach dem Scannen: was der nächste Schritt ist. */
+export const CheckinInfo = z.object({
+  valid: z.boolean(),
+  classCode: z.string().nullable(),
+  date: date.nullable(),
+  next: z.enum(["in", "out", "done"]).nullable(),
+  checkIn: time.nullable(),
+  checkOut: time.nullable(),
+});
+export type CheckinInfo = z.infer<typeof CheckinInfo>;
