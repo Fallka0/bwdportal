@@ -1940,3 +1940,59 @@
     flex: 1;
   }
 }
+
+/* ---------- SOL für Lehrpersonen ---------- */
+.soltk {
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.soltk > li {
+  padding: var(--sp-5) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.soltk-h {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-4);
+  align-items: center;
+}
+
+.soltk-h > span:first-child {
+  display: grid;
+  gap: var(--sp-0);
+  min-width: 0;
+}
+
+.soltk-h b {
+  font-weight: 600;
+}
+
+.soltk-h .s {
+  font-size: var(--fs-s);
+  color: var(--text2);
+}
+
+.solmx td,
+.solmx thead th:not(:first-child) {
+  text-align: center;
+}
+
+.solmx .sm-done {
+  color: var(--ok);
+}
+
+.solmx .sm-started {
+  color: var(--warn);
+}
+
+.solmx .sm-open {
+  color: var(--text2);
+}
+
+.solmx td .ic {
+  display: inline-block;
+  vertical-align: middle;
+}
