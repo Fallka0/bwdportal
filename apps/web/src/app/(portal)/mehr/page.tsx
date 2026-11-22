@@ -19,7 +19,7 @@ export default async function More() {
   const items: { href: string; title: string; sub?: string; icon: IconName; dot?: boolean }[] = [
     { href: "/pruefungen", title: "Prüfungen", sub: next ? `Nächste ${fmtWeekdayDate(next.date)}` : "", icon: "note" },
     ...(teacher
-      ? []
+      ? [{ href: "/klassen", title: "Klassen", sub: me.teaches.length ? [...new Set(me.teaches.map((t) => t.classCode))].join(", ") : "", icon: "users" as const }]
       : [
           { href: "/sol", title: "SOL", sub: solSub, icon: "book" as const },
           { href: "/absenzen", title: "Absenzen", sub: `Kontingent ${me.counts.contingentAvailable} von ${me.counts.contingentSize}`, icon: "clock" as const, dot: me.counts.contingentAvailable === 0 },

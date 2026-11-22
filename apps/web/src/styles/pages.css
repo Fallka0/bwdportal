@@ -456,6 +456,7 @@
   .h-next { order: 1; }
   .h-qa { order: 2; }
   .h-today { order: 3; }
+  .h-att { order: 3; }
   .h-abs,
   .h-cls { order: 4; }
   .h-ts { order: 5; }
@@ -1680,5 +1681,84 @@
   .tcal-list {
     display: block;
     margin-top: var(--sp-6);
+  }
+}
+
+/* ---------- Präsenz ---------- */
+.pres {
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pres li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-5);
+  align-items: center;
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pres .pres-n {
+  display: grid;
+  gap: var(--sp-0);
+  min-width: 0;
+}
+
+.pres .pres-n b {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pres .pres-n .s {
+  font-size: var(--fs-s);
+  color: var(--text2);
+}
+
+.pres .seg {
+  background: var(--bg);
+}
+
+.pres .seg button {
+  height: 38px;
+  min-width: 44px;
+}
+
+.pres .seg button:disabled {
+  cursor: default;
+}
+
+.pres li.off .seg button[aria-pressed="true"] {
+  color: var(--err);
+}
+
+.pres li.off .av {
+  opacity: 0.5;
+}
+
+.pres-a {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sp-6);
+}
+
+@media (max-width: 599px) {
+  .pres li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .pres .av {
+    display: none;
+  }
+
+  .pres .seg button {
+    padding: 0 var(--sp-3);
+  }
+
+  .pres-a .btn {
+    width: 100%;
   }
 }
