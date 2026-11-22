@@ -116,7 +116,7 @@ export function MonthCalendar({
                         >
                           <b>
                             {t.subject.short}
-                            {teacher && t.classCode ? ` ${t.classCode}` : ""}
+                            {teacher && t.classCode ? <span> {t.classCode}</span> : null}
                           </b>
                           <span>{t.title}</span>
                         </Link>
