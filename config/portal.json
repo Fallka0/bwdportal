@@ -94,7 +94,7 @@
     "to": "13:00"
   },
   "timeGridEnd": "18:00",
-  "homeGridEnd": "18:00",
+  "homeGridEnd": "15:00",
   "absenceContingent": {
     "lessons": 20,
     "per": "semester",

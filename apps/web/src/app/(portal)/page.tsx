@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getHome } from "@bwd/db";
-import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtShort, fmtWeekdayShort, greeting, isInsufficient, plural } from "@bwd/shared";
+import { config, dayColumns, homeGridEnd, fmtDate, fmtGrade, fmtLong, fmtShort, fmtWeekdayShort, greeting, isInsufficient, plural } from "@bwd/shared";
 import { Card, CardHead, Icon, LinkButton, ListRow, Status } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
@@ -36,7 +36,7 @@ export default async function Home() {
           <div className="h-today">
             <TimeGrid
               variant="day"
-              grid={{ end: config.homeGridEnd, columns: dayColumns([{ date: h.today }], h.lessons), lunch: h.lessons.length ? config.lunch : null }}
+              grid={{ end: homeGridEnd(h.lessons), columns: dayColumns([{ date: h.today }], h.lessons), lunch: h.lessons.length ? config.lunch : null }}
               now={{ date: env.now.date, time: env.now.time }}
               live={!env.demo}
               title="Heute"

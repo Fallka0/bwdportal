@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { login } from "./helpers";
 
-const PAGES = ["/", "/stundenplan", "/stundenplan?ansicht=tag", "/noten", "/noten/MA", "/noten?ansicht=efz", "/noten?import=1", "/absenzen", "/absenzen?tab=abmeldungen", "/absenzen?tab=dispensationen&neu=gesuch", "/sol", "/sol?tab=kalender", "/sol?tab=portfolio", "/mitteilungen", "/mitteilungen/pp", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/mehr"];
+const PAGES = ["/", "/stundenplan", "/stundenplan?ansicht=tag", "/noten", "/noten/MA", "/noten?ansicht=efz", "/noten?import=1", "/absenzen", "/absenzen?tab=abmeldungen", "/absenzen?tab=dispensationen&neu=gesuch", "/sol", "/sol?tab=kalender", "/sol?tab=portfolio", "/mitteilungen", "/mitteilungen/pp", "/dokumente", "/links", "/benachrichtigungen", "/profil", "/mehr", "/klassenraum", "/pruefungen", "/pruefungen?ansicht=liste", "/sol/checkin"];
 
 for (const scheme of ["light", "dark"] as const) {
   test(`Barrierefreiheit (axe, WCAG 2.2 AA) im Design ${scheme}`, async ({ page }) => {
@@ -15,6 +15,26 @@ for (const scheme of ["light", "dark"] as const) {
       const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
       for (const v of r.violations) problems.push(`${path}: ${v.id} (${v.nodes.length}) ${v.nodes[0]?.target.join(" ")}`);
     }
+    expect(problems).toEqual([]);
+  });
+}
+
+const TEACHER_PAGES = ["/", "/stundenplan", "/stundenplan?ansicht=tag", "/klassen", "/klassen/IM24b", "/klassen/IM24b/noten/MA", "/klassen/IM24b/raum", "/klassen/IM24b/sol", "/klassen/IM24b/sol/checkin", "/pruefungen", "/pruefungen?ansicht=liste", "/pruefungen?ansicht=vergangen", "/pruefungen?ansicht=liste&neu=1", "/praesenz"];
+
+for (const scheme of ["light", "dark"] as const) {
+  test(`Barrierefreiheit Lehrperson (axe, WCAG 2.2 AA) im Design ${scheme}`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await login(page, "Regula Keller");
+    await page.goto("/praesenz");
+    const detail = await page.locator('a[href^="/praesenz/"]').first().getAttribute("href");
+    const problems: string[] = [];
+    for (const path of [...TEACHER_PAGES, ...(detail ? [detail] : [])]) {
+      await page.goto(path);
+      await expect(page.locator("h1")).toHaveCount(1);
+      const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+      for (const v of r.violations) problems.push(`${path}: ${v.id} (${v.nodes.length}) ${v.nodes[0]?.target.join(" ")}`);
+    }
+    expect(detail).toBeTruthy();
     expect(problems).toEqual([]);
   });
 }

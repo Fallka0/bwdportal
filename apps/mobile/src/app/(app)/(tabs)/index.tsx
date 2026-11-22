@@ -1,4 +1,4 @@
-import { config, dayColumns, fmtDate, fmtLong, fmtShort, fmtWeekdayShort, greeting, plural, type Home } from "@bwd/shared";
+import { config, dayColumns, homeGridEnd, fmtDate, fmtLong, fmtShort, fmtWeekdayShort, greeting, plural, type Home } from "@bwd/shared";
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { api } from "@/lib/api";
@@ -43,7 +43,7 @@ function HomeBody({ h, firstName, classCode }: { h: Home; firstName: string; cla
       <QuickAccess />
       <TimeGrid
         variant="day"
-        grid={{ end: config.homeGridEnd, columns: dayColumns([{ date: h.today }], h.lessons), lunch: h.lessons.length ? config.lunch : null }}
+        grid={{ end: homeGridEnd(h.lessons), columns: dayColumns([{ date: h.today }], h.lessons), lunch: h.lessons.length ? config.lunch : null }}
         now={{ date: h.today, time: h.now }}
         live={false}
         title="Heute"

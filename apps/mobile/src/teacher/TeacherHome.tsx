@@ -1,4 +1,4 @@
-import { config, dayColumns, fmtLong, fmtWeekdayShort, getNow, greeting, plural } from "@bwd/shared";
+import { config, dayColumns, homeGridEnd, fmtLong, fmtWeekdayShort, getNow, greeting, plural } from "@bwd/shared";
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { HomeSkeleton, NextCard, QuickAccess } from "@/home/parts";
@@ -46,7 +46,7 @@ export function TeacherHome() {
           <QuickAccess />
           <TimeGrid
             variant="day"
-            grid={{ end: config.homeGridEnd, columns: dayColumns([{ date: d.today }], d.lessons), lunch: d.lessons.length ? config.lunch : null }}
+            grid={{ end: homeGridEnd(d.lessons), columns: dayColumns([{ date: d.today }], d.lessons), lunch: d.lessons.length ? config.lunch : null }}
             now={{ date: d.today, time: d.now }}
             live={false}
             title="Heute"

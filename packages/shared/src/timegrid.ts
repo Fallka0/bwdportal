@@ -200,5 +200,16 @@ export function solColumns(date: string, plan: SolPlanEntry[], presence: SolPres
   ];
 }
 
+/**
+ * Ende des Rasters in der Übersicht: volle Stunde nach der letzten Lektion des Tages,
+ * frühestens homeGridEnd (15:00 wie im Design), spätestens timeGridEnd.
+ */
+export function homeGridEnd(lessons: Pick<Lesson, "end">[]): string {
+  const min = toMin(config.homeGridEnd);
+  const max = toMin(config.timeGridEnd);
+  const last = Math.max(0, ...lessons.map((l) => toMin(l.end)));
+  return fromMin(Math.min(max, Math.max(min, Math.ceil(last / 60) * 60)));
+}
+
 export const SCHOOL_LUNCH = config.lunch;
 export const SOL_LUNCH = config.solLunch;

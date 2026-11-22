@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Lesson } from "../src/schemas";
-import { gridY, layoutGrid, lessonBlocks, solColumns } from "../src/timegrid";
+import { gridY, homeGridEnd, layoutGrid, lessonBlocks, solColumns } from "../src/timegrid";
 
 const L = (id: string, start: string, end: string, extra: Partial<Lesson> = {}): Lesson => ({
   id,
@@ -80,5 +80,17 @@ describe("solColumns", () => {
     expect(c[0]!.blocks[0]).toMatchObject({ kind: "plan", title: "Mathe 3.02", detail: "Lineare Optimierung I" });
     expect(c[1]).toMatchObject({ lanes: 4, weight: 1.6 });
     expect(c[1]!.blocks[0]).toMatchObject({ kind: "presence", title: "Keller", titleShort: "KEL", sub: "Mathe" });
+  });
+});
+
+describe("homeGridEnd", () => {
+  it("endet frühestens um 15:00 wie im Design", () => {
+    expect(homeGridEnd([])).toBe("15:00");
+    expect(homeGridEnd([L("a", "08:00", "09:40")])).toBe("15:00");
+  });
+  it("zeigt späte Lektionen bis zur nächsten vollen Stunde, höchstens bis timeGridEnd", () => {
+    expect(homeGridEnd([L("a", "08:00", "09:40"), L("b", "15:00", "16:35")])).toBe("17:00");
+    expect(homeGridEnd([L("b", "15:00", "16:00")])).toBe("16:00");
+    expect(homeGridEnd([L("c", "18:00", "19:30")])).toBe("18:00");
   });
 });

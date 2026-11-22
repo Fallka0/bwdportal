@@ -1593,7 +1593,7 @@
 
 .tcal-t td.out:not(.now) .tcal-n {
   color: var(--text2);
-  opacity: 0.6;
+  font-weight: 400;
 }
 
 .tcal-t td.now .tcal-n {
@@ -1676,7 +1676,6 @@
   .tcal-e {
     padding: 1px 2px;
     text-align: center;
-    text-overflow: clip;
   }
 
   .tcal-e b {

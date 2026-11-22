@@ -20,6 +20,10 @@ export default async function CheckinBoardPage({ params }: Props) {
   return (
     <>
       <nav className="crumb" aria-label="Pfad">
+        <Link className="ul" href="/klassen">
+          Klassen
+        </Link>
+        <Icon name="chev-r" small />
         <Link className="ul" href={`/klassen/${encodeURIComponent(board.classCode)}`}>
           {board.classCode}
         </Link>
