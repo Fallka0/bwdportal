@@ -23,6 +23,7 @@ import {
 } from "@bwd/shared";
 import type { Db } from "./client";
 import { DomainError, randomId, teacherScope } from "./queries";
+import { insertNotifications } from "./push";
 import * as s from "./schema";
 
 type Access = { classId: string; classCode: string; subject: Subject; edit: boolean };
@@ -188,7 +189,7 @@ export async function saveAssessmentGrades(db: Db, userId: string, id: string, i
     const rows = newly
       .filter((u) => on.find((x) => x.id === u)?.on !== false)
       .map((u) => ({ id: `nt-${randomId(10)}`, userId: u, kind: "info", icon: "chart", title: `Neue Note in ${subject.name}`, body: r.a.title, href: `/noten/${subject.code}?semester=${r.a.semester}`, createdAt: now.stamp }));
-    for (let i = 0; i < rows.length; i += 10) await db.insert(s.notifications).values(rows.slice(i, i + 10));
+    await insertNotifications(db, rows);
   }
   return getAssessment(db, userId, id, now);
 }

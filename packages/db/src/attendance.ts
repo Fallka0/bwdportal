@@ -8,6 +8,7 @@ import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { fmtLong, fmtPeriods, initials, periodOf, type AttendanceSheet, type AttendanceSlot, type ClassView, type Lesson, type Now } from "@bwd/shared";
 import type { Db } from "./client";
 import { DomainError, getAbsences, lessonsBetween, randomId, teacherClasses, teacherScope } from "./queries";
+import { insertNotifications } from "./push";
 import * as s from "./schema";
 
 async function requireTeacher(db: Db, userId: string) {
@@ -205,7 +206,7 @@ export async function saveAttendance(db: Db, userId: string, lessonId: string, a
         href: "/absenzen",
         createdAt: now.stamp,
       }));
-    for (let i = 0; i < rows.length; i += 10) await db.insert(s.notifications).values(rows.slice(i, i + 10));
+    await insertNotifications(db, rows);
   }
   return getAttendanceSheet(db, userId, lessonId, now);
 }

@@ -467,6 +467,21 @@ export const notifications = sqliteTable("notifications", {
   readAt: text("read_at"),
 });
 
+/** Push: Expo-Push-Token pro Gerät. Ein Token gehört genau einer Person (beim Kontowechsel neu zugeordnet). */
+export const pushTokens = sqliteTable(
+  "push_tokens",
+  {
+    token: text("token").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    platform: text("platform").notNull(),
+    createdAt: text("created_at").notNull(),
+    lastSeenAt: text("last_seen_at").notNull(),
+  },
+  (t) => [index("push_tokens_user").on(t.userId)],
+);
+
 export const settings = sqliteTable("settings", {
   userId: text("user_id").primaryKey(),
   theme: text("theme").notNull().default("system"),

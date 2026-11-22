@@ -7,6 +7,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { fmtLong, type ClassFile, type ClassPost, type ClassPostInput, type Classroom, type Now, type Subject } from "@bwd/shared";
 import type { Db } from "./client";
 import { DomainError, randomId, teacherScope } from "./queries";
+import { insertNotifications } from "./push";
 import * as s from "./schema";
 
 type Ctx = { userId: string; teacher: boolean; classId: string; classCode: string; classTeacher: boolean; subjects: string[] };
@@ -201,7 +202,7 @@ async function notify(db: Db, c: Ctx, input: ClassPostInput, now: Now) {
   const rows = students
     .filter((u) => u.on !== false)
     .map((u) => ({ id: `nt-${randomId(10)}`, userId: u.id, kind: "info", icon: "msg", title: `Klassenraum: ${where}`, body: first.length > 90 ? `${first.slice(0, 88)}…` : first, href: "/klassenraum", createdAt: now.stamp }));
-  for (let i = 0; i < rows.length; i += 10) await db.insert(s.notifications).values(rows.slice(i, i + 10));
+  await insertNotifications(db, rows);
 }
 
 export const classroomDate = (stamp: string) => `${fmtLong(stamp.slice(0, 10))}, ${stamp.slice(11, 16)}`;
