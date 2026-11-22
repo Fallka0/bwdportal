@@ -34,6 +34,9 @@ export default async function ClassPage({ params }: Props) {
           <p className="ph-sub">{[c.program, c.subjects.map((s) => s.name).join(", "), c.classTeacher ? "Klassenlehrperson" : null].filter(Boolean).join(" · ")}</p>
         </div>
       </div>
+      <Card aria-label="Klassenraum" style={{ marginBottom: "var(--sp-5)" }}>
+        <ListRow href={`/klassen/${encodeURIComponent(c.code)}/raum`} title="Klassenraum" />
+      </Card>
       {books.length > 0 && (
         <Card aria-labelledby="nb-h" style={{ marginBottom: "var(--sp-5)" }}>
           <h2 id="nb-h" className="box-t" style={{ marginBottom: "var(--sp-3)" }}>

@@ -119,5 +119,6 @@ export function downloadHeaders(name: string, type: string, inline: boolean) {
     "content-type": type,
     "content-disposition": `${inline ? "inline" : "attachment"}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`,
     "cache-control": "private, no-store",
+    "x-content-type-options": "nosniff",
   };
 }
