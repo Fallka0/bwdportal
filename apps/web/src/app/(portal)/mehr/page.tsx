@@ -21,6 +21,7 @@ export default async function More() {
     ...(teacher
       ? [{ href: "/klassen", title: "Klassen", sub: me.teaches.length ? [...new Set(me.teaches.map((t) => t.classCode))].join(", ") : "", icon: "users" as const }]
       : [
+          { href: "/klassenraum", title: "Klassenraum", sub: me.classCode, icon: "msg" as const },
           { href: "/sol", title: "SOL", sub: solSub, icon: "book" as const },
           { href: "/absenzen", title: "Absenzen", sub: `Kontingent ${me.counts.contingentAvailable} von ${me.counts.contingentSize}`, icon: "clock" as const, dot: me.counts.contingentAvailable === 0 },
         ]),

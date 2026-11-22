@@ -244,6 +244,50 @@ export const assessmentGrades = sqliteTable(
   (t) => [primaryKey({ columns: [t.assessmentId, t.userId] }), index("assessment_grades_user").on(t.userId), check("assessment_grades_value_check", sql`${t.value} BETWEEN 1 AND 6`)],
 );
 
+/**
+ * Klassenraum: Beiträge der Lehrpersonen an eine Klasse, für ein Fach oder (subject_code leer) die ganze Klasse,
+ * und Dateien, an einen Beitrag gehängt oder einzeln abgelegt. Dateien liegen in R2 unter klassenraum/<Klasse>/.
+ */
+export const classPosts = sqliteTable(
+  "class_posts",
+  {
+    id: text("id").primaryKey(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    subjectCode: text("subject_code"),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => [index("class_posts_class_created").on(t.classId, t.createdAt)],
+);
+
+export const classFiles = sqliteTable(
+  "class_files",
+  {
+    id: text("id").primaryKey(),
+    classId: text("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    subjectCode: text("subject_code"),
+    postId: text("post_id").references(() => classPosts.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    ext: text("ext").notNull(),
+    mime: text("mime").notNull(),
+    bytes: integer("bytes").notNull(),
+    r2Key: text("r2_key").notNull(),
+    uploadedBy: text("uploaded_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => [index("class_files_class").on(t.classId, t.createdAt), index("class_files_post").on(t.postId)],
+);
+
 /** EFZ-Übersicht: Informatikmodule (gibb) und überbetriebliche Kurse (üK) pro Ausbildungsjahr. */
 export const myEfz = sqliteTable(
   "my_efz",

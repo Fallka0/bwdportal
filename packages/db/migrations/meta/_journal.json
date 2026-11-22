@@ -85,6 +85,13 @@
       "when": 1795307127504,
       "tag": "0011_assessments",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1795308458772,
+      "tag": "0012_classroom",
+      "breakpoints": true
     }
   ]
 }

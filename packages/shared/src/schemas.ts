@@ -609,3 +609,53 @@ export const Gradebook = z.object({
   editable: z.boolean(),
 });
 export type Gradebook = z.infer<typeof Gradebook>;
+
+// ---------- Klassenraum ----------
+
+export const ClassFile = z.object({
+  id: z.string(),
+  name: z.string(),
+  ext: z.string(),
+  bytes: z.number(),
+  subject: Subject.nullable(),
+  postId: z.string().nullable(),
+  uploadedBy: z.string(),
+  createdAt: z.string(),
+  /** Darf löschen (hochgeladen oder Klassenlehrperson) */
+  canDelete: z.boolean(),
+});
+export type ClassFile = z.infer<typeof ClassFile>;
+
+export const ClassPost = z.object({
+  id: z.string(),
+  subject: Subject.nullable(),
+  author: z.string(),
+  body: z.string(),
+  createdAt: z.string(),
+  edited: z.boolean(),
+  files: z.array(ClassFile),
+  /** Darf bearbeiten (verfasst) */
+  mine: z.boolean(),
+  /** Darf löschen (verfasst oder Klassenlehrperson) */
+  canDelete: z.boolean(),
+});
+export type ClassPost = z.infer<typeof ClassPost>;
+
+export const Classroom = z.object({
+  classCode: z.string(),
+  /** Fächer mit Beiträgen oder Dateien, zum Filtern */
+  subjects: z.array(Subject),
+  /** Wofür ich schreiben darf; null = ganze Klasse (nur Klassenlehrperson). Leer: nur lesen */
+  canPostFor: z.array(z.object({ code: z.string().nullable(), name: z.string() })),
+  posts: z.array(ClassPost),
+  files: z.array(ClassFile),
+});
+export type Classroom = z.infer<typeof Classroom>;
+
+export const ClassPostInput = z.object({
+  classCode: z.string().trim().min(1).max(12),
+  subject: z.string().trim().max(8).nullable(),
+  body: z.string().trim().min(1, "Der Beitrag ist leer.").max(5000, "Höchstens 5000 Zeichen."),
+  fileIds: z.array(z.string()).max(10).default([]),
+});
+export type ClassPostInput = z.infer<typeof ClassPostInput>;
