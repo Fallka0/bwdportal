@@ -7,6 +7,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, lt, lte, or, type SQL } from 
 import { fmtLong, type Lesson, type Now, type Subject, type TestInput, type TestItem } from "@bwd/shared";
 import type { Db } from "./client";
 import { DomainError, randomId, teacherScope } from "./queries";
+import { insertNotifications } from "./push";
 import * as s from "./schema";
 
 type Who = { id: string; teacher: boolean; classId: string | null; scope: Awaited<ReturnType<typeof teacherScope>>; classTeacherOf: string[] };
@@ -157,6 +158,5 @@ async function notifyClass(db: Db, classId: string, input: TestInput, now: Now) 
   const rows = students
     .filter((u) => u.on !== false)
     .map((u) => ({ id: `nt-${randomId(10)}`, userId: u.id, kind: "info", icon: "cal", title: `Neue Prüfung in ${sub?.name ?? input.subject}`, body: `${input.title.trim()} · ${fmtLong(input.date)}`, href: "/pruefungen", createdAt: now.stamp }));
-  // D1 begrenzt die Parameter pro Anweisung: in Blöcken einfügen
-  for (let i = 0; i < rows.length; i += 10) await db.insert(s.notifications).values(rows.slice(i, i + 10));
+  await insertNotifications(db, rows);
 }

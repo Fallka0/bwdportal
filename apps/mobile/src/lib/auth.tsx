@@ -4,6 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, API_URL, setApiToken, setUnauthorizedHandler } from "./api";
 import { clearCache } from "./cache";
+import { unregisterPush } from "./push";
 import { storage } from "./storage";
 
 const KEY = "session";
@@ -88,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    await unregisterPush();
     await api.logout().catch(() => {});
     await clear();
   }, [clear]);

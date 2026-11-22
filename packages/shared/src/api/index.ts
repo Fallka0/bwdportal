@@ -141,6 +141,8 @@ export function createApiClient(opts: ApiClientOptions) {
     notifications: () => call(z.object({ items: z.array(NotificationItem) }), "GET", "/notifications"),
     calendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "GET", "/me/calendar"),
     resetCalendar: () => call(z.object({ url: z.string(), webcal: z.string() }), "POST", "/me/calendar"),
+    registerPush: (token: string, platform: "android" | "ios" | "web") => call(Ok, "POST", "/me/push", { token, platform }),
+    removePush: (token: string) => call(Ok, "DELETE", "/me/push", { token }),
     markAllRead: () => call(Ok, "POST", "/notifications/read"),
     markRead: (ids: string[]) => call(Ok, "POST", "/notifications/read", { ids }),
     // Prüfungen

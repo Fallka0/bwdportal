@@ -6,4 +6,5 @@ export * from "./tests";
 export * from "./attendance";
 export * from "./assessments";
 export * from "./classroom";
+export * from "./push";
 export { buildSeed, seedSql, seedStatements, DEMO_USERS, CLASS_ID } from "./seed/build";
