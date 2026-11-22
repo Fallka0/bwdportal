@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getHome } from "@bwd/db";
 import { config, dayColumns, fmtDate, fmtGrade, fmtLong, fmtShort, fmtWeekdayShort, greeting, isInsufficient, plural } from "@bwd/shared";
 import { Card, CardHead, Icon, LinkButton, ListRow, Status } from "@/components/ui";
 import { TimeGrid } from "@/components/timegrid/TimeGrid";
 import { requireUser } from "@/lib/auth";
+import { NEXT_COOKIE } from "@/lib/next-cookie";
 import { NextCard } from "./NextCard";
 import { TestsCard } from "./TestsCard";
 import { TeacherHome } from "./TeacherHome";
@@ -13,6 +16,8 @@ export const metadata: Metadata = { title: "Übersicht" };
 
 export default async function Home() {
   const { env, me } = await requireUser();
+  // Nach dem Login vom QR-Check-in: zurück zum gescannten Code
+  if ((await cookies()).has(NEXT_COOKIE)) redirect("/api/v1/auth/continue");
   if (me.role === "teacher") return <TeacherHome env={env} me={me} />;
   const h = await getHome(env.db, me.id, env.now);
   return (
