@@ -14,6 +14,7 @@ import {
   semesterOf,
   type AbsenceLessonState,
   BM_SUBJECTS,
+  bmCode,
   bmSemester,
   efzSummary,
   informatics,
@@ -315,10 +316,66 @@ async function efzNames(db: Db, userId: string): Promise<Map<string, string>> {
 }
 
 /** Ein Semester wie das Blatt "Noten_BM_Sem_n": Fächer, Informatikmodule, BM- und EFZ-Schnitt, Ampeln. */
+type GradeRow = typeof s.myGrades.$inferSelect & { source: "own" | "teacher"; counts: boolean; teacher: string | null; canon: string };
+
+/**
+ * Alle Noten einer Person: eigene (erfasst oder importiert) und die der Lehrpersonen. Hat eine Lehrperson in einem
+ * Fach und Semester Noten erfasst, zählen dort nur diese; eigene Erfassungen bleiben sichtbar (counts = false).
+ */
+async function gradeRows(db: Db, userId: string): Promise<GradeRow[]> {
+  const own = await db.select().from(s.myGrades).where(eq(s.myGrades.userId, userId));
+  const mine = await db
+    .select({ g: s.assessmentGrades, a: s.assessments, first: s.users.firstName, last: s.users.lastName })
+    .from(s.assessmentGrades)
+    .innerJoin(s.assessments, eq(s.assessments.id, s.assessmentGrades.assessmentId))
+    .innerJoin(s.users, eq(s.users.id, s.assessments.ownerId))
+    .where(eq(s.assessmentGrades.userId, userId));
+  const ids = mine.map((m) => m.a.id);
+  // Klassenschnitt erst ab drei Noten, damit sich einzelne Noten nicht zurückrechnen lassen
+  const avg = ids.length
+    ? await db
+        .select({ id: s.assessmentGrades.assessmentId, n: sql<number>`count(*)`, v: sql<number>`avg(${s.assessmentGrades.value})` })
+        .from(s.assessmentGrades)
+        .where(inArray(s.assessmentGrades.assessmentId, ids))
+        .groupBy(s.assessmentGrades.assessmentId)
+    : [];
+  const teacherRows: GradeRow[] = mine.map(({ g, a, first, last }) => {
+    const x = avg.find((r) => r.id === a.id);
+    return {
+      id: `as-${a.id}`,
+      userId,
+      semester: a.semester,
+      subject: a.subjectCode,
+      module: null,
+      moduleName: null,
+      title: a.title,
+      value: g.value,
+      weight: a.weight,
+      date: a.date,
+      enteredAt: g.enteredAt.slice(0, 10),
+      classAverage: x && Number(x.n) >= 3 ? round1(Number(x.v)) : null,
+      sort: 0,
+      source: "teacher",
+      counts: true,
+      teacher: `${first} ${last}`,
+      canon: bmCode(a.subjectCode),
+    };
+  });
+  const graded = new Set(teacherRows.map((r) => `${r.semester}|${r.canon}`));
+  const ownRows: GradeRow[] = own.map((r) => {
+    const canon = bmCode(r.subject);
+    return { ...r, source: "own", counts: canon === "IN" || !graded.has(`${r.semester}|${canon}`), teacher: null, canon };
+  });
+  return [...teacherRows, ...ownRows];
+}
+
+const when = (r: { date: string | null; enteredAt: string }) => r.date ?? r.enteredAt;
+const toEntry = (r: GradeRow) => ({ id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage, source: r.source, counts: r.counts, teacher: r.teacher });
+
 export async function getPortfolioSemester(db: Db, userId: string, now: Now, n?: number): Promise<PortfolioSemester> {
   const code = await classCodeOf(db, userId);
   const current = bmSemester(code, now.date, config.secondSemesterStart);
-  const all = await db.select().from(s.myGrades).where(eq(s.myGrades.userId, userId));
+  const all = await gradeRows(db, userId);
   const counts = new Map<number, number>();
   for (const r of all) counts.set(r.semester, (counts.get(r.semester) ?? 0) + 1);
   const sem = n && n >= 1 && n <= 6 ? n : (current ?? Math.max(1, ...counts.keys()));
@@ -328,19 +385,20 @@ export async function getPortfolioSemester(db: Db, userId: string, now: Now, n?:
   const modNames = await efzNames(db, userId);
   const bySubject = new Map<string, typeof rows>();
   for (const r of rows) {
-    const k = r.subject === "IN" ? `IN#${r.module ?? ""}` : r.subject;
+    const k = r.canon === "IN" ? `IN#${r.module ?? ""}` : r.canon;
     bySubject.set(k, [...(bySubject.get(k) ?? []), r]);
   }
   const subjects: PortfolioSubjectRow[] = [];
   const modules: PortfolioSubjectRow[] = [];
   for (const [k, list] of bySubject) {
     const first = list[0]!;
-    if (first.subject === "IN") {
-      const grade = moduleGrade(list);
+    const counted = list.filter((r) => r.counts);
+    if (first.canon === "IN") {
+      const grade = moduleGrade(counted);
       modules.push({ code: "IN", name: `Modul ${first.module}`, module: first.module, moduleName: first.moduleName ?? modNames.get(first.module ?? "") ?? null, raw: grade, grade, count: list.length });
     } else {
-      const g = subjectGrade(list);
-      const need = g && g.grade < 4 ? neededGrade(list, 4, commonWeight(list)) : null;
+      const g = subjectGrade(counted);
+      const need = g && g.grade < 4 ? neededGrade(counted, 4, commonWeight(counted)) : null;
       subjects.push({ code: k, name: names.get(k) ?? k, module: null, moduleName: null, raw: g?.raw ?? null, grade: g?.grade ?? null, count: list.length, needFor4: need?.kind === "need" ? need.value : null });
     }
   }
@@ -367,13 +425,10 @@ export async function getPortfolioSemester(db: Db, userId: string, now: Now, n?:
 export async function getPortfolioSubject(db: Db, userId: string, now: Now, subject: string, n?: number, module?: string | null): Promise<PortfolioSubjectDetail | null> {
   const code = await classCodeOf(db, userId);
   const sem = n && n >= 1 && n <= 6 ? n : (bmSemester(code, now.date, config.secondSemesterStart) ?? 1);
-  const conds = [eq(s.myGrades.userId, userId), eq(s.myGrades.semester, sem), eq(s.myGrades.subject, subject)];
-  if (subject === "IN" && module) conds.push(eq(s.myGrades.module, module));
-  const rows = await db
-    .select()
-    .from(s.myGrades)
-    .where(and(...conds))
-    .orderBy(desc(sql`coalesce(${s.myGrades.date}, ${s.myGrades.enteredAt})`), desc(s.myGrades.sort));
+  subject = bmCode(subject);
+  const rows = (await gradeRows(db, userId))
+    .filter((r) => r.semester === sem && r.canon === subject && (subject !== "IN" || !module || r.module === module))
+    .sort((a, b) => when(b).localeCompare(when(a)) || b.sort - a.sort);
   const names = await subjectNames(db);
   if (!rows.length && !names.has(subject)) return null;
   const teacher = (
@@ -381,12 +436,13 @@ export async function getPortfolioSubject(db: Db, userId: string, now: Now, subj
       .select({ name: s.teachers.name })
       .from(s.classSubjects)
       .leftJoin(s.teachers, eq(s.classSubjects.teacherCode, s.teachers.code))
-      .where(and(eq(s.classSubjects.classId, (await classOf(db, userId)) ?? ""), eq(s.classSubjects.subjectCode, subject)))
+      .where(and(eq(s.classSubjects.classId, (await classOf(db, userId)) ?? ""), inArray(s.classSubjects.subjectCode, [subject, ...Object.entries({ DE: "D", EN: "E", FR: "F" }).filter(([, v]) => v === subject).map(([k]) => k)])))
       .limit(1)
   )[0];
-  const g = subject === "IN" ? (() => { const m = moduleGrade(rows); return m === null ? null : { raw: m, grade: m }; })() : subjectGrade(rows);
-  // Klassenschnitt (Beispieldaten): Mittel der Klassenschnitte der Proben, ungewichtet
-  const ca = rows.filter((r) => r.classAverage !== null).map((r) => r.classAverage!);
+  const counted = rows.filter((r) => r.counts);
+  const g = subject === "IN" ? (() => { const m = moduleGrade(counted); return m === null ? null : { raw: m, grade: m }; })() : subjectGrade(counted);
+  // Klassenschnitt: Mittel der Klassenschnitte der zählenden Proben, ungewichtet
+  const ca = counted.filter((r) => r.classAverage !== null).map((r) => r.classAverage!);
   return {
     semester: sem,
     label: semesterLabel(code, sem),
@@ -394,29 +450,24 @@ export async function getPortfolioSubject(db: Db, userId: string, now: Now, subj
     name: subject === "IN" && module ? `Modul ${module}` : (names.get(subject) ?? subject),
     module: module ?? null,
     moduleName: rows[0]?.moduleName ?? (module ? ((await efzNames(db, userId)).get(module) ?? null) : null),
-    teacher: teacher?.name ?? null,
+    teacher: rows.find((r) => r.source === "teacher")?.teacher ?? teacher?.name ?? null,
     raw: g?.raw ?? null,
     grade: g?.grade ?? null,
     classAverage: ca.length ? round1(ca.reduce((a, b) => a + b, 0) / ca.length) : null,
-    entries: rows.map((r) => ({ id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage })),
+    entries: rows.map(toEntry),
   };
 }
 
 /** Neuste Noten für die Übersicht: nach Datum der Probe, sonst nach Erfassung. */
 export async function recentGrades(db: Db, userId: string, limit = 3): Promise<RecentGrade[]> {
-  const rows = await db
-    .select()
-    .from(s.myGrades)
-    .where(eq(s.myGrades.userId, userId))
-    .orderBy(desc(sql`coalesce(${s.myGrades.date}, ${s.myGrades.enteredAt})`), desc(s.myGrades.sort))
-    .limit(limit);
+  const rows = (await gradeRows(db, userId)).filter((r) => r.counts).sort((a, b) => when(b).localeCompare(when(a)) || b.sort - a.sort).slice(0, limit);
   const names = await subjectNames(db);
   return rows.map((r) => ({
     examId: r.id,
-    subjectCode: r.subject,
-    subjectName: r.subject === "IN" ? `Informatik Modul ${r.module}` : (names.get(r.subject) ?? r.subject),
+    subjectCode: r.canon,
+    subjectName: r.canon === "IN" ? `Informatik Modul ${r.module}` : (names.get(r.canon) ?? r.canon),
     title: r.title,
-    date: r.date ?? r.enteredAt,
+    date: when(r),
     value: r.value,
     semester: r.semester,
     module: r.module,
@@ -487,7 +538,7 @@ export async function addPortfolioEntry(db: Db, userId: string, input: Portfolio
   const [last] = await db.select({ n: sql<number>`coalesce(max(${s.myGrades.sort}), -1)` }).from(s.myGrades).where(and(eq(s.myGrades.userId, userId), eq(s.myGrades.semester, input.semester), eq(s.myGrades.subject, input.subject)));
   await db.insert(s.myGrades).values({ id, userId, semester: input.semester, subject: input.subject, module, moduleName, title: input.title, value: input.value, weight: input.weight, date: input.date ?? null, enteredAt: now.date, classAverage: null, sort: Number(last?.n ?? -1) + 1 });
   const r = await ownGrade(db, userId, id);
-  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage };
+  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage, source: "own", counts: true, teacher: null };
 }
 
 export async function updatePortfolioEntry(db: Db, userId: string, id: string, input: PortfolioEntryInput): Promise<PortfolioEntry> {
@@ -495,7 +546,7 @@ export async function updatePortfolioEntry(db: Db, userId: string, id: string, i
   const module = input.subject === "IN" ? (input.module ?? null) : null;
   await db.update(s.myGrades).set({ semester: input.semester, subject: input.subject, module, title: input.title, value: input.value, weight: input.weight, date: input.date ?? null }).where(eq(s.myGrades.id, id));
   const r = await ownGrade(db, userId, id);
-  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage };
+  return { id: r.id, title: r.title, value: r.value, weight: r.weight, date: r.date, enteredAt: r.enteredAt, classAverage: r.classAverage, source: "own", counts: true, teacher: null };
 }
 
 export async function deletePortfolioEntry(db: Db, userId: string, id: string): Promise<void> {

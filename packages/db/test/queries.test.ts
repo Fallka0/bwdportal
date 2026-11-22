@@ -83,9 +83,10 @@ describe("Noten (Notenportfolio)", () => {
     expect(g).toMatchObject({ n: 5, current: 5, label: "2026/27 Herbst", count: 25 });
     // Reihenfolge der Vorlage (D, F, E, FRW, WR, MA, GP), dann weitere Fächer
     expect(g.subjects.map((x) => [x.code, x.grade, x.count])).toEqual([
-      ["DE", 5, 3],
-      ["FR", 4.5, 2],
-      ["EN", 5.5, 3],
+      // Kürzel des Stundenplans (DE, FR, EN) erscheinen unter denen der Vorlage
+      ["D", 5, 3],
+      ["F", 4.5, 2],
+      ["E", 5.5, 3],
       ["FRW", 5, 3],
       ["WR", 5, 3],
       ["MA", 4.5, 3],

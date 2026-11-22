@@ -452,6 +452,12 @@ export const PortfolioEntry = z.object({
   date: date.nullable(),
   enteredAt: date,
   classAverage: z.number().nullable(),
+  /** own: selbst erfasst oder importiert; teacher: von der Lehrperson */
+  source: z.enum(["own", "teacher"]).default("own"),
+  /** false: eigene Erfassung in einem Fach, in dem die Lehrperson Noten erfasst hat */
+  counts: z.boolean().default(true),
+  /** Lehrperson bei source teacher */
+  teacher: z.string().nullable().optional(),
 });
 export type PortfolioEntry = z.infer<typeof PortfolioEntry>;
 
@@ -539,3 +545,67 @@ export const EfzValueInput = z.object({ value: grade.nullable() });
 
 export const PortfolioImportResult = z.object({ entries: z.number(), semesters: z.number(), efz: z.number(), nameMatches: z.boolean() });
 export type PortfolioImportResult = z.infer<typeof PortfolioImportResult>;
+
+// ---------- Noten der Lehrpersonen ----------
+
+const gradeValue = z.number().min(1, "Noten gehen von 1 bis 6.").max(6, "Noten gehen von 1 bis 6.");
+
+/** Eine Probe der Lehrperson für eine Klasse und ein Fach. */
+export const Assessment = z.object({
+  id: z.string(),
+  classCode: z.string(),
+  subject: Subject,
+  title: z.string(),
+  date,
+  weight: z.number(),
+  semester: z.number(),
+  /** Mittel der erfassten Noten, ab drei Noten */
+  average: z.number().nullable(),
+  graded: z.number(),
+  mine: z.boolean(),
+});
+export type Assessment = z.infer<typeof Assessment>;
+
+export const AssessmentInput = z.object({
+  classCode: z.string().trim().min(1).max(12),
+  subject: z.string().trim().min(1).max(8),
+  title: z.string().trim().min(1, "Titel fehlt.").max(80),
+  date,
+  weight: z.number().gt(0, "Das Gewicht muss grösser als 0 sein.").max(100),
+});
+export type AssessmentInput = z.infer<typeof AssessmentInput>;
+
+export const AssessmentGradesInput = z.object({
+  grades: z.array(z.object({ userId: z.string(), value: gradeValue.nullable() })).max(200),
+});
+export type AssessmentGradesInput = z.infer<typeof AssessmentGradesInput>;
+
+export const AssessmentSheet = z.object({
+  assessment: Assessment,
+  students: z.array(z.object({ id: z.string(), name: z.string(), initials: z.string(), value: z.number().nullable() })),
+  editable: z.boolean(),
+});
+export type AssessmentSheet = z.infer<typeof AssessmentSheet>;
+
+/** Notenbuch: Proben als Spalten, Lernende als Zeilen, Zeugnisnote pro Person. */
+export const Gradebook = z.object({
+  classCode: z.string(),
+  subject: Subject,
+  semester: z.number(),
+  semesterLabel: z.string(),
+  semesters: z.array(z.object({ n: z.number(), label: z.string() })),
+  assessments: z.array(Assessment),
+  students: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      initials: z.string(),
+      values: z.array(z.number().nullable()),
+      raw: z.number().nullable(),
+      grade: z.number().nullable(),
+    }),
+  ),
+  /** Darf Proben erfassen (Fach zugeteilt); die Klassenlehrperson sieht alle Fächer nur an */
+  editable: z.boolean(),
+});
+export type Gradebook = z.infer<typeof Gradebook>;
