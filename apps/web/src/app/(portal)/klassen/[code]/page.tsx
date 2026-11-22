@@ -36,6 +36,7 @@ export default async function ClassPage({ params }: Props) {
       </div>
       <Card aria-label="Klassenraum" style={{ marginBottom: "var(--sp-5)" }}>
         <ListRow href={`/klassen/${encodeURIComponent(c.code)}/raum`} title="Klassenraum" />
+        <ListRow href={`/klassen/${encodeURIComponent(c.code)}/sol`} title="SOL" />
       </Card>
       {books.length > 0 && (
         <Card aria-labelledby="nb-h" style={{ marginBottom: "var(--sp-5)" }}>

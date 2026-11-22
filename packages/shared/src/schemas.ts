@@ -659,3 +659,39 @@ export const ClassPostInput = z.object({
   fileIds: z.array(z.string()).max(10).default([]),
 });
 export type ClassPostInput = z.infer<typeof ClassPostInput>;
+
+// ---------- SOL für Lehrpersonen ----------
+
+export const SolTeacherTask = z.object({
+  id: z.string(),
+  code: z.string(),
+  title: z.string(),
+  minutes: z.number(),
+  sharepointUrl: z.string().nullable(),
+  files: z.array(SolFile),
+  counts: z.object({ open: z.number(), started: z.number(), done: z.number() }),
+});
+export type SolTeacherTask = z.infer<typeof SolTeacherTask>;
+
+/** SOL einer Klasse aus Sicht der Lehrperson: Aufträge pro Fach mit Stand pro Person. */
+export const SolOverview = z.object({
+  classCode: z.string(),
+  blocks: z.array(SolBlock),
+  block: SolBlock.nullable(),
+  groups: z.array(z.object({ subject: Subject, editable: z.boolean(), tasks: z.array(SolTeacherTask) })),
+  students: z.array(z.object({ id: z.string(), name: z.string() })),
+  /** Stand pro Auftrag und Person (fehlt = offen) */
+  status: z.record(z.string(), z.record(z.string(), SolStatus)),
+});
+export type SolOverview = z.infer<typeof SolOverview>;
+
+export const SolTaskInput = z.object({
+  classCode: z.string().trim().min(1).max(12),
+  block: z.number().int().min(1).max(99),
+  subject: z.string().trim().min(1).max(8),
+  code: z.string().trim().min(1, "Kürzel fehlt.").max(12),
+  title: z.string().trim().min(1, "Titel fehlt.").max(120),
+  minutes: z.number().int().min(5).max(600),
+  sharepointUrl: z.string().trim().url("Keine gültige Adresse.").max(500).nullable().optional(),
+});
+export type SolTaskInput = z.infer<typeof SolTaskInput>;
