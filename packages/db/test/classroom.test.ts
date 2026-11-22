@@ -59,7 +59,7 @@ describe("Klassenraum", () => {
     await a.adminSetAssignments(db, mia, [{ classCode: "IM24b", subject: "DE" }]);
     await expect(c.createClassPost(db, mia, { classCode: "IM24b", subject: "DE", body: "x", fileIds: [f.id] }, NOW)).rejects.toThrow("gehört nicht");
     const p = await c.createClassPost(db, teacher, { classCode: "IM24b", subject: "MA", body: "Mit Datei", fileIds: [f.id] }, NOW);
-    expect(await c.deleteClassPost(db, teacher, p.id)).toEqual([f.r2Key ?? expect.any(String)]);
+    expect(await c.deleteClassPost(db, teacher, p.id)).toEqual([expect.stringMatching(/^klassenraum\//)]);
     expect((await c.getClassroom(db, selin, null)).files).toEqual([]);
     await c.updateClassPost(db, teacher, (await c.createClassPost(db, teacher, { classCode: "IM24b", subject: "MA", body: "a", fileIds: [] }, NOW)).id, "b", { ...NOW, stamp: "2026-10-26T11:00" });
     expect((await c.getClassroom(db, selin, null)).posts[0]).toMatchObject({ body: "b", edited: true });
